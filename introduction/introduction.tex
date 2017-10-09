@@ -1,22 +1,103 @@
 
-\chapter{Introduction}
+\chapter{Thesis Proposal}
 
 \section{Motivation and Objectives}
+A function, at its core, is a map from a domain to a co-domain. In other words,
+we expect there to be a certain set of elements in the universe for which our
+function can give us a corresponding output. A way to remove certain bugs in
+programs is to ensure that a function in a program is indeed mapping from the
+correct set of potential inputs to the set of potential outputs. 
 
-Motivation and Objectives here.
+One can consider static type systems as a way to narrow down the set of
+potential inputs to the set of possible outputs. For example, a function that
+takes in a string and outputs an integer gives certain compile-time guarantees
+to its programmer. If compilation succeeds, the domain of this function will be
+strictly limited to an element in the set of all possible strings in the
+universe and the output will be limited to an element of the set of all possible
+integers. 
+
+However, consider, for example, a function that appends an item to a list. Under
+a regular type system, we would say that this function takes in a list of
+elements of type a, an element of type a, and returns elements of type a. A
+Haskell type signature for this function would look like this: 
+
+\texttt{append :: [a] -> a -> [a]}. 
 
 
+Let's imagine that we have a list data type signature that contains information
+not only about the type of the elements that the list contains, but also about
+the length of the list. That is to say, the type signature of a list can be
+expressed as: 
 
-\section{Contributions}
+\texttt{List :: Int -> Type}
 
-Contributions here.
+\texttt{-- A list has an integer denoting length, and the type of its elements.}
 
-
-\section{Statement of Originality}
-
-Statement here.
+\texttt{[1,2,3] :: List 3 Int} 
 
 
-\section{Publications}
+Now that we've introduced the length of the list type as part of its type
+signature, we can write a much more strict and bug-free type signature for our
+append function. Essentially, any append function would take any list with
+length $n$ and type $a$. It also takes in an element of type $a$ to append. It
+outputs a list of length $n+1$ and type $a$. This type signature looks like: 
+$$
+\texttt{append :: List n a -> a -> List (n+1) a}
+$$
 
-Publications here.
+What's peculiar about this is that the co-domain of this function is not
+particularly fixed. In fact, it depends on the value of its input. For example,
+if a list of length 3 and type Int is inputted, the co-domain of our function is
+the set of all lists with length 4 and type integer. This is an
+example application of \textit{dependent types}. What we've done is created
+a function where the co-domain varies as the input value varies. The guarantee
+of type safety provided by this type signature is substantial. 
+
+The goal of dependent types is to write programs with extreme guarantees of
+compile-time safety. We can use the types of the parameters of a function to
+place tighter limits on the set that consists of its co-domain, with the
+co-domain varying depending on the values of the input parameters. 
+
+Currently, programming languages designed around dependent types have been
+implemented, for example: Idris (\cite{idris_systems_programming}), Agda
+(\cite{agda1}, \cite{agda2}), Coq (\cite{coq1}), and
+F*(\cite{fstardependent2016}).There is also significant existing work to bring
+dependent types into Haskell, an existing more mainstream programming language
+(\cite{eisenberg2016}, \cite{gundry2013}). Gundry and Eisenberg both provide
+interesting examples of how to apply dependent types in practical programming.
+
+Amongst other examples, Eisenberg describes a relational database where queries
+can be guaranteed to be type safe. This eliminates a class of potential database
+errors and improves performance since runtime typechecking does not need to
+occur. A dependently typed relational database would have far-reaching
+ramifications in fields ranging from web development to defense software and
+demonstrates the incredible potential present in applying dependent types. 
+
+A practical application for dependent types from Gundry's thesis is to eliminate
+bugs that can arise from improper unit conversions. Units of measurement are 
+already implemented in Microsoft's F\# Programming Language (\cite{kennedy2009}).
+If numbers carry a type denoting their unit of measurement with them, we can
+ensure at compile time that improper unit conversions are not going to occur at
+runtime. These bugs can be catastrophic, as made evident by NASA's loss of a
+\$125-million ``Mars Climate Orbiter'' when ``spacecraft engineers failed to 
+convert from English to Metric units of measurement'' \cite{hotz1999}. Bringing 
+full dependent types to the Haskell programming language would allow a similar
+system to be implemented for Haskell. 
+
+The goal of my literature review is to explore existing literature around the
+potential practical applications for dependent types. A spring semester research
+component of my thesis would involve using a dependently typed language to solve
+a problem where type safety and guarantees of correctness are critical. While
+I'm still uncertain about the direction to proceed, I'm interested in looking at
+elections and e-voting and whether or not we can provide guarantees of
+correctness to vote counting software written in dependently typed languages. I
+take a particular interest in the Australian Senate voting verification process
+because verification of vote count is an NP-complete problem (\cite{aus_senate}). 
+
+If we were able to verify that vote counting software is correct at
+compile-time, we would sidestep the need to run verification code that is trying
+to solve an np-complete problem. Currently, the Australian government uses
+proprietary code to count Australian senate ballots and has refused to release
+the source code after a Freedom of Information Act request (\cite{aus_senate_news}). If an
+open-sourced, verifiably correct counting program were devised, we could greatly
+protect the integrity of Australian elections. 
