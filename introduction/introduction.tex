@@ -1,12 +1,14 @@
 
-\chapter{Thesis Proposal}
+\chapter{Literature Review}
 
-\section{Motivation and Objectives}
-A function, at its core, is a map from a domain to a co-domain. In other words,
-we expect there to be a certain set of elements in the universe for which our
-function can give us a corresponding output. A way to remove certain bugs in
-programs is to ensure that a function in a program is indeed mapping from the
-correct set of potential inputs to the set of potential outputs. 
+\section{Background}
+A dependently typed programming language can have functions with types that
+depend on a value. A function, at its core, is a map from a domain to a
+co-domain. In other words, we expect there to be a certain set of elements in
+the universe for which our function can give us a corresponding output. A way to
+remove certain bugs in programs is to ensure that a function in a program is
+indeed mapping from the correct set of potential inputs to the set of potential
+outputs. 
 
 One can consider static type systems as a way to narrow down the set of
 potential inputs to the set of possible outputs. For example, a function that
@@ -26,78 +28,363 @@ Haskell type signature for this function would look like this:
 
 Let's imagine that we have a list data type signature that contains information
 not only about the type of the elements that the list contains, but also about
-the length of the list. That is to say, the type signature of a list can be
-expressed as: 
+the length of the list. That is to say, the type signature of a vect (list with
+length-in-type) can be expressed as: 
 
-\texttt{List :: Int -> Type}
-
-\texttt{-- A list has an integer denoting length, and the type of its elements.}
-
-\texttt{[1,2,3] :: List 3 Int} 
+\begin{figure}
+    \caption{Using a Vect data type.}
+    \begin{lstlisting}
+        Vect :: Int -> Type
+        -- A list has an integer denoting length, and the type of its elements.}
+        [1,2,3] :: Vect 3 Int
+    \end{lstlisting}
+\end{figure} 
 
 
 Now that we've introduced the length of the list type as part of its type
 signature, we can write a much more strict and bug-free type signature for our
 append function. Essentially, any append function would take any list with
 length $n$ and type $a$. It also takes in an element of type $a$ to append. It
-outputs a list of length $n+1$ and type $a$. This type signature looks like: 
-$$
-\texttt{append :: List n a -> a -> List (n+1) a}
-$$
+outputs a list of length $n+1$ and type $a$. This type signature looks like: $$
+\texttt{append :: List n a -> a -> List (n+1) a} $$
 
 What's peculiar about this is that the co-domain of this function is not
 particularly fixed. In fact, it depends on the value of its input. For example,
 if a list of length 3 and type Int is inputted, the co-domain of our function is
-the set of all lists with length 4 and type integer. This is an
-example application of \textit{dependent types}. What we've done is created
-a function where the co-domain varies as the input value varies. The guarantee
-of type safety provided by this type signature is substantial. 
+the set of all lists with length 4 and type integer. This is an example
+application of dependent types. What we've done is created a function where the
+co-domain varies as the input value varies. The guarantee of type safety
+provided by this type signature is substantial. 
 
 The goal of dependent types is to write programs with extreme guarantees of
 compile-time safety. We can use the types of the parameters of a function to
 place tighter limits on the set that consists of its co-domain, with the
 co-domain varying depending on the values of the input parameters. 
 
-Currently, programming languages designed around dependent types have been
-implemented, for example: Idris (\cite{idris_systems_programming}), Agda
-(\cite{agda1}, \cite{agda2}), Coq (\cite{coq1}), and
-F*(\cite{fstardependent2016}).There is also significant existing work to bring
-dependent types into Haskell, an existing more mainstream programming language
-(\cite{eisenberg2016}, \cite{gundry2013}). Gundry and Eisenberg both provide
-interesting examples of how to apply dependent types in practical programming.
-
-Amongst other examples, Eisenberg describes a relational database where queries
-can be guaranteed to be type safe. This eliminates a class of potential database
-errors and improves performance since runtime typechecking does not need to
-occur. A dependently typed relational database would have far-reaching
-ramifications in fields ranging from web development to defense software and
-demonstrates the incredible potential present in applying dependent types. 
-
-A practical application for dependent types from Gundry's thesis is to eliminate
-bugs that can arise from improper unit conversions. Units of measurement are 
-already implemented in Microsoft's F\# Programming Language (\cite{kennedy2009}).
-If numbers carry a type denoting their unit of measurement with them, we can
-ensure at compile time that improper unit conversions are not going to occur at
-runtime. These bugs can be catastrophic, as made evident by NASA's loss of a
-\$125-million ``Mars Climate Orbiter'' when ``spacecraft engineers failed to 
-convert from English to Metric units of measurement'' \cite{hotz1999}. Bringing 
-full dependent types to the Haskell programming language would allow a similar
-system to be implemented for Haskell. 
-
 The goal of my literature review is to explore existing literature around the
 potential practical applications for dependent types. A spring semester research
 component of my thesis would involve using a dependently typed language to solve
-a problem where type safety and guarantees of correctness are critical. While
-I'm still uncertain about the direction to proceed, I'm interested in looking at
-elections and e-voting and whether or not we can provide guarantees of
-correctness to vote counting software written in dependently typed languages. I
-take a particular interest in the Australian Senate voting verification process
-because verification of vote count is an NP-complete problem (\cite{aus_senate}). 
+a problem where type safety and guarantees of correctness are critical. 
+
+\section{Dependent Types: A History}
+Dependent types in programming languages have their roots in intuitionist type
+theory or Martin Lof Type Theory (CITATION NEEDED). This type theory serves as a
+foundation for \textit{constructive mathematics} (CITATION NEEDED). Per Martin
+Lof was interested in a type theory that could be used as a programming
+language, where all well-typed programs must terminate \cite{intro_martin_lof}.
+Sets in Martin-Lof Type Theory are viewed as problems and elements potential
+solutions to a problem. Since all programs terminate in Martin-Lof Type Theory
+and a set contains all potential solutions to a problem, the requirements for
+total correctness are satisfied \cite{intro_martin_lof}.
+
+A dependently typed programming language based on foundations in Martin-Lof Type
+Theory called NuPrl was first released in 1984 \cite{nuprl}. NuPrl is used as a
+``proof assistant'' that helps mathematicians and programmers formalize proofs
+\cite{prl_home}. Dependently typed proof assistants like NuPrl found a home at
+the intersection between programming language enthusiasts interested in total
+program correctness and constructive mathematicians interested in systems where
+mathematical formulisms could be systematically encoded. Other proof assistants
+with support for dependent types followed: Coq (1989) \cite{girard1989proofs},
+ALF (1990), Cayenne (1998), Agda (1999). (CITATIONS NEEDED)
+
+While there are now robust theorem provers that incorporate dependent types,
+work now is primarily concerned with bringing them into mainstream programming
+and software development. Idris (2011) was designed with general purpose
+programming in mind \cite{tdd_book}. F\* (2011) was introduced by Microsoft as a
+dependently typed language specifically designed around solving problems in
+secure distributed programming \cite{fstar_distributed_programming}. In addition
+to the development of new programming languages with dependent type systems
+built into the language by design, work exists to mainstream dependent types
+into more prominent programming languages. The most active and promising
+mainstreaming work is on Haskell \cite{eisenberg2016, gundry2013}. 
+
+\section{Implementing Domain-Specific Languages with Dependent Types}
+
+\subsection{Cryptol: A DSL for Cryptography}
+
+Dependent type systems have potential applications in easily implementing domain
+specific languages (DSLs). Cryptol, for example, is a domain-specific language
+designed around cryptography (\cite{cryptol_manual}). Problems inherent in
+implementing a Cryptol compiler or interpreter can be solved through dependent
+types (\cite{power_of_pi}). Cryptol is a functional programming language with
+advanced support for pattern matching. Since cryptography commonly requires
+dealing with low-level bit manipulation, it follows that Cryptol is designed
+around facilitating these operations and making them safe. A function that does
+this sort of low-level manipulation is the \texttt{swab} function, which takes
+in a 32-bit word and swaps the first two bytes (\cite{cryptol_manual}).: 
+
+$$
+\texttt{swab :: Word 32 -> Word 32} \\
+\texttt{swab [a b c d] = [b a c d]} $$
+
+Ideally, a word would be represented by a vector of 32-bits. We would be able to
+declare a pattern match with swab that looks similar to the declaration
+presented by Oury and Swiestra above. How then does the compiler understand that
+this pattern match declaration means we expect the input vector to be divided
+into 4 separate vectors of 8 bits? This is where dependent types serve a
+practical purpose. By specifying types that split the length of the vector up
+into a multiple of two scalars, we can effectively implement this clever pattern
+match, allowing for powerful pattern matching required by the Cryptol language
+(\cite{power_of_pi}). 
+
+\subsection{PBM: Generating Parsers with Data Description Languages}
+
+Work also exists to use dependent types in creating embedded data description
+languages, which are languages where a programmer can describe the structure of
+data and quickly generate a working parser \cite{power_of_pi}.  For example,
+consider the portable bitmap (pbm) file format, which consists simply of ``P4'',
+followed by the dimensions of the image in pixels as $n, m$ integers separated
+by a space. After a newline, hde image is described as a string of $n\times m $
+bits where 1 is black and 0 is white \cite{pmb_spec}. If a parser were generated
+from a data description language, we expect the parser to either return
+well-typed data (a vector of bits and the dimensions of the image) or to signal
+that the data is not well-formed. In other words, if we want to generate parsers
+through embedded data description languages, we could specify the file format as
+a value. The type of the generated parser then, would depend on the file format
+as a value, making this an appropriate area to apply dependent types
+\cite{power_of_pi}. 
+
+We can start by defining our \textit{universe} (see Figure ~\ref{universe}),
+which contains all the types that our parser will be manipulating in some way.
+We also define a function \textit{el}, which will take any value of type U and
+convert it to an appropriate type. The combination of this data type declaration
+and this \textit{el} function is a definition of the relevant universe for this
+problem domain \cite{power_of_pi}. 
+
+\begin{figure}
+    \caption{Universe declaration in Idris \cite{power_of_pi}, Idris implementation by \cite{idris_pop}.}
+    \label{universe}
+    \begin{lstlisting}
+        data Bit : Type where
+            O : Bit
+            I : Bit
+
+        data U: Type where
+            BIT : U
+            CHAR : U
+            NAT : U
+            VECT : Nat -> U -> U
+        
+        el : U -> Type
+            el BIT = Bit
+            el CHAR = Char
+            el NAT = Nat
+            el (VECT n u) = Vect n (el u) 
+    \end{lstlisting}
+\end{figure}
+
+From here, we can define a \textit{Format} data type that enables us to describe
+the format of our data. When sequencing formats, we want two binary operators
+that either read or skip. To skip means to skip over the first parameter and
+generate a type for the file format from the second parameter. To read means to
+build a type from both parameters before moving on. We will need to define both
+these operations, a base operation that gives us a type, a terminal, and
+rejection if the input data is badly formed. We can declare such a type as
+follows: 
+
+\begin{figure}
+    \caption{Format data type in Idris \cite{power_of_pi}, Idris implementation by \cite{idris_pop}.}
+    \label{formatDeclaration}
+    \begin{lstlisting}
+        data Format : Type where
+        Bad : Format
+        End : Format
+        Base : U -> Format
+        Plus : Format -> Format -> Format
+        Skip : Format -> Format -> Format
+        Read : (f : Format) -> (Fmt f -> Format) -> Format
+
+        Fmt : Format -> Type
+        Fmt Bad = Void
+        Fmt End = Unit
+        Fmt (Base u) = el u
+        Fmt (Plus f1 f2) = Either (Fmt f1) (Fmt f2)
+        Fmt (Read f1 f2) = (x : Fmt f1 ** Fmt (f2 x))
+        Fmt (Skip _ f) = Fmt f
+
+        (>>) : Format -> Format -> Format
+        f1 >> f2 = Skip f1 f2
+
+        (>>=) : (f : Format) -> (Fmt f -> Format) -> Format
+        x >>= f = Read x f
+    \end{lstlisting}
+\end{figure}
+
+In the code of Figure ~\ref{formatDeclaration} one thing noteworthy is the
+$(**)$ operator, which is Idris syntactic sugar for a dependent pair. A
+dependent pair (a : A ** P) means that the type variable a is of type A and can
+also occur in the type P. For example, consider Figure
+~\ref{dependentPairExample}. The example will only type check correctly if the
+natural number present in the first element of the pair is the same as the
+length of the list. 
+
+\begin{figure}
+    \caption{Example for Dependent Pairs taken from the Idris documentation.}
+    \label{dependentPairExample}
+    \begin{lstlisting}
+        vec : (n : Nat ** Vect n Int)
+        vec = (2 ** [3, 4])
+    \end{lstlisting}
+\end{figure}
+
+Given that Having defined this mutually recursive data type for format, we can then specify
+a format for the PBM data type. 
+
+\begin{figure}
+    \caption{Format declaration of PBM \cite{power_of_pi}, Idris implementation by \cite{idris_pop}.}
+    \begin{lstlisting}
+        export
+        pbm : Format
+        pbm = char 'P' >>
+              char '4' >>
+              char ' ' >>
+              Base NAT >>= \n =>
+              char ' ' >>
+              Base NAT >>= \m =>
+              char '\n' >>
+              Base (VECT n (VECT m BIT)) >>= \bs =>
+              End
+    \end{lstlisting}
+\end{figure}
+
+Having described the file format of PBM, we are now able to write a parser that takes in a Format as a data type, and allows 
+
+\subsection{Safer Databases: Relational Algebras}
+
+Additional work exists on relational algebras in dependent types
+\cite{power_of_pi}, \cite{eisenberg2016}. A relational algebra would allow a
+programmer to interface with a database where all queries are guaranteed at
+compile time to be type safe. This eliminates a class of potential database
+errors and improves performance since runtime typechecking does not need to
+occur. 
+
+% \section{Systems Programming with Dependent Types}
+
+% General purpose dependently typed programming languages such as Idris (and in the future, Haskell), allow programmers to integrate dependent types into lower level work than a theorem proving language would allow. 
+% TODO: Write this in the future. 
+
+\section{Well-Typed Unit Measurements with Dependent Types}
+
+
+A practical application for dependent types from Gundry's thesis is to eliminate
+bugs that can arise from improper unit conversions. Units of measurement are
+already implemented in Microsoft's F\# Programming Language
+(\cite{kennedy2009}). If numbers carry a type denoting their unit of measurement
+with them, we can ensure at compile time that improper unit conversions are not
+going to occur at runtime. These bugs can be catastrophic, as made evident by
+NASA's loss of a\$125-million ``Mars Climate Orbiter'' when ``spacecraft
+engineers failed to convert from English to Metric units of measurement''
+\cite{hotz1999}. 
+
+Currently, in F\#, units of measure are defined with the \texttt{[<measure>]}
+attribute followed by the \texttt{type} reserved keyword (see below)<CITATION NEEDED>. We can define simple, non-derived units and also derived units. 
+
+\texttt{[<measure>] type inch}\\
+\texttt{[<measure>] type kg}\\
+\texttt{[<measure>] type m}\\
+\texttt{[<measure>] type s}
+
+Derived units are built out of more elemental definitions of units of measurement. See the definition of Newtons provided below: 
+
+\texttt{[<measure>] type N = kg * m/s}
+
+The benefits of a type system that support units of measurement should become
+apparent from this quick tour of F\#'s support for such a system. These types
+support decidable equality by definition. Two typed variables can only be equal
+because they have the same unit of measurement or derived unit of measurement
+and the same value. This means that errors of conversion between units will now
+be caught by our compiler, like the one below: 
+
+\texttt{let distanceTraveled = 1.5<inch>}\\
+\texttt{let velocityOfSpaceCraft : float<m/s> = distanceTraveled/60<s>}
+
+While units of measurement are implemented as a feature in the F\# language,
+which is not dependently typed, a dependently typed programming language would
+allow for a units of measurement system to be implemented \cite{gundry2013}. Gundry invites us to consider a system for describing units in terms of a constructor that allows us to both enumerate elementary units and also express derived units in terms of one another. 
+
+\begin{figure}[h]
+    \caption{Basic SI unit declarations in adapted from Dependent Haskell to Idris \cite{gundry2013}}
+    \begin{lstlisting}
+        data Unit : Int -> Int -> Int -> Type
+        
+        Dimensionless : Type
+        Dimensionless = Unit 0 0 0
+        
+        Metres : Type
+        Metres = Unit 1 0 0
+        
+        Seconds: Type
+        Seconds = Unit 0 1 0
+        
+        Kilograms: Type
+        Kilograms = Unit 0 0 1
+    \end{lstlisting}
+\end{figure}
+
+For now, unit only supports three elementary units (metres, seconds, kilograms),
+but one can imagine a full library implementing the entire SI Units system. Each
+elementary unit is implemented as a single 1 in the call to the Unit constructor
+with all entries as zero. Thus, we can express derived units in a call to the
+Unit constructor where negative integers would represent elementary units
+present in the denominator. Newtons, a derived unit of $\frac{kg \times m}{s^2}$ can be expressed as it is above. 
+
+We can define quantities as a type containing a \texttt{Unit} and an integer. This then allows us to write simple constructors for the quantity type. We can
+ then define well-typed multiplication and addition operations
+giving us similar guarantees to that which is given by units of measurement in
+F\#. 
+
+\begin{figure}[h]
+    \caption{Quantity as a type (dependent Haskell with Inch) \cite{gundry2013}}
+    \begin{lstlisting}
+        newtype Quantity u a = Q { value :: a}
+        metres :: a -> Quantity Metres a
+        seconds :: a -> Quantity Seconds a
+        kilograms :: a -> Quantity Kilograms a
+        (dimensionless, metres, seconds, kilograms) = (Q,Q,Q,Q)
+
+        plus :: Num a => Quantity u a -> Quantity u a -> Quantity u a
+        plus (Q x) (Q y) = Q (x + y)
+    \end{lstlisting}
+\end{figure}
+
+As defined above, this enforces well-typed addition, requiring that two
+additions be of the same type. Additional work exists to incorporate prefixes
+(milli, centi, etc.) in such a way that adding units with different prefixes can
+be easily done \cite{gundry2013}. What we've shown here is that while units of
+measurement can be first-class features in a programming language like F\#, a
+dependently typed language allows us to build certain functionality easily into
+the language without changing the language specification whatsoever. 
+
+\section{Distributed Computing}
+
+
+\section{Proposal for Future Work}
+
+While I'm still uncertain about the direction to proceed, I'm interested in
+looking at elections and e-voting and whether or not we can provide guarantees
+of correctness to vote counting software written in dependently typed languages.
+I take a particular interest in the Australian Senate voting verification
+process because verification of vote count is an NP-complete problem
+(\cite{aus_senate}). 
 
 If we were able to verify that vote counting software is correct at
 compile-time, we would sidestep the need to run verification code that is trying
 to solve an np-complete problem. Currently, the Australian government uses
 proprietary code to count Australian senate ballots and has refused to release
-the source code after a Freedom of Information Act request (\cite{aus_senate_news}). If an
-open-sourced, verifiably correct counting program were devised, we could greatly
-protect the integrity of Australian elections. 
+the source code after a Freedom of Information Act request
+(\cite{aus_senate_news}). If an open-sourced, verifiably correct counting
+program were devised, we could greatly protect the integrity of Australian
+elections. 
+
+\section{Conclusion}
+While many literature reviews begin by looking examining a problem and looking
+for existing solutions, this literature review takes an opposite approach. The
+broader problem we are trying to answer is one that crosses various domains and
+engineering fields. To put it quite simply, \textit{programs crash}. Dependent
+typed languages, long a toy for theoretical computer scientists and
+constructivist mathematicians, are increasingly becoming realistic tools to
+write code with necessary guarantees of correctness. In other words, dependent
+types are a solution in search of a problem. In this literature review, I
+offered a brief summary as to what dependent types are and what languages exist
+where dependent type functionality is available. I then moved on to describe
+problem domains where a dependently typed languages would offer tangible solutions.
