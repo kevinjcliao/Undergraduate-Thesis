@@ -35,18 +35,22 @@ length-in-type) can be expressed as:
     \caption{Using a Vect data type.}
     \begin{lstlisting}
         Vect :: Int -> Type
-        -- A list has an integer denoting length, and the type of its elements.}
+        -- A list has an integer denoting length, 
+        -- and the type of its elements.
         [1,2,3] :: Vect 3 Int
     \end{lstlisting}
 \end{figure} 
 
 
-Now that we've introduced the length of the list type as part of its type
+Now that we've introduced the length of the vect type as part of its type
 signature, we can write a much more strict and bug-free type signature for our
-append function. Essentially, any append function would take any list with
+append function. Essentially, any append function would take any vect with
 length $n$ and type $a$. It also takes in an element of type $a$ to append. It
-outputs a list of length $n+1$ and type $a$. This type signature looks like: $$
-\texttt{append :: List n a -> a -> List (n+1) a} $$
+outputs a list of length $n+1$ and type $a$. This type signature looks like: 
+
+$$
+\texttt{append :: Vect n a -> a -> Vect (n+1) a} 
+$$
 
 What's peculiar about this is that the co-domain of this function is not
 particularly fixed. In fact, it depends on the value of its input. For example,
@@ -61,15 +65,20 @@ compile-time safety. We can use the types of the parameters of a function to
 place tighter limits on the set that consists of its co-domain, with the
 co-domain varying depending on the values of the input parameters. 
 
-The goal of my literature review is to explore existing literature around the
-potential practical applications for dependent types. A spring semester research
-component of my thesis would involve using a dependently typed language to solve
-a problem where type safety and guarantees of correctness are critical. 
+In this literature review, I will explore existing literature around practical
+real-world applications of dependent types. I'll take a look at three examples
+where a domain specific language can be built if a language can support full
+dependent types. I'll then show how dependent types can be applied to make
+systems programming and building distributed systems safer. I'll also take a
+look at how a dependently typed language can implement units of measurement,
+preventing a set of potentially costly and fatal human errors. The hope is to
+demonstrate that dependent types, long confined to theoretical mathematics, have
+tremendous promise in helping programmers build reliable and safe programs. 
 
 \section{Dependent Types: A History}
 Dependent types in programming languages have their roots in intuitionist type
-theory or Martin Lof Type Theory (CITATION NEEDED). This type theory serves as a
-foundation for \textit{constructive mathematics} (CITATION NEEDED). Per Martin
+theory or Martin Lof Type Theory \cite{martin_lof}. This type theory serves as a
+foundation for \textit{constructive mathematics} \cite{constructive_math}. Per Martin
 Lof was interested in a type theory that could be used as a programming
 language, where all well-typed programs must terminate \cite{intro_martin_lof}.
 Sets in Martin-Lof Type Theory are viewed as problems and elements potential
@@ -85,12 +94,14 @@ the intersection between programming language enthusiasts interested in total
 program correctness and constructive mathematicians interested in systems where
 mathematical formulisms could be systematically encoded. Other proof assistants
 with support for dependent types followed: Coq (1989) \cite{girard1989proofs},
-ALF (1990), Cayenne (1998), Agda (1999). (CITATIONS NEEDED)
+ALF (1990) \cite{Magnusson95theimplementation}, Cayenne (1998)
+\cite{Augustsson:1998:CLD:291251.289451}, Agda (1999)
+\cite{structured_type_theory}.
 
 While there are now robust theorem provers that incorporate dependent types,
 work now is primarily concerned with bringing them into mainstream programming
 and software development. Idris (2011) was designed with general purpose
-programming in mind \cite{tdd_book}. F\* (2011) was introduced by Microsoft as a
+programming in mind \cite{tdd_book}. F\text{*} (2011) was introduced by Microsoft as a
 dependently typed language specifically designed around solving problems in
 secure distributed programming \cite{fstar_distributed_programming}. In addition
 to the development of new programming languages with dependent type systems
@@ -126,6 +137,8 @@ practical purpose. By specifying types that split the length of the vector up
 into a multiple of two scalars, we can effectively implement this clever pattern
 match, allowing for powerful pattern matching required by the Cryptol language
 (\cite{power_of_pi}). 
+
+\textit{More coming in final draft of literature review}
 
 \subsection{PBM: Generating Parsers with Data Description Languages}
 
@@ -212,11 +225,24 @@ follows:
 
 In the code of Figure ~\ref{formatDeclaration} one thing noteworthy is the
 $(**)$ operator, which is Idris syntactic sugar for a dependent pair. A
-dependent pair (a : A ** P) means that the type variable a is of type A and can
-also occur in the type P. For example, consider Figure
-~\ref{dependentPairExample}. The example will only type check correctly if the
+dependent pair (a : A ** P) means that the type variable $a$ is of type A and can
+also occur in the type P \cite{idris_dependent_pairs}. For example, consider Figure
+~\ref{dependentPairExample}. The example will only type check correctly iff the
 natural number present in the first element of the pair is the same as the
 length of the list. 
+
+Having specified a data type that lets us declare formats, we can then move on
+to creating a specification. In Figure ~\ref{spec_declaration}, a format for the
+PBM spec is provided. We are now able to write a parser that takes in a Format as a data type, and
+then is able to parse files to generate well-typed data. See Figure
+~\ref{parser}. This straightforward parsing code is aided by the types that we
+declared before, skipping, reading, and terminating where required by our file
+format specification. We can use Idris' REPL to see how the parser deals with
+our PBM specification in Figure ~\ref{repl}. Here, we see that the type
+signature of the function created by giving the parse function our pbm
+specification is a function that takes in a list of bits and returns a matrix of
+bits with sizes bound by the natural numbers that we first specified in the file
+format. 
 
 \begin{figure}
     \caption{Example for Dependent Pairs taken from the Idris documentation.}
@@ -227,11 +253,9 @@ length of the list.
     \end{lstlisting}
 \end{figure}
 
-Given that Having defined this mutually recursive data type for format, we can then specify
-a format for the PBM data type. 
-
 \begin{figure}
     \caption{Format declaration of PBM \cite{power_of_pi}, Idris implementation by \cite{idris_pop}.}
+    \label{spec_declaration}
     \begin{lstlisting}
         export
         pbm : Format
@@ -247,7 +271,44 @@ a format for the PBM data type.
     \end{lstlisting}
 \end{figure}
 
-Having described the file format of PBM, we are now able to write a parser that takes in a Format as a data type, and allows 
+
+\begin{figure}
+    \caption{Parser declaration \cite{power_of_pi}, Idris implementation by \cite{idris_pop}.}
+    \label{parser}
+    \begin{lstlisting}
+        parse : (f : Format) -> List Bit -> Maybe (Fmt f, List Bit)
+        parse Bad bs = Nothing
+        parse End bs       = Just ((), bs)
+        parse (Base u) bs  = read u bs
+        parse (Plus f1 f2) bs with (parse f1 bs)
+        | Just (x, cs)   = Just (Left x, cs)
+        | Nothing with (parse f2 bs)
+            | Just (y, ds) = Just (Right y, ds)
+            | Nothing      = Nothing
+        parse (Skip f1 f2) bs with (parse f1 bs)
+        | Nothing        = Nothing
+        | Just (_, cs)   = parse f2 cs
+        parse (Read f1 f2) bs with (parse f1 bs)
+        | Nothing        = Nothing
+        | Just (x, cs) with (parse (f2 x) cs)
+            | Nothing      = Nothing
+            | Just (y, ds) = Just ((x ** y), ds)
+    \end{lstlisting}
+\end{figure}
+
+\begin{figure}
+    \caption{Putting the PBM spec into Idris' REPL}
+    \label{repl}
+    \begin{lstlisting}
+        *Parser> :t parse pbm
+        parse pbm : 
+            List Bit -> Maybe 
+                ( (x : Nat ** x1 : Nat ** x2 : Vect x (Vect x1 Bit) ** ())
+                , List Bit)
+    \end{lstlisting}
+\end{figure}
+
+In this section, we show that dependent types allow us to create embedded data description languages inside of a dependently typed language. We can then generate well-typed, reliable parsers without having to rewrite a lot of code. Thus, using dependently typed languages to write parsers with embedded data description languages both demonstrates promise in brevity and also safety. 
 
 \subsection{Safer Databases: Relational Algebras}
 
@@ -258,13 +319,13 @@ compile time to be type safe. This eliminates a class of potential database
 errors and improves performance since runtime typechecking does not need to
 occur. 
 
-% \section{Systems Programming with Dependent Types}
+\section{Systems Programming with Dependent Types}
 
-% General purpose dependently typed programming languages such as Idris (and in the future, Haskell), allow programmers to integrate dependent types into lower level work than a theorem proving language would allow. 
-% TODO: Write this in the future. 
+General purpose dependently typed programming languages such as Idris (and in
+the future, Haskell), allow programmers to integrate dependent types into lower
+level work than a theorem proving language would allow. This section of the literature review will take a look at Brady's \textit{Idris: Systems Programming Meets Full Dependent Types} \cite{idris_systems_programming}.
 
 \section{Well-Typed Unit Measurements with Dependent Types}
-
 
 A practical application for dependent types from Gundry's thesis is to eliminate
 bugs that can arise from improper unit conversions. Units of measurement are
@@ -277,12 +338,20 @@ engineers failed to convert from English to Metric units of measurement''
 \cite{hotz1999}. 
 
 Currently, in F\#, units of measure are defined with the \texttt{[<measure>]}
-attribute followed by the \texttt{type} reserved keyword (see below)<CITATION NEEDED>. We can define simple, non-derived units and also derived units. 
+attribute followed by the \texttt{type} reserved keyword (see Figure
+~\ref{units_in_f_sharp}) \cite{f_sharp_units}. We can define simple, non-derived
+units and also derived units. 
 
-\texttt{[<measure>] type inch}\\
-\texttt{[<measure>] type kg}\\
-\texttt{[<measure>] type m}\\
-\texttt{[<measure>] type s}
+\begin{figure}
+    \caption{Example of units of measurement in F\#}
+    \label{units_in_f_sharp}
+    \begin{lstlisting}
+        [<measure>] type inch
+        [<measure>] type kg
+        [<measure>] type m
+        [<measure>] type s}
+    \end{lstlisting}
+\end{figure}
 
 Derived units are built out of more elemental definitions of units of measurement. See the definition of Newtons provided below: 
 
@@ -355,8 +424,10 @@ measurement can be first-class features in a programming language like F\#, a
 dependently typed language allows us to build certain functionality easily into
 the language without changing the language specification whatsoever. 
 
-\section{Distributed Computing}
+\section{Programming Distributed Systems}
 
+To be included in the final literature review. A review of ``Secure Distributed
+Programming with Value-Dependent Types''. \cite{fstar_distributed_programming}
 
 \section{Proposal for Future Work}
 
@@ -384,7 +455,24 @@ engineering fields. To put it quite simply, \textit{programs crash}. Dependent
 typed languages, long a toy for theoretical computer scientists and
 constructivist mathematicians, are increasingly becoming realistic tools to
 write code with necessary guarantees of correctness. In other words, dependent
-types are a solution in search of a problem. In this literature review, I
-offered a brief summary as to what dependent types are and what languages exist
-where dependent type functionality is available. I then moved on to describe
-problem domains where a dependently typed languages would offer tangible solutions.
+types are a solution in search of a problem. 
+
+In this literature review, I offered a brief summary as to what dependent types
+are and what languages exist where dependent type functionality is available. I
+then moved on to describe different applications of dependently typed
+programming that exist in literature. I started by looking at Cryptol, a DSL for
+cryptography, and showed how dependent types allow for implementing complex
+pattern-matching that the language requires \cite{power_of_pi}. I then moved on
+to discuss embedded data description languages, showing how one can describe how
+data is structured and generate a parser out of such a description
+\cite{power_of_pi}. I also examined the potential of dependent types to build a
+typesafe database, eliminating runtime typechecking and thus reducing error and
+increasing performance \cite{power_of_pi, eisenberg2016}. 
+
+Outside of domain specific languages, I also showed the application of dependent
+types to systems programming \cite{idris_systems_programming}, building
+distributed systems \cite{fstar_distributed_programming} and units of
+measurement \cite{gundry2013}. In this wide-ranging review, I've demonstrated
+that as dependent types become brought into the mainstream, they have the
+potential to empower programmers to build safe, robust programs in ways that
+have not been possible before. 
