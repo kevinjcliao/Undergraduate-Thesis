@@ -103,12 +103,21 @@
 	author = "Galois Inc",
 	title = "Cryptol Reference Manual",
 	year = 2002,
+	annotate = "I'm implementing part of a Cryptol compiler in Idris as part of my literature review. This provides a handy reference to the Cryptol programming language."
 }
 
 @misc{pmb_spec,
 	title = "The PBM Format", 
 	howpublished = {\url{http://netpbm.sourceforge.net/doc/pbm.html}},
-	note = {Accessed: 2017-10-25}
+	note = {Accessed: 2017-10-25},
+	annotate = "This provides a specification for the PBM file format, which I'm trying to parse in my literature review."
+}
+
+@article{ml_type_theory,
+	title = "An Intuitionistic Theory of Types",
+	author = "Per Martin-L{\"ö}f",
+	journal = "Unpublished Preprint",
+	year = 1972,
 }
 
 @book{intro_martin_lof,
@@ -116,18 +125,21 @@
 	author = "Bengt Nordstrom and Kent Petersson and Jan M. Smith",
 	year = 1990,
 	publisher = "Oxford University Press",
+	annotate = "An introduction to Martin-L{\"ö}f Type Theory, which serves as the theoretical foundation for dependent types."
 }
 
 @article{nuprl,
 	title = "Implementing Mathematics with The Nuprl Proof Development System",
 	author = "R.L. Constable and S.F. Allen and H.M. Bromley and W.R. Cleaveland and J.F. Cremer and R.W. Harper and D.J. Howe and T.B. Knoblock and N.P. Mendler and P. Panangaden and J.T. Sasaki and S.F. Smith",
-	year = 1985
+	year = 1985,
+	annotate = "A paper that discusses the NuPRL theorem prover. I cite this in my discussion on the history of dependent types."
 }
 
 @misc{prl_home,
 	title = "The Nature of the PRL Project",
 	howpublished = {\url{http://www.nuprl.org/Intro/intro.html"}},
-	note = {Accessed: 2017-10-28}
+	note = {Accessed: 2017-10-28},
+	annotate = "Also cited in my discussion on the history of dependent types."
 }
 
 @book{girard1989proofs,
@@ -138,7 +150,8 @@
 	series={Cambridge Tracts in Theoretical Computer Science},
 	url={https://books.google.com/books?id=6JOEQgAACAAJ},
 	year={1989},
-	publisher={Cambridge University Press}
+	publisher={Cambridge University Press},
+	annotate = "Cited in my section on the history of dependent types when discussing Agda, a theorem prover and programming language."
 }
 
 @book{tdd_book,
@@ -146,50 +159,54 @@
 	author = "Edwin Brady",
 	year = 2017,
 	publisher = "Manning Publications",
+	annotate = "I've been reading through this book to pick up Idris, which is a dependently typed general-purpose programming language."
 }
 
 @article{fstar_distributed_programming,
 	title = "Secure Distributed Programming with Value-Dependent Types",
 	author = "Nikhil Swamy and Juan Chen and Cedric Fournet and Pierre-Yves Strub and Karthikeyan Bhargavan and Jean Yang",
 	year = 2011,
+	annotate = "F\*'s utility in distributed programming makes it yet another interesting case of practical uses of dependent types. I'll be reading this paper and summarizing it for my literature review."
 }
 
 @misc{idris_pop,
 	title = "the-power-of-pi, Cryptol.lidr",
 	author = "Eric Bailey",
 	year = 2016,
-	howpublished = {\url{https://github.com/yurrriq/the-power-of-pi/blob/master/src/Data/Cryptol.lidr}}
+	annotate = "This is an implementation of the power of pi cryptol compiler and PBM parser but in the Idris general-purpose dependently typed programming language."
 }
 
 @misc{f_sharp_units,
 	title = "Units of Measure",
 	author = "Philip Carter and Luke Latham and Maira Wenzel",
 	year = 2016, 
-	howpublished = {\url{https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/units-of-measure}}
+	annotate = "I give a brief overview of units of measure in F\#. This is official Microsoft documentation on how they appear in F\#"
 }
 
 @misc{Magnusson95theimplementation,
     author = {Lena Magnusson},
-    title = {The Implementation of ALF - a Proof Editor based on Martin-Löf's Monomorphic Type Theory with Explicit Substitution},
-    year = {1995}
+    title = {The Implementation of ALF - a Proof Editor based on Martin-L{\"ö}f's Monomorphic Type Theory with Explicit Substitution},
+    year = {1995},
+	annotate = "Cited when I reference ALF in a history of dependent types."
 }
 
 @article{structured_type_theory,
 	author = "Catarina Coquand and Thierry Coquand",
 	title = "Structured Type Theory",
 	year = 1999,
+	annotate = "Cited when I discuss Agda in the history of dependent types."
 }
 
 @misc{idris_dependent_pairs,
 	author = {Jan de Muijnck-Hughes},
 	title = {Types and Functions},
 	year = 2015,
-	howpublished = {\url{https://github.com/idris-lang/Idris-dev/blob/master/docs/tutorial/typesfuns.rst}}
+	annotate = "Cited when I introduce the concept of dependent pairs in Idris."
 }
 
 @article{Augustsson:1998:CLD:291251.289451,
 	author = {Augustsson, Lennart},
-	title = {Cayenne\&Mdash;a Language with Dependent Types},
+	title = {Cayenne Language with Dependent Types},
 	journal = {SIGPLAN Not.},
 	issue_date = {Jan. 1999},
 	volume = {34},
@@ -205,6 +222,7 @@
 	publisher = {ACM},
 	address = {New York, NY, USA},
 	keywords = {dependent types, language design, module systems, type systems},
+	annotate = {Cited when I discuss the history of theorem provers. Cayenne was a theorem prover created in the late '90s and so is relevant in this discussion.}
 } 
 
 @incollection{martin_lof,
@@ -220,12 +238,13 @@
 	issn = "0049-237X",
 	doi = "https://doi.org/10.1016/S0049-237X(09)70189-2",
 	url = "http://www.sciencedirect.com/science/article/pii/S0049237X09701892",
-	author = "Per Martin-Löf"
+	author = "Per Martin-L{\"ö}f",
+	annotate = "This is the paper where Per Martin-L{\"ö}f introduces Martin-L{\"ö}f type theory, which serves as a theoretical underpinning for modern-day dependent type implementations in Idris and Agda."
 }
 
 @article{constructive_math,
 	title = "Constructive Mathematics",
 	author = "Maarten McKubre-Jordens",
-	howpublished = {\url{http://www.iep.utm.edu/con-math/}}
+	annotate = "Constructive math is one of the theoretical underpinnings of dependent types. I cite this article as a general introduction to the theoretical background in constructive math."
 }
 
