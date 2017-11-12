@@ -415,6 +415,31 @@ the language without changing the language specification whatsoever.
 To be included in the final literature review. A review of ``Secure Distributed
 Programming with Value-Dependent Types''. \cite{fstar_distributed_programming}
 
+\section{Programming with Algebraic Effects}
+
+In functional programming, we want to isolate side effects as much as possible
+to keep our code clear. In Haskell and many other programming languages, side
+effects like IO, State, Random Number Generation, etc. are handled by Monads. If
+we want to use several Monads at once (our code requires simultaneous handling
+of different side effects), we are often required to use monad transformers.
+While this approach works for programs that require one or two transformations
+between monads, as we bring in more and more side effects, the number of
+transformation monads we need to write increases quite quickly. 
+
+Work exists to sidestep the problem of handling increasingly complex monadic transformations by encoding algebraic effects as a domain-specific language in a dependently typed programming language \cite{algebraic}. We can start by defining an \texttt{EFFECT} type, as seen in 
+
+\begin{figure}
+    \caption{Definition of effect type}
+    \label{effects_def}
+    \begin{lstlisting}
+        STATE     : Type -> EFFECT
+        EXCEPTION : Type -> EFFECT
+        FILEIO    : Type -> EFFECT
+        STDIO     : EFFECT
+        RND       : EFFECT
+    \end{lstlisting}
+\end{figure}
+
 \section{Proposal for Future Work}
 
 While I'm still uncertain about the direction to proceed, I'm interested in
