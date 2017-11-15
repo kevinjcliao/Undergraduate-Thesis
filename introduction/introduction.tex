@@ -34,8 +34,8 @@ length-in-type) can be expressed as:
 \begin{figure}
     \caption{Using a Vect data type.}
     \begin{lstlisting}
-        Vect :: Int -> Type -- A list has an integer denoting length, -- and the
-        type of its elements. [1,2,3] :: Vect 3 Int
+        Vect :: Int -> Type -> Type -- A list has an integer denoting length, 
+        -- and the type of its elements. [1,2,3] :: Vect 3 Int
     \end{lstlisting}
 \end{figure} 
 
@@ -47,7 +47,8 @@ length $n$ and type $a$. It also takes in an element of type $a$ to append. It
 outputs a list of length $n+1$ and type $a$. This type signature looks like: 
 
 $$
-\texttt{append :: Vect n a -> a -> Vect (n+1) a} $$
+\texttt{append :: Vect n a -> a -> Vect (n+1) a} 
+$$
 
 What's peculiar about this is that the co-domain of this function is not
 particularly fixed. In fact, it depends on the value of its input. For example,
@@ -74,9 +75,9 @@ tremendous promise in helping programmers build reliable and safe programs.
 
 \section{Dependent Types: A History}
 Dependent types in programming languages have their roots in intuitionistic type
-theory or Martin Lof Type Theory \cite{intro_martin_lof, ml_type_theory}. This
+theory or Martin-L\"{o}f Type Theory \cite{intro_martin_lof, ml_type_theory}. This
 type theory serves as a foundation for \textit{constructive mathematics}
-\cite{constructive_math}. Per Martin Löf was interested in a type theory that
+\cite{constructive_math}. Per Martin-L\"{o}f was interested in a type theory that
 could be used as a programming language, where all well-typed programs must
 terminate \cite{ml_type_theory}. His type theory is based on the principles of
 constructive mathematics, mainly Curry-Howard isomorphism. Curry-Howard
@@ -89,7 +90,7 @@ illustrate this, consider the examples in Figure ~\ref{ml_type_theory_examples}
 \footnote{These examples were provided by Prof. Richard Eisenberg in a
 discussion.}. 
 
-\begin{figure}
+\begin{figure}[h]
     \label{ml_type_theory_examples}
     \caption{Comparison between Haskell type signatures and mathematical proofs to illustrate Curry-Howard Isomorphism}
     \begin{tabular}{c|c|c|c}
@@ -101,24 +102,31 @@ discussion.}.
     \end{tabular}
 \end{figure}
 
-From the figure, we see the Curry-Howard isomorphism that forms the fundamentals of Martin-Lof's type theory. 
+From the figure, we see the Curry-Howard isomorphism that forms the fundamentals
+of Martin-L\"{o}f's type theory. We see that in all four cases, if there is a
+function that inhabits the type signature, the mathematical proposition
+presented is valid and if a function does not exist, the proposition is invalid. 
 
-A dependently typed programming language based on foundations in Martin-Lof Type
-Theory called NuPrl was first released in 1984 \cite{nuprl}. NuPrl is used as a
-``proof assistant'' that helps mathematicians and programmers formalize proofs
-\cite{prl_home}. Dependently typed proof assistants like NuPrl found a home at
-the intersection between programming language enthusiasts interested in total
-program correctness and constructive mathematicians interested in systems where
-mathematical formulisms could be systematically encoded. Other proof assistants
-with support for dependent types followed: Coq (1989) \cite{girard1989proofs},
-ALF (1990) \cite{Magnusson95theimplementation}, Cayenne (1998)
+Mathematicians took an interest in creating a programming language based on
+Curry-Howard isomorphism and Martin-L\"{o}f type theory, since Curry-Howard
+isomorphism meant that a valid function that inhabits a type signature could be
+equivalent to a proof. A dependently typed programming language based on
+foundations in Martin-L\"{o}f Type Theory called NuPrl was first released in
+1984 \cite{nuprl}. NuPrl is used as a \textit{proof assistant} that helps
+mathematicians and programmers formalize proofs \cite{prl_home}. Dependently
+typed proof assistants like NuPrl found a home at the intersection between
+programming language enthusiasts interested in total program correctness and
+constructive mathematicians interested in systems where mathematical formulisms
+could be systematically encoded. Other proof assistants with support for
+dependent types followed: Coq (1989) \cite{girard1989proofs}, ALF (1990)
+\cite{Magnusson95theimplementation}, Cayenne (1998)
 \cite{Augustsson:1998:CLD:291251.289451}, Agda (1999)
 \cite{structured_type_theory}.
 
 While there are now robust theorem provers that incorporate dependent types,
 work now is primarily concerned with bringing them into mainstream programming
 and software development. Idris (2011) was designed with general purpose
-programming in mind \cite{tdd_book}. F\* (2011) was introduced by Microsoft as a
+programming in mind \cite{tdd_book}. F* (2011) was introduced by Microsoft as a
 dependently typed language specifically designed around solving problems in
 secure distributed programming \cite{fstar_distributed_programming}. In addition
 to the development of new programming languages with dependent type systems
@@ -181,17 +189,28 @@ convert it to an appropriate type. The combination of this data type declaration
 and this \textit{el} function is a definition of the relevant universe for this
 problem domain \cite{power_of_pi}. 
 
-\begin{figure}
+\begin{figure}[h]
     \caption{Universe declaration in Idris \cite{power_of_pi}, Idris
     implementation by \cite{idris_pop}.}
     \label{universe}
     \begin{lstlisting}
-        data Bit : Type where O : Bit I : Bit
+        data Bit : Type where 
+            O : Bit 
+            I : Bit
 
-        data U: Type where BIT : U CHAR : U NAT : U VECT : Nat -> U -> U
+        data U : Type where
+            STRING : U
+            BOOL : U
+            CHAR : U
+            NAT : U
+            VECT : Nat -> U -> U
         
-        el : U -> Type el BIT = Bit el CHAR = Char el NAT = Nat el (VECT n u) =
-            Vect n (el u) 
+        el : U -> Type
+            el STRING     = String
+            el BOOL       = Bool
+            el CHAR       = Char
+            el NAT        = Nat
+            el (VECT n u) = Vect n (el u)
     \end{lstlisting}
 \end{figure}
 
@@ -204,7 +223,7 @@ these operations, a base operation that gives us a type, a terminal, and
 rejection if the input data is badly formed. We can declare such a type as
 follows: 
 
-\begin{figure}
+\begin{figure}[h]
     \caption{Format data type in Idris \cite{power_of_pi}, Idris implementation
     by \cite{idris_pop}.}
     \label{formatDeclaration}
@@ -244,7 +263,7 @@ specification is a function that takes in a list of bits and returns a matrix of
 bits with sizes bound by the natural numbers that we first specified in the file
 format. 
 
-\begin{figure}
+\begin{figure}[h]
     \caption{Example for Dependent Pairs taken from the Idris documentation.}
     \label{dependentPairExample}
     \begin{lstlisting}
@@ -252,7 +271,7 @@ format.
     \end{lstlisting}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[h]
     \caption{Format declaration of PBM \cite{power_of_pi}, Idris implementation
     by \cite{idris_pop}.}
     \label{spec_declaration}
@@ -264,20 +283,28 @@ format.
 \end{figure}
 
 
-\begin{figure}
+\begin{figure}[h]
     \caption{Parser declaration \cite{power_of_pi}, Idris implementation by
     \cite{idris_pop}.}
     \label{parser}
     \begin{lstlisting}
-        parse : (f : Format) -> List Bit -> Maybe (Fmt f, List Bit) parse Bad bs
-        = Nothing parse End bs       = Just ((), bs) parse (Base u) bs  = read u
-        bs parse (Plus f1 f2) bs with (parse f1 bs) | Just (x, cs)   = Just
-        (Left x, cs) | Nothing with (parse f2 bs) | Just (y, ds) = Just (Right
-        y, ds) | Nothing      = Nothing parse (Skip f1 f2) bs with (parse f1 bs)
-        | Nothing        = Nothing | Just (_, cs)   = parse f2 cs parse (Read f1
-        f2) bs with (parse f1 bs) | Nothing        = Nothing | Just (x, cs) with
-        (parse (f2 x) cs) | Nothing      = Nothing | Just (y, ds) = Just ((x **
-        y), ds)
+        parse : (f : Format) -> List Bit -> Maybe (Fmt f, List Bit)
+        parse Bad bs       = Nothing
+        parse End bs       = Just ((), bs)
+        parse (Base u) bs  = read u bs
+        parse (Plus f1 f2) bs with (parse f1 bs)
+          | Just (x, cs)   = Just (Left x, cs)
+          | Nothing with (parse f2 bs)
+            | Just (y, ds) = Just (Right y, ds)
+            | Nothing      = Nothing
+        parse (Skip f1 f2) bs with (parse f1 bs)
+          | Nothing        = Nothing
+          | Just (_, cs)   = parse f2 cs
+        parse (Read f1 f2) bs with (parse f1 bs)
+          | Nothing        = Nothing
+          | Just (x, cs) with (parse (f2 x) cs)
+            | Nothing      = Nothing
+            | Just (y, ds) = Just ((x ** y), ds)
     \end{lstlisting}
 \end{figure}
 
@@ -298,12 +325,114 @@ description languages both demonstrates promise in brevity and also safety.
 
 \subsection{Safer Databases: Relational Algebras}
 
-Additional work exists on relational algebras in dependent types
-\cite{power_of_pi}, \cite{eisenberg2016}. A relational algebra would allow a
-programmer to interface with a database where all queries are guaranteed at
-compile time to be type safe. This eliminates a class of potential database
-errors and improves performance since runtime typechecking does not need to
-occur. 
+Databases are one of the pillars of modern software. Databases are employed in
+everything from social media software \cite{tao} to flight scheduling and
+booking \cite{flights}. Different programming languages have varying interfaces
+for querying an SQL database. Oftentimes, a query and response interface simply
+asks a user to send and receive a SQL query and as a string and to process a
+response given as a string. While this offers flexibility, it means that there
+is no compile-time guarantee of correctness and that poorly written SQL queries
+result in run-time crashes, rather than compile-time debugging. We would like to
+be able to easily compose types from a set of values (database schema), which
+would allow a programmer to easily compose type-safe queries with compile-time
+verification of correctness \cite{power_of_pi}. Many SQL interfaces do runtime
+type checking, meaning if we can avoid these type checks, there may be
+performance gains. 
+
+\begin{figure}[h]
+    \caption{Declaration of schema. Idris adaption of code from Power of Pi
+    \cite{power_of_pi}}
+    \label{schema}
+    \begin{lstlisting}
+        Attribute : Type}
+        (String, U)}
+
+        Schema : Type}
+        List Attribute}
+
+        Students : Schema}
+        Students = (   ("name", STRING)}
+                    :: ("id", VECT 6 CHAR)} 
+                    :: ("classyear", VECT 4 CHAR)}
+                    :: Nil)}
+
+        data Row : Schema -> Type where
+            EmptyRow : Row Nil
+            ConsRow : el u -> Row s -> Row ((name, u) :: s)
+
+        kevin : Row Students
+        kevin = ConsRow "Kevin Jiah-Chih Liao"
+            (ConsRow ('1'::'2'::'3'::'4'::'5'::'6'::Nil)
+            (ConsRow ('2'::'0'::'1'::'8'::Nil) EmptyRow))
+    \end{lstlisting}
+\end{figure}
+
+We can start by defining types to represent a database schema. A database table
+is a row of elements that correspond to a declared schema. A schema is a list of
+attributes that each element should have. An attribute is simply a column name
+and the type of what the column contains. Thus, we can declare an attributes and
+schemas as follows in Figure ~\ref{schema}. 
+
+
+Where U refers to the universe that we built in an earlier example. Given that
+we built a schema, we are now able to define a schema to hold students. Take,
+for example, a schema that stores a student's name, student id, and class year.
+Our next job is to be able to express a database table with a row of instances
+of a schema. This is reflected in our declaration of the \texttt{Row} type,
+which lets us join rows together, ending in an EmptyRow. An example
+\texttt{kevin} is provided. 
+
+\begin{figure}[h]
+    \caption{Declaration of connect. Idris adaption of code from Power of Pi
+    \cite{power_of_pi}}
+    \label{connect}
+    \begin{lstlisting}
+        -- Connect takes in a server name, a table name, 
+        -- and a schema, and executes IO operations on that table. 
+        -- This type ensures that upon connection, if successful, 
+        -- the table on the server must have the same schema. 
+        connect : String -> String -> (s : Schema) -> IO (Handle s)
+
+        
+        -- Only modeling a single 'read' operation. 
+        data RA : Schema -> Type where
+            Read : Handle s -> RA s
+        
+        -- Takes in a query written with our relational algebra and then sends back a table that corresponds to our schema. 
+        toSQL : RA s -> IO (List (Row s))
+    \end{lstlisting}
+\end{figure}
+
+Now that we've defined the schema and tables, it's time to show how we connect
+and query the table. Usually this means that we have a function \texttt{connect}
+that takes in a servername and tablename as strings, and a SQL query as a
+string, before returning a string in an IO monad. Now that we've defined a
+schema type, we can build a well-typed database connection that validates that
+the database table we are connecting to is of the same schema as the schema we
+are requesting. If connection succeeds, that means that all subsequent requests
+with the \texttt{Handle schema} type returned by the connect function must be
+safe, because we know that the schemas we are reading or writing from the table
+must correspond to the schema in our code. This connect function is defined in
+Figure ~\ref{connect}. 
+
+Finally, we define a type "Relational Algebra", which contains the opperations
+that we would perform in a database query. For the sake of brevity, we've 
+limited it to \texttt{Read}. We then have a function that does an IO operation
+on a database, taking in a query of type Relational Algebra, to return us
+a database table of consisting of the results of our query. 
+
+Thus, in this example, we've shown the potential for dependent types to build a
+type safe database, where if the schemas match on connection, all subsequent
+queries should be type safe. While there was some overhead in setting up the
+types, once the database software is written, declaring a schema with elements
+in our universe was pretty easy and I anticipate database queries not being
+significantly more difficult to compose and write. Thus, this is an exciting
+application of dependent types where programmers can potentially benefit from
+high-level use of dependently typed software once the more complex moving parts
+are written. 
+
+
+
 
 \section{Systems Programming with Dependent Types}
 
@@ -325,34 +454,26 @@ NASA's loss of a\$125-million ``Mars Climate Orbiter'' when ``spacecraft
 engineers failed to convert from English to Metric units of measurement''
 \cite{hotz1999}. 
 
-Currently, in F\#, units of measure are defined with the \texttt{[<measure>]}
-attribute followed by the \texttt{type} reserved keyword (see Figure
-~\ref{units_in_f_sharp}) \cite{f_sharp_units}. We can define simple, non-derived
-units and also derived units. 
-
 \begin{figure}
-    \caption{Example of units of measurement in F\#}
-    \label{units_in_f_sharp}
-    \begin{lstlisting}
-        [<measure>] type inch [<measure>] type kg [<measure>] type m [<measure>]
-        type s}
-    \end{lstlisting}
+  \caption{Displays a unit error that would be caught at compile-time with units of measurement.}
+  \label{unit_error}
+  \begin{lstlisting}
+    distanceTraveled : Quantity Inches
+    distanceTraveled = inches 20
+
+    distanceLeft : Quantity Metres
+    distanceLeft = (metres 1000) - distanceTraveled
+  \end{lstlisting}
 \end{figure}
 
-Derived units are built out of more elemental definitions of units of
-measurement. See the definition of Newtons provided below: 
-
-\texttt{[<measure>] type N = kg * m/s}
-
-The benefits of a type system that support units of measurement should become
-apparent from this quick tour of F\#'s support for such a system. These types
-support decidable equality by definition. Two typed variables can only be equal
-because they have the same unit of measurement or derived unit of measurement
-and the same value. This means that errors of conversion between units will now
-be caught by our compiler, like the one below: 
-
-\texttt{let distanceTraveled = 1.5<inch>}\\
-\texttt{let velocityOfSpaceCraft : float<m/s> = distanceTraveled/60<s>}
+An implementation of units of measurement should have types that support
+decidable equality by definition. Two typed variables can only be equal because
+they have the same unit of measurement or derived unit of measurement and the
+same value. This means that if coding style guidelines enforce that all numeric
+values must be well-typed with units of measurement, there will be compile-time
+guarantees that errors of conversion between units of measurement will not
+occur. See Figure ~\ref{unit_error} for an example of a program that should
+error. 
 
 While units of measurement are implemented as a feature in the F\# language,
 which is not dependently typed, a dependently typed programming language would
@@ -362,19 +483,37 @@ constructor that allows us to both enumerate elementary units and also express
 derived units in terms of one another. 
 
 \begin{figure}[h]
-    \caption{Basic SI unit declarations in adapted from Dependent Haskell to
-    Idris \cite{gundry2013}}
-    \begin{lstlisting}
-        data Unit : Int -> Int -> Int -> Type
-        
-        Dimensionless : Type Dimensionless = Unit 0 0 0
-        
-        Metres : Type Metres = Unit 1 0 0
-        
-        Seconds: Type Seconds = Unit 0 1 0
-        
-        Kilograms: Type Kilograms = Unit 0 0 1
-    \end{lstlisting}
+  \label{idris_code}
+  \caption{Basic SI unit declarations in adapted from Dependent Haskell to Idris \cite{gundry2013}}
+  \begin{lstlisting}
+    data Unit : Int -> Int -> Int -> Type
+    
+    Dimensionless : Type
+    Dimensionless = Unit 0 0 0
+    
+    Metres : Type
+    Metres = Unit 1 0 0
+    
+    Seconds : Type
+    Seconds = Unit 0 1 0
+    
+    Kilograms : Type
+    Kilograms = Unit 0 0 1
+    
+    data Quantity u = Q Double
+    
+    metres : Double -> Quantity Metres
+    metres v = (Q v)
+    
+    seconds : Double -> Quantity Seconds
+    seconds v = (Q v)
+    
+    kilograms : Double -> Quantity Kilograms
+    kilograms v = (Q v)
+    
+    plus : Quantity u -> Quantity u -> Quantity u
+    plus (Q x) (Q y) = Q (x + y)
+  \end{lstlisting}
 \end{figure}
 
 For now, unit only supports three elementary units (metres, seconds, kilograms),
@@ -382,33 +521,39 @@ but one can imagine a full library implementing the entire SI Units system. Each
 elementary unit is implemented as a single 1 in the call to the Unit constructor
 with all entries as zero. Thus, we can express derived units in a call to the
 Unit constructor where negative integers would represent elementary units
-present in the denominator. Newtons, a derived unit of $\frac{kg \times m}{s^2}$
-can be expressed as it is above. 
+present in the denominator. 
 
 We can define quantities as a type containing a \texttt{Unit} and an integer.
- This then allows us to write simple constructors for the quantity type. We can
- then define well-typed multiplication and addition operations giving us similar
- guarantees to that which is given by units of measurement in F\#. 
-
-\begin{figure}[h]
-    \caption{Quantity as a type (dependent Haskell with Inch) \cite{gundry2013}}
-    \begin{lstlisting}
-        newtype Quantity u a = Q { value :: a} metres :: a -> Quantity Metres a
-        seconds :: a -> Quantity Seconds a kilograms :: a -> Quantity Kilograms
-        a (dimensionless, metres, seconds, kilograms) = (Q,Q,Q,Q)
-
-        plus :: Num a => Quantity u a -> Quantity u a -> Quantity u a plus (Q x)
-        (Q y) = Q (x + y)
-    \end{lstlisting}
-\end{figure}
+This then allows us to write simple constructors for the quantity type. We can
+then define well-typed multiplication and addition operations giving us similar
+guarantees to that which is given by units of measurement in F\#. 
 
 As defined above, this enforces well-typed addition, requiring that two
-additions be of the same type. Additional work exists to incorporate prefixes
-(milli, centi, etc.) in such a way that adding units with different prefixes can
-be easily done \cite{gundry2013}. What we've shown here is that while units of
-measurement can be first-class features in a programming language like F\#, a
-dependently typed language allows us to build certain functionality easily into
-the language without changing the language specification whatsoever. 
+additions be of the same type. we can also define operations that allow us to
+express fractional units. For example, a Newton of force is defined as a
+$kg\times ms^{-2}$. Therefore, if we are able to compose types through
+multiplication and division, we can express a Newton with our units system. See
+Figure ~\ref{division}. 
+
+\begin{figure}[h]
+  \caption{Definition of division and multiplication of dependently typed units
+  of measurement. Ported to Idris from \cite{gundry2013}}
+  \label{division}
+  \begin{lstlisting}
+    Newtons : Type
+    Newtons = Unit 1 -2 1
+
+    newtons : Double -> Quantity Newtons
+    newtons val = over 
+        (times (kilograms val) (metres 1)) 
+        (times (seconds 1) (seconds 1))
+  \end{lstlisting}
+\end{figure}
+
+What we've shown here is that while units of measurement can be first-class
+features in a programming language like F\#, a dependently typed language allows
+us to build certain functionality easily into the language without changing the
+language specification whatsoever. 
 
 \section{Programming Distributed Systems}
 
@@ -419,24 +564,79 @@ Programming with Value-Dependent Types''. \cite{fstar_distributed_programming}
 
 In functional programming, we want to isolate side effects as much as possible
 to keep our code clear. In Haskell and many other programming languages, side
-effects like IO, State, Random Number Generation, etc. are handled by Monads. If
-we want to use several Monads at once (our code requires simultaneous handling
-of different side effects), we are often required to use monad transformers.
-While this approach works for programs that require one or two transformations
-between monads, as we bring in more and more side effects, the number of
-transformation monads we need to write increases quite quickly. 
+effects like IO, State, Random Number Generation, etc. are handled by Monads
+<CITATION NEEDED>. If we want to use several Monads at once (our code requires
+simultaneous handling of different side effects), we are often required to use
+monad transformers. While this approach works for programs that require one or
+two transformations between monads, as we bring in more and more side effects,
+the number of transformation monads we need to write increases quite quickly. 
 
-Work exists to sidestep the problem of handling increasingly complex monadic transformations by encoding algebraic effects as a domain-specific language in a dependently typed programming language \cite{algebraic}. We can start by defining an \texttt{EFFECT} type, as seen in 
+Work exists to sidestep the problem of handling increasingly complex monadic
+transformations by encoding algebraic effects as a domain-specific language in a
+dependently typed programming language \cite{algebraic}. We can start by
+defining an \texttt{EFFECT} type, as seen in Figure ~\ref{effects_def}. In order
+for a function to use our effects DSL, it will have to be of type \texttt{Eff},
+where Eff is a data declaration where the 'execution context' m (optionally a
+Monad) is specified, a list of side effects, and the program's return type. For
+example, a function that of the execution context \texttt{IO} that throws side
+effects, does work on STDIO, and maintains an integer state will look something
+like the function \texttt{example} in Figure ~\ref{effects_def}. 
 
-\begin{figure}
+\begin{figure}[h]
     \caption{Definition of effect type}
     \label{effects_def}
     \begin{lstlisting}
-        STATE     : Type -> EFFECT
-        EXCEPTION : Type -> EFFECT
-        FILEIO    : Type -> EFFECT
-        STDIO     : EFFECT
-        RND       : EFFECT
+        data EFFECT : Type where
+            STATE     : Type -> EFFECT
+            EXCEPTION : Type -> EFFECT
+            FILEIO    : Type -> EFFECT
+            STDIO     : EFFECT
+            RND       : EFFECT
+        
+        data Eff : (m : Type -> Type) -> (es : List EFFECT) -> 
+            (a : Type) -> Type
+    
+        example : Eff IO [EXCEPTION String, STDIO, STATE Int] ()
+    \end{lstlisting}
+\end{figure}
+
+We can now apply this small Effects DSL we have defined to work on some simple
+programs where we need to maintain a side effect of some sort. I will provide an
+example of a program where we tag each node of a binary tree with a unique ID. 
+
+\begin{figure}[h]
+    \caption{Tagging a binary tree with integers. Taken from Brady's work.
+    \cite{algebraic}}
+    \label{tag_def}
+    \begin{lstlisting}
+        -- Simple type def of binary tree in Idris
+        data Tree a = Leaf
+                    | Node (Tree a) a (Tree a)
+        
+        -- Takes in a tree and produces a tagged tree with
+        -- State containing an integer passed inside of
+        -- the function. 
+        tag : Tree a -> Eff m [STATE Int] (Tree (Int, a))
+        tag Leaf = return Leaf
+        tag (Node l x r) = do
+            l' <- tag l
+            lbl <- get; put (lbl + 1)
+            r' <- tag r
+            return (Node l' (lbl, x) r')
+        
+        get : Eff m [STATE x] x
+        
+        put : x -> Eff m [STATE x] ()
+        
+        EffM :  (m   : Type -> Type) ->
+                (es  : List EFFECT) ->
+                (es' : List EFFECT) ->
+                (a   : Type) -> Type
+        
+        runPure : Env id es -> EffM id es es' a -> a
+        
+        tagFrom : Int -> Tree a -> Tree (Int, a)
+        tagFrom x t = runPure [x] (tag t)
     \end{lstlisting}
 \end{figure}
 
