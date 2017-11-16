@@ -9,7 +9,7 @@ natural $n$ and returns a vect of $n$ Peano natural of value 1 to $n$. We can
 express this in Idris, a dependently typed functional programming language, as
 follows in Figure ~\ref{replicate_in_idris}. 
 
-\begin{figure}
+\begin{figure}[ht!]
   \caption{Implementation of Replicate in Idris}
   \label{replicate_in_idris}
   \begin{lstlisting}
@@ -33,18 +33,38 @@ to write mathematical formulisms, dependent types have applications outside of
 such a theoretical domain. In my work, I seek to summarize the existing body of
 work around practical applications of dependent types. 
 
+\section{Additional Work}
+This review is a  tour of a potential application of dependent types. In this
+abstract, I have chosen a brief example, units of measurement, in order to
+demonstrate their potency. However, in addition to units of measurement,
+dependent types have far ranging applications. My review explores the following
+additional examples: 
+\begin{enumerate}
+  \item Complicated pattern matching in the Cryptol DSL for cryptographic
+  applications. \cite{power_of_pi}
+  \item Generating file format parsers from a data description language.
+  \cite{power_of_pi}
+  \item A relational database and algebra. \cite{power_of_pi, eisenberg2016}
+  \item An alternative to monadic transformations with an algebraic effects DSL
+  \cite{algebraic}
+  \item Programming distributed systems with F\* and dependent types.
+  \cite{fstar_distributed_programming}
+  \item A low-level domain-specific language demonstrating the applicability of
+  dependent types to systems programming. \cite{idris_systems_programming}
+\end{enumerate}
+
 \section{Units of Measurement}
-A practical application for dependent types from Gundry's thesis is to eliminate
-bugs that can arise from improper unit conversions. Units of measurement are
+A practical application for dependent types from is to eliminate bugs that can
+arise from improper unit conversions \cite{gundry2013}. Units of measurement are
 already implemented in Microsoft's F\# Programming Language
 (\cite{kennedy2009}). If numbers carry a type denoting their unit of measurement
 with them, we can ensure at compile time that improper unit conversions are not
 going to occur at runtime. These bugs can be catastrophic, as made evident by
-NASA's loss of a\$125-million ``Mars Climate Orbiter'' when ``spacecraft
+NASA's loss of a \$125-million \textit{Mars Climate Orbiter} when ``spacecraft
 engineers failed to convert from English to Metric units of measurement''
 \cite{hotz1999}. 
 
-\begin{figure}
+\begin{figure}[ht!]
   \caption{Displays a unit error that would be caught at compile-time with units of measurement.}
   \label{unit_error}
   \begin{lstlisting}
@@ -72,7 +92,7 @@ Gundry invites us to consider a system for describing units in terms of a
 constructor that allows us to both enumerate elementary units and also express
 derived units in terms of one another. 
 
-\begin{figure}[h]
+\begin{figure}[ht!]
   \label{idris_code}
   \caption{Basic SI unit declarations in adapted from Dependent Haskell to Idris \cite{gundry2013}}
   \begin{lstlisting}
@@ -145,23 +165,6 @@ features in a programming language like F\#, a dependently typed language allows
 us to build certain functionality easily into the language without changing the
 language specification whatsoever. 
 
-\section{Additional Work}
-This abstract is a quick whirlwind tour of a potential application of dependent
-types. In addition to units of measurement, dependent types have far ranging
-applications. My review explores the following examples: 
-\begin{enumerate}
-  \item Complicated pattern matching in the Cryptol DSL for cryptographic
-  applications. \cite{power_of_pi}
-  \item Generating file format parsers from a data description language.
-  \cite{power_of_pi}
-  \item A relational database and algebra. \cite{power_of_pi, eisenberg2016}
-  \item An alternative to monadic transformations with an algebraic effects DSL
-  \cite{algebraic}
-  \item Programming distributed systems with F\* and dependent types.
-  \cite{fstar_distributed_programming}
-  \item A low-level domain-specific language demonstrating the applicability of
-  dependent types to systems programming. \cite{idris_systems_programming}
-\end{enumerate}
 \section{Conclusions}
 Through a review of the practical applications of dependent types in existing
 and implemented functional programming languages, I demonstrate that while
