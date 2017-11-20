@@ -65,10 +65,19 @@ which lets us join rows together, ending in an EmptyRow. An example
         -- the table on the server must have the same schema. 
         connect : String -> String -> (s : Schema) -> IO (Handle s)
 
-        
-        -- Only modeling a single 'read' operation. 
+        -- Tells us if two schemas are disjoint. 
+        -- Implementation is not of importance at this moment. 
+        disjoint : Schema -> Schema -> Bool
+
+        -- A simple proposition that stops any false proposition from compiling
+        So Bool -> Type
+        So True = Unit
+        So False = Void
+
+        -- Only modeling Read and Product RA expressions.
         data RA : Schema -> Type where
             Read : Handle s -> RA s
+            Product : (So $ disjoint s s') => RA s -> RA s' -> RA (append s s')
         
         -- Takes in a query written with our relational algebra and then sends back a table that corresponds to our schema. 
         toSQL : RA s -> IO (List (Row s))
@@ -87,11 +96,26 @@ safe, because we know that the schemas we are reading or writing from the table
 must correspond to the schema in our code. This connect function is defined in
 Figure ~\ref{connect}. 
 
-Finally, we define a type "Relational Algebra", which contains the opperations
-that we would perform in a database query. For the sake of brevity, we've 
-limited it to \texttt{Read}. We then have a function that does an IO operation
-on a database, taking in a query of type Relational Algebra, to return us
-a database table of consisting of the results of our query. 
+Finally, we define a type \texttt{RA} which denotes expressions in our
+relational algebra. For the sake of brevity, we've limited it to \texttt{Read}
+and \texttt{Product}. We then have a function that does an IO operation on a
+database, taking in a query of type Relational Algebra, to return us a database
+table of consisting of the results of our query. 
+
+\texttt{Product} computes the Cartesian product of two tables, producing a
+larger table where each row in the first table maps to every row in the second
+table. This operation only works if the two schemas are disjoint. While it is
+trivial to write a function \texttt{disjoint} that checks to see if two schemas
+are disjoint, we want to enforce that product is only a valid RA expression on
+disjoint schemas. Thus, we want the type of \texttt{Product} to enforce that its
+two schemas are disjoint. In addition, we have a simple proposition \texttt{So}
+that ensures that the schemas are disjoint. 
+
+In writing relational algebra expressions as such, we now ensure that they will
+be well-typed with safety guaranteed at compile-time. We know that input and
+output from our database tables is guaranteed to be type-safe once an initial
+check is completed. We also can guarantee safety of composing relational
+algebras on various schema like our \texttt{Product} operation. 
 
 Thus, in this example, we've shown the potential for dependent types to build a
 type safe database, where if the schemas match on connection, all subsequent

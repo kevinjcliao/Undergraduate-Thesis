@@ -1,7 +1,11 @@
 In functional programming, we want to isolate side effects as much as possible
 to keep our code clear. In Haskell and many other programming languages, side
 effects like IO, State, Random Number Generation, etc. are handled by Monads
-<CITATION NEEDED>. If we want to use several Monads at once (our code requires
+\cite{realworldhaskell}\footnote{This part of the literature assumes that you
+are familiar with Monads, which is how the Haskell programming language handles
+side effects. For more information, I highly recommend reading O'Sullivan et.
+al's Real World Haskell or other widely available tutorials on Monads in
+Haskell.}. If we want to use several Monads at once (our code requires
 simultaneous handling of different side effects), we are often required to use
 monad transformers. While this approach works for programs that require one or
 two transformations between monads, as we bring in more and more side effects,
@@ -18,7 +22,7 @@ example, a function that of the execution context \texttt{IO} that throws side
 effects, does work on STDIO, and maintains an integer state will look something
 like the function \texttt{example} in Figure ~\ref{effects_def}. 
 
-\begin{figure}[h]
+\begin{figure}[ht!!!!]
     \caption{Definition of effect type}
     \label{effects_def}
     \begin{lstlisting}
@@ -40,7 +44,7 @@ We can now apply this small Effects DSL we have defined to work on some simple
 programs where we need to maintain a side effect of some sort. I will provide an
 example of a program where we tag each node of a binary tree with a unique ID. 
 
-\begin{figure}[h]
+\begin{figure}[ht!!!!]
     \caption{Tagging a binary tree with integers. Taken from Brady's work.
     \protect\cite{algebraic}}
     \label{tag_def}
@@ -75,3 +79,55 @@ example of a program where we tag each node of a binary tree with a unique ID.
         tagFrom x t = runPure [x] (tag t)
     \end{lstlisting}
 \end{figure}
+
+This tagging program is a simple function that recurses through a tree. The
+function 'gets' from and 'puts' to a state that is kept alive for the duration
+of the program. Since this side effect is 'created' at function call-time and
+'destroyed' on termination, it makes sense to say that this function can be
+invoked as a pure function. Thus, we have a function with internal side effects
+that have been clearly specified. We can see here how specifying side effects as
+a list of effects rather than with monad transformers means that we can easily
+add or remove side effects as required. 
+
+\begin{figure}[ht!!!!]
+    \caption{Declaring handlers for side effects. Taken from Brady's work.
+    \protect\cite{algebraic}}
+    \label{handlers}
+    \begin{lstlisting}
+        Effect : Type
+        Effect = (res : Type) -> (res' : Type) -> (t : Type) -> Type
+
+        class Handler (e : Effect) (m : Type -> Type) where
+            handle : res -> (eff : e res res' t) -> (res' -> t -> m a) -> m add
+        
+        instance Handler State m where
+            handle st Get     k = k st st
+            handle st (Put n) k = k n ()
+        
+        instance Handler StdIO IO where
+            handle () (PutStr s) k = do putStrs; k () ()
+            handle () GetStr     k = do x <- getLine; k () x
+    \end{lstlisting}
+\end{figure}
+
+Having specified how this Effects DSL works, how then should we implement it?
+Functions with different side effects are invoked from an execution context
+\texttt{Env}. The specifics of how execution contexts are defined are not
+important, however, we can note that different effects require different
+execution contexts. \texttt{STATE}, for example, is strictly locally confined
+and thus its execution context does not matter. Meanwhile, \texttt{STDIO} does
+IO operations, and therefore its execution context must be inside of the IO
+Monad. We can specify a type class \texttt{Handler}. All effects should be
+instances of this type class. \texttt{Handler} enforces that the environment we
+invoke a function from is the correct one. In other words, if I attempted to
+invoke a \texttt{runpure} function that had an \texttt{STDIO} side effect, the
+program will not compile. 
+
+Isolating side effects is a form of best practice and doing so is not easy.
+While monads provide a way to handle side effects, programs multiple side
+effects often require the use of monad transformers, making a programmer more
+likely to take coarse-grained shortcuts which avoid many of the benefits of
+monads in the first place. Building an \texttt{Effects} DSL allows the
+programmer to specify effects of a program that executes inside a single
+execution context. This allows for multiple monadic side effects to be
+effectively juggled by a programmer. 

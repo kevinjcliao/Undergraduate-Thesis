@@ -43,6 +43,13 @@
   publisher={Elsevier}
 }
 
+@book{realworldhaskell,
+  title={Real World Haskell},
+  author={O'Sullivan, Bryan and Goerzen, John and Stewart, Donald Bruce},
+  year={2008},
+  publisher={" O'Reilly Media, Inc."}
+}
+
 
 @article{mcbride2014,
 	author = "Conor McBride",
@@ -158,21 +165,38 @@
  publisher = {ACM},
  address = {New York, NY, USA},
  keywords = {dependent types, domain-specific embedded languages},
+}
+
+@inproceedings{cryptol_manual,
+ 	author = {Lewis, Jeff},
+ 	title = {Cryptol: Specification, Implementation and Verification of High-grade Cryptographic Applications},
+ 	booktitle = {Proceedings of the 2007 ACM Workshop on Formal Methods in Security Engineering},
+ 	series = {FMSE '07},
+ 	year = {2007},
+ 	isbn = {978-1-59593-887-9},
+ 	location = {Fairfax, Virginia, USA},
+ 	pages = {41--41},
+ 	numpages = {1},
+ 	url = {http://doi.acm.org/10.1145/1314436.1314442},
+ 	doi = {10.1145/1314436.1314442},
+ 	acmid = {1314442},
+ 	publisher = {ACM},
+ 	address = {New York, NY, USA},
+ 	keywords = {certification, cryptography, high assurance, specification language, symmetric key},
+ 	annotate = "I'm implementing part of a Cryptol compiler in Idris as part of my literature review. This provides a handy reference to the Cryptol programming language."
+
 } 
 
-@book {cryptol_manual,
-	author = "Galois Inc",
-	title = "Cryptol Reference Manual",
-	year = 2002,
-	annotate = "I'm implementing part of a Cryptol compiler in Idris as part of my literature review. This provides a handy reference to the Cryptol programming language."
-}
+@book{pmb_spec,
+ author = {Kay, David C. and Levine, John R.},
+ title = {Graphics File Formats},
+ year = {1994},
+ isbn = {0070340250},
+ edition = {2nd},
+ publisher = {McGraw-Hill, Inc.},
+ address = {New York, NY, USA},
+} 
 
-@misc{pmb_spec,
-	title = "The PBM Format", 
-	howpublished = {\url{http://netpbm.sourceforge.net/doc/pbm.html}},
-	note = {Accessed: 2017-10-25},
-	annotate = "This provides a specification for the PBM file format, which I'm trying to parse in my literature review."
-}
 
 @article{ml_type_theory,
 	title = {An Intuitionistic Theory of Types},

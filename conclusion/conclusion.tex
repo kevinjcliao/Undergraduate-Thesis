@@ -1,18 +1,47 @@
 
 \chapter{Conclusion}
 
-\label{ch:conclusions}
+\section{Proposal for Future Work}
 
-\section{Summary of Thesis Achievements}
+While I'm still uncertain about the direction to proceed, I'm interested in
+looking at elections and e-voting and whether or not we can provide guarantees
+of correctness to vote counting software written in dependently typed languages.
+I take a particular interest in the Australian Senate voting verification
+process because verification of vote count is an NP-complete problem
+\cite{aus_senate}. 
 
-Summary.
+Currently, the Australian government uses proprietary code to count Australian
+senate ballots and has refused to release the source code after a Freedom of
+Information Act request \cite{aus_senate_news}. If an open-sourced, verifiably
+correct counting program were devised, we could greatly protect the integrity of
+Australian elections. 
 
+\section{Conclusion}
+While many literature reviews begin by looking examining a problem and looking
+for existing solutions, this literature review takes an opposite approach. The
+broader problem we are trying to answer is one that crosses various domains and
+engineering fields. To put it quite simply, \textit{programs crash}. Dependent
+typed languages, long a toy for theoretical computer scientists and
+constructivist mathematicians, are increasingly becoming realistic tools to
+write code with necessary guarantees of correctness. In other words, dependent
+types are a solution in search of a problem. 
 
-\section{Applications}
+In this literature review, I offered a brief summary as to what dependent types
+are and what languages exist where dependent type functionality is available. I
+then moved on to describe different applications of dependently typed
+programming that exist in literature. I started by looking at Cryptol, a DSL for
+cryptography, and showed how dependent types allow for implementing complex
+pattern-matching that the language requires \cite{power_of_pi}. I then moved on
+to discuss embedded data description languages, showing how one can describe how
+data is structured and generate a parser out of such a description
+\cite{power_of_pi}. I also examined the potential of dependent types to build a
+typesafe database, eliminating runtime typechecking and thus reducing error and
+increasing performance \cite{power_of_pi,eisenberg2016}. 
 
-Applications.
-
-
-\section{Future Work}
-
-Future Work.
+Outside of domain specific languages, I also showed the application of dependent
+types to systems programming \cite{idris_systems_programming}, building
+distributed systems \cite{fstar_distributed_programming} and units of
+measurement \cite{gundry2013}. In this wide-ranging review, I've demonstrated
+that as dependent types become brought into the mainstream, they have the
+potential to empower programmers to build safe, robust programs in ways that
+have not been possible before. 

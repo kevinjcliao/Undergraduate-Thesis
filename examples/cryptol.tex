@@ -1,0 +1,26 @@
+Dependent type systems have potential applications in easily implementing domain
+specific languages (DSLs). Cryptol, for example, is a domain-specific language
+designed around cryptography \cite{cryptol_manual}. Problems inherent in
+implementing a Cryptol compiler or interpreter can be solved through dependent
+types \cite{power_of_pi}. Cryptol is a functional programming language with
+advanced support for pattern matching. Since cryptography commonly requires
+dealing with low-level bit manipulation, it follows that Cryptol is designed
+around facilitating these operations and making them safe. A function that does
+this sort of low-level manipulation is the \texttt{swab} function, which takes
+in a 32-bit word and swaps the first two bytes \cite{cryptol_manual}.: 
+
+$$
+\texttt{swab :: Word 32 -> Word 32} \\
+\texttt{swab [a b c d] = [b a c d]} $$
+
+Ideally, a word would be represented by a vector of 32-bits. We would be able to
+declare a pattern match with swab that looks similar to the declaration
+presented by Oury and Swiestra above. How then does the compiler understand that
+this pattern match declaration means we expect the input vector to be divided
+into 4 separate vectors of 8 bits? This is where dependent types serve a
+practical purpose. By specifying types that split the length of the vector up
+into a multiple of two scalars, we can effectively implement this clever pattern
+match, allowing for powerful pattern matching required by the Cryptol language
+(\cite{power_of_pi}). 
+
+\textit{More coming in final draft of literature review}
