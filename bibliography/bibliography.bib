@@ -6,6 +6,14 @@
 	annotate = "Richard Eisenberg's work, as mentioned in the thesis proposal, provides an account of how dependent types would look in Haskell. He also provides examples of practical applications of dependent types, such as a type-safe database. This work forms one of the foundations of my research."
 }
 
+@phdthesis{alf,
+	author = "Lena Magnusson",
+	title = {The Implementation of ALF: A Proof Editor Based on Martin-L{\"o}f's Monomorphic Type Theory with Explicit Substitution},
+	year = 1994,
+	school = "University of Gothenburg",
+	isbn = {91-7197-066-5},
+}
+
 @phdthesis{gundry2013,
 	author = "Adam Michael Gundry",
 	title = "Type Inference, Haskell and Dependent Types",
@@ -13,6 +21,28 @@
 	school = "University of Strathclyde",
 	annotate = "As mentioned in the thesis proposal, Gundry provides an earlier proposal for how dependent types could look in Haskell. Like Eisenberg, Gundry provides examples of dependent type applications such as removing unit conversion errors, which I describe briefly in my proposal.",
 }
+
+@phdthesis{norell:thesis,
+  author  = {Ulf Norell},
+  title	  = {Towards a practical programming language based on dependent type
+	     theory},
+  school  = {Department of Computer Science and Engineering, Chalmers University of Technology},
+  year	  = 2007,
+  month	  = {September},
+  address = {SE-412 96 G\"{o}teborg, Sweden}
+}
+
+@article{coquand1988calculus,
+  title={The calculus of constructions},
+  author={Coquand, Thierry and Huet, G{\'e}rard},
+  journal={Information and computation},
+  volume={76},
+  number={2-3},
+  pages={95--120},
+  year={1988},
+  publisher={Elsevier}
+}
+
 
 @article{mcbride2014,
 	author = "Conor McBride",
@@ -78,6 +108,16 @@
 	annotate = "I cite this to show that dependent types exist in the Agda programming language.",
 }
 
+@book{tdd_book,
+  title={Type-Driven Development with Idris},
+  author={Brady, Edwin},
+  isbn={9781617293023},
+  url={https://books.google.com/books?id=eWzEjwEACAAJ},
+  year={2017},
+  publisher={Manning Publications Company}
+}
+
+
 @article{idris_systems_programming,
 	author = "Edwin C. Brady",
 	title = "Idris: Systems Programming Meets Full Dependent Types",
@@ -120,8 +160,6 @@
  keywords = {dependent types, domain-specific embedded languages},
 } 
 
-[download] 
-
 @book {cryptol_manual,
 	author = "Galois Inc",
 	title = "Cryptol Reference Manual",
@@ -151,19 +189,14 @@
 	annotate = {An introduction to Martin-L{\"ö}f Type Theory, which serves as the theoretical foundation for dependent types.}
 }
 
-@article{nuprl,
-	title = "Implementing Mathematics with The Nuprl Proof Development System",
-	author = "R.L. Constable and S.F. Allen and H.M. Bromley and W.R. Cleaveland and J.F. Cremer and R.W. Harper and D.J. Howe and T.B. Knoblock and N.P. Mendler and P. Panangaden and J.T. Sasaki and S.F. Smith",
-	year = 1985,
-	annotate = "A paper that discusses the NuPRL theorem prover. I cite this in my discussion on the history of dependent types."
-}
-
-@misc{prl_home,
-	title = "The Nature of the PRL Project",
-	howpublished = {\url{http://www.nuprl.org/Intro/intro.html"}},
-	note = {Accessed: 2017-10-28},
-	annotate = "Also cited in my discussion on the history of dependent types."
-}
+@book{nuprl,
+ author = {Constable, R. L. and Allen, S. F. and Bromley, H. M. and Cleaveland, W. R. and Cremer, J. F. and Harper, R. W. and Howe, D. J. and Knoblock, T. B. and Mendler, N. P. and Panangaden, P. and Sasaki, J. T. and Smith, S. F.},
+ title = {Implementing Mathematics with the Nuprl Proof Development System},
+ year = {1986},
+ isbn = {0-13-451832-2},
+ publisher = {Prentice-Hall, Inc.},
+ address = {Upper Saddle River, NJ, USA},
+} 
 
 @book{girard1989proofs,
 	title={Proofs and Types},
@@ -175,14 +208,6 @@
 	year={1989},
 	publisher={Cambridge University Press},
 	annotate = "Cited in my section on the history of dependent types when discussing Agda, a theorem prover and programming language."
-}
-
-@book{tdd_book,
-	title = "Type-Driven Development with Idris",
-	author = "Edwin Brady",
-	year = 2017,
-	publisher = "Manning Publications",
-	annotate = "I've been reading through this book to pick up Idris, which is a dependently typed general-purpose programming language."
 }
 
 @misc{idris_pop,
@@ -199,13 +224,6 @@
 	annotate = "I give a brief overview of units of measure in F\#. This is official Microsoft documentation on how they appear in F\#"
 }
 
-@misc{Magnusson95theimplementation,
-    author = {Lena Magnusson},
-    title = {The Implementation of ALF - a Proof Editor based on Martin-L{\"o}f's Monomorphic Type Theory with Explicit Substitution},
-    year = {1995},
-	annotate = "Cited when I reference ALF in a history of dependent types."
-}
-
 @article{structured_type_theory,
 	author = "Catarina Coquand and Thierry Coquand",
 	title = "Structured Type Theory",
@@ -220,31 +238,30 @@
 	annotate = "Cited when I introduce the concept of dependent pairs in Idris."
 }
 
-@article{Augustsson:1998:CLD:291251.289451,
-	author = {Lennart Augustsson},
-	title = {Cayenne Language with Dependent Types},
-	journal = {SIGPLAN Not.},
-	issue_date = {Jan. 1999},
-	volume = {34},
-	number = {1},
-	month = sep,
-	year = {1998},
-	issn = {0362-1340},
-	pages = {239--250},
-	numpages = {12},
-	url = {http://doi.acm.org/10.1145/291251.289451},
-	doi = {10.1145/291251.289451},
-	acmid = {289451},
-	publisher = {ACM},
-	address = {New York, NY, USA},
-	keywords = {dependent types, language design, module systems, type systems},
-	annotate = {Cited when I discuss the history of theorem provers. Cayenne was a theorem prover created in the late '90s and so is relevant in this discussion.}
-}
+@inproceedings{cayenne,
+ author = {Augustsson, Lennart},
+ title = {Cayenne: a Language with Dependent Types},
+ booktitle = {Proceedings of the Third ACM SIGPLAN International Conference on Functional Programming},
+ series = {ICFP '98},
+ year = {1998},
+ isbn = {1-58113-024-4},
+ location = {Baltimore, Maryland, USA},
+ pages = {239--250},
+ numpages = {12},
+ url = {http://doi.acm.org/10.1145/289423.289451},
+ doi = {10.1145/289423.289451},
+ acmid = {289451},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {dependent types, language design, module systems, type systems},
+} 
 
-@article{tao,
+
+
+@inproceedings {tao,
 	author = {Nathan Bronson and Zach Amsden and George Cabrera and Prasad Chakka and Peter Dimov and Hui Ding and Jack Ferris and Anthony Giardullo and Sachin Kulkarni and Harry Li and Mark Marchukov and Dmitri Petrov and Lovro Puzar and Yee Jiun Song and Venkat Venkataramani},
 	title = {{TAO}: Facebook{\textquoteright}s Distributed Data Store for the Social Graph},
-	booktitle = {Presented as part of the 2013 {USENIX} Annual Technical Conference ({USENIX} {ATC} 13)},
+	booktitle = {The 2013 {USENIX} Annual Technical Conference ({USENIX} {ATC} 13)},
 	year = {2013},
 	isbn = {978-1-931971-01-0},
 	address = {San Jose, CA},
@@ -268,12 +285,6 @@
 	url = "http://www.sciencedirect.com/science/article/pii/S0049237X09701892",
 	author = {Per Martin-L{\"o}f},
 	annotate = "This is the paper where Per Martin-L{\"ö}f introduces Martin-L{\"ö}f type theory, which serves as a theoretical underpinning for modern-day dependent type implementations in Idris and Agda."
-}
-
-@article{constructive_math,
-	title = "Constructive Mathematics",
-	author = "Maarten McKubre-Jordens",
-	annotate = "Constructive math is one of the theoretical underpinnings of dependent types. I cite this article as a general introduction to the theoretical background in constructive math."
 }
 
 @article{algebraic,

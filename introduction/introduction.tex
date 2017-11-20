@@ -75,17 +75,17 @@ tremendous promise in helping programmers build reliable and safe programs.
 
 \section{Dependent Types: A History}
 Dependent types in programming languages have their roots in intuitionistic type
-theory or Martin-L\"{o}f Type Theory \cite{intro_martin_lof, ml_type_theory}. This
-type theory serves as a foundation for \textit{constructive mathematics}
-\cite{constructive_math}. Per Martin-L\"{o}f was interested in a type theory that
-could be used as a programming language, where all well-typed programs must
-terminate \cite{ml_type_theory}. His type theory is based on the principles of
+theory or Martin-L\"{o}f Type Theory \cite{intro_martin_lof,ml_type_theory}.
+This type theory serves as a foundation for \textit{constructive mathematics}
+\cite{martin_lof}. Per Martin-L\"{o}f was interested in a type theory that could
+be used as a programming language, where all well-typed programs must terminate
+\cite{ml_type_theory}. His type theory is based on the principles of
 constructive mathematics, mainly Curry-Howard isomorphism. Curry-Howard
 isomorphism is the notion that there is a direct correspondence between
 mathematical proofs and type theory. In other words, a type signature is
 synonymous with a mathematical proposition, and if a valid program satisfying
 the constraints of such a type signature exists, then a proof proving the
-corresponding mathematical proposition \cite{martin_lof, ml_type_theory}. To
+corresponding mathematical proposition \cite{martin_lof,ml_type_theory}. To
 illustrate this, consider the examples in Figure ~\ref{ml_type_theory_examples}
 \footnote{These examples were provided by Prof. Richard Eisenberg in a
 discussion.}. 
@@ -113,15 +113,13 @@ isomorphism meant that a valid function that inhabits a type signature could be
 equivalent to a proof. A dependently typed programming language based on
 foundations in Martin-L\"{o}f Type Theory called NuPrl was first released in
 1984 \cite{nuprl}. NuPrl is used as a \textit{proof assistant} that helps
-mathematicians and programmers formalize proofs \cite{prl_home}. Dependently
-typed proof assistants like NuPrl found a home at the intersection between
-programming language enthusiasts interested in total program correctness and
-constructive mathematicians interested in systems where mathematical formulisms
-could be systematically encoded. Other proof assistants with support for
-dependent types followed: Coq (1989) \cite{girard1989proofs}, ALF (1990)
-\cite{Magnusson95theimplementation}, Cayenne (1998)
-\cite{Augustsson:1998:CLD:291251.289451}, Agda (1999)
-\cite{structured_type_theory}.
+mathematicians and programmers formalize proofs \cite{nuprl}. Dependently typed
+proof assistants like NuPrl found a home at the intersection between programming
+language enthusiasts interested in total program correctness and constructive
+mathematicians interested in systems where mathematical formulisms could be
+systematically encoded. Other proof assistants with support for dependent types
+followed: Coq (1989) \cite{coquand1988calculus}, ALF (1990) \cite{alf}, Cayenne
+(1998) \cite{nuprl}, Agda (1999) \cite{norell:thesis}.
 
 While there are now robust theorem provers that incorporate dependent types,
 work now is primarily concerned with bringing them into mainstream programming
@@ -132,7 +130,7 @@ secure distributed programming \cite{fstar_distributed_programming}. In addition
 to the development of new programming languages with dependent type systems
 built into the language by design, work exists to mainstream dependent types
 into more prominent programming languages. The most active and promising
-mainstreaming work is on Haskell \cite{eisenberg2016, gundry2013}. 
+mainstreaming work is on Haskell \cite{eisenberg2016,gundry2013}. 
 
 \section{Implementing Domain-Specific Languages with Dependent Types}
 
@@ -201,14 +199,14 @@ looking at elections and e-voting and whether or not we can provide guarantees
 of correctness to vote counting software written in dependently typed languages.
 I take a particular interest in the Australian Senate voting verification
 process because verification of vote count is an NP-complete problem
-(\cite{aus_senate}). 
+\cite{aus_senate}. 
 
 If we were able to verify that vote counting software is correct at
 compile-time, we would sidestep the need to run verification code that is trying
 to solve an np-complete problem. Currently, the Australian government uses
 proprietary code to count Australian senate ballots and has refused to release
 the source code after a Freedom of Information Act request
-(\cite{aus_senate_news}). If an open-sourced, verifiably correct counting
+\cite{aus_senate_news}. If an open-sourced, verifiably correct counting
 program were devised, we could greatly protect the integrity of Australian
 elections. 
 
@@ -232,7 +230,7 @@ to discuss embedded data description languages, showing how one can describe how
 data is structured and generate a parser out of such a description
 \cite{power_of_pi}. I also examined the potential of dependent types to build a
 typesafe database, eliminating runtime typechecking and thus reducing error and
-increasing performance \cite{power_of_pi, eisenberg2016}. 
+increasing performance \cite{power_of_pi,eisenberg2016}. 
 
 Outside of domain specific languages, I also showed the application of dependent
 types to systems programming \cite{idris_systems_programming}, building

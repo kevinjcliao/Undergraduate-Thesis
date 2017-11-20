@@ -14,9 +14,9 @@ as a value, making this an appropriate area to apply dependent types
 \cite{power_of_pi}. 
 
 We can start by defining our \textit{universe} (see Figure
-~\ref{universe})\footnote{Original implementation in \cite{power_of_pi} was in
-Agda. An Idris implementation was sourced from
-https://github.com/yurrriq/the-power-of-pi/blob/master/src/Data/Cryptol.lidr},
+~\ref{universe})\footnote{\label{idris_source}Original implementation in
+\cite{power_of_pi} was in Agda. An Idris implementation was sourced from
+https://github.com/yurrriq/the-power-of-pi/blob/master/src/Data/Cryptol.lidr },
 which contains all the types that our parser will be manipulating in some way.
 We also define a function \textit{el}, which will take any value of type U and
 convert it to an appropriate type. The combination of this data type declaration
@@ -24,7 +24,7 @@ and this \textit{el} function is a definition of the relevant universe for this
 problem domain \cite{power_of_pi}. 
 
 \begin{figure}[h]
-    \caption{Universe declaration in Idris \cite{power_of_pi}}
+    \caption{Universe declaration in Idris \protect\cite{power_of_pi}}
     \label{universe}
     \begin{lstlisting}
         data Bit : Type where 
@@ -57,8 +57,7 @@ rejection if the input data is badly formed. We can declare such a type as
 follows: 
 
 \begin{figure}[h]
-    \caption{Format data type in Idris \cite{power_of_pi}, Idris implementation
-    by \cite{idris_pop}.}
+    \caption{Format data type in Idris \protect\cite{power_of_pi}}
     \label{formatDeclaration}
     \begin{lstlisting}
         data Format : Type where Bad : Format End : Format Base : U -> Format
@@ -75,23 +74,25 @@ follows:
     \end{lstlisting}
 \end{figure}
 
-In the code of Figure ~\ref{formatDeclaration} one thing noteworthy is the
-$(**)$ operator, which is Idris syntactic sugar for a dependent pair. A
-dependent pair (a : A ** P) means that the type variable $a$ is of type A and
-can also occur in the type P \cite{idris_dependent_pairs}. For example, consider
-Figure ~\ref{dependentPairExample}. The example will only type check correctly
-iff the natural number present in the first element of the pair is the same as
-the length of the list. 
+In the code of Figure ~\ref{formatDeclaration}\footnotemark[\ref{idris_source}]
+one thing noteworthy is the $(**)$ operator, which is Idris syntactic sugar for
+a dependent pair. A dependent pair (a : A ** P) means that the type variable $a$
+is of type A and can also occur in the type P \cite{tdd_book}. For example,
+consider Figure ~\ref{dependentPairExample}. The example will only type check
+correctly iff the natural number present in the first element of the pair is the
+same as the length of the list. 
 
 Having specified a data type that lets us declare formats, we can then move on
-to creating a specification. In Figure ~\ref{spec_declaration}, a format for the
-PBM spec is provided. We are now able to write a parser that takes in a Format
-as a data type, and then is able to parse files to generate well-typed data. See
-Figure ~\ref{parser}. This straightforward parsing code is aided by the types
-that we declared before, skipping, reading, and terminating where required by
-our file format specification. We can use Idris' REPL to see how the parser
-deals with our PBM specification in Figure ~\ref{repl}. Here, we see that the
-type signature of the function created by giving the parse function our pbm
+to creating a specification. In Figure
+~\ref{spec_declaration}\footnotemark[\ref{idris_source}], a format for the PBM
+spec is provided. We are now able to write a parser that takes in a Format as a
+data type, and then is able to parse files to generate well-typed data. See
+Figure ~\ref{parser}\footnotemark[\ref{idris_source}]. This straightforward
+parsing code is aided by the types that we declared before, skipping, reading,
+and terminating where required by our file format specification. We can use
+Idris' REPL to see how the parser deals with our PBM specification in Figure
+~\ref{repl}\footnotemark[\ref{idris_source}]. Here, we see that the type
+signature of the function created by giving the parse function our pbm
 specification is a function that takes in a list of bits and returns a matrix of
 bits with sizes bound by the natural numbers that we first specified in the file
 format. 
@@ -105,8 +106,7 @@ format.
 \end{figure}
 
 \begin{figure}[h]
-    \caption{Format declaration of PBM \cite{power_of_pi}, Idris implementation
-    by \cite{idris_pop}.}
+    \caption{Format declaration of PBM \protect\cite{power_of_pi}}
     \label{spec_declaration}
     \begin{lstlisting}
         export pbm : Format pbm = char 'P' >> char '4' >> char ' ' >> Base NAT
@@ -117,8 +117,7 @@ format.
 
 
 \begin{figure}[h]
-    \caption{Parser declaration \cite{power_of_pi}, Idris implementation by
-    \cite{idris_pop}.}
+    \caption{Parser declaration \protect\cite{power_of_pi}}
     \label{parser}
     \begin{lstlisting}
         parse : (f : Format) -> List Bit -> Maybe (Fmt f, List Bit)
@@ -141,7 +140,7 @@ format.
     \end{lstlisting}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[ht]
     \caption{Putting the PBM spec into Idris' REPL}
     \label{repl}
     \begin{lstlisting}
