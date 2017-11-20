@@ -1,0 +1,157 @@
+Work also exists to use dependent types in creating embedded data description
+languages, which are languages where a programmer can describe the structure of
+data and quickly generate a working parser \cite{power_of_pi}.  For example,
+consider the portable bitmap (pbm) file format, which consists simply of ``P4'',
+followed by the dimensions of the image in pixels as $n, m$ integers separated
+by a space. After a newline, hde image is described as a string of $n\times m $
+bits where 1 is black and 0 is white \cite{pmb_spec}. If a parser were generated
+from a data description language, we expect the parser to either return
+well-typed data (a vector of bits and the dimensions of the image) or to signal
+that the data is not well-formed. In other words, if we want to generate parsers
+through embedded data description languages, we could specify the file format as
+a value. The type of the generated parser then, would depend on the file format
+as a value, making this an appropriate area to apply dependent types
+\cite{power_of_pi}. 
+
+We can start by defining our \textit{universe} (see Figure
+~\ref{universe})\footnote{Original implementation in \cite{power_of_pi} was in
+Agda. An Idris implementation was sourced from
+https://github.com/yurrriq/the-power-of-pi/blob/master/src/Data/Cryptol.lidr},
+which contains all the types that our parser will be manipulating in some way.
+We also define a function \textit{el}, which will take any value of type U and
+convert it to an appropriate type. The combination of this data type declaration
+and this \textit{el} function is a definition of the relevant universe for this
+problem domain \cite{power_of_pi}. 
+
+\begin{figure}[h]
+    \caption{Universe declaration in Idris \cite{power_of_pi}}
+    \label{universe}
+    \begin{lstlisting}
+        data Bit : Type where 
+            O : Bit 
+            I : Bit
+
+        data U : Type where
+            STRING : U
+            BOOL : U
+            CHAR : U
+            NAT : U
+            VECT : Nat -> U -> U
+        
+        el : U -> Type
+            el STRING     = String
+            el BOOL       = Bool
+            el CHAR       = Char
+            el NAT        = Nat
+            el (VECT n u) = Vect n (el u)
+    \end{lstlisting}
+\end{figure}
+
+From here, we can define a \textit{Format} data type that enables us to describe
+the format of our data. When sequencing formats, we want two binary operators
+that either read or skip. To skip means to skip over the first parameter and
+generate a type for the file format from the second parameter. To read means to
+build a type from both parameters before moving on. We will need to define both
+these operations, a base operation that gives us a type, a terminal, and
+rejection if the input data is badly formed. We can declare such a type as
+follows: 
+
+\begin{figure}[h]
+    \caption{Format data type in Idris \cite{power_of_pi}, Idris implementation
+    by \cite{idris_pop}.}
+    \label{formatDeclaration}
+    \begin{lstlisting}
+        data Format : Type where Bad : Format End : Format Base : U -> Format
+        Plus : Format -> Format -> Format Skip : Format -> Format -> Format Read
+        : (f : Format) -> (Fmt f -> Format) -> Format
+
+        Fmt : Format -> Type Fmt Bad = Void Fmt End = Unit Fmt (Base u) = el u
+        Fmt (Plus f1 f2) = Either (Fmt f1) (Fmt f2) Fmt (Read f1 f2) = (x : Fmt
+        f1 ** Fmt (f2 x)) Fmt (Skip _ f) = Fmt f
+
+        (>>) : Format -> Format -> Format f1 >> f2 = Skip f1 f2
+
+        (>>=) : (f : Format) -> (Fmt f -> Format) -> Format x >>= f = Read x f
+    \end{lstlisting}
+\end{figure}
+
+In the code of Figure ~\ref{formatDeclaration} one thing noteworthy is the
+$(**)$ operator, which is Idris syntactic sugar for a dependent pair. A
+dependent pair (a : A ** P) means that the type variable $a$ is of type A and
+can also occur in the type P \cite{idris_dependent_pairs}. For example, consider
+Figure ~\ref{dependentPairExample}. The example will only type check correctly
+iff the natural number present in the first element of the pair is the same as
+the length of the list. 
+
+Having specified a data type that lets us declare formats, we can then move on
+to creating a specification. In Figure ~\ref{spec_declaration}, a format for the
+PBM spec is provided. We are now able to write a parser that takes in a Format
+as a data type, and then is able to parse files to generate well-typed data. See
+Figure ~\ref{parser}. This straightforward parsing code is aided by the types
+that we declared before, skipping, reading, and terminating where required by
+our file format specification. We can use Idris' REPL to see how the parser
+deals with our PBM specification in Figure ~\ref{repl}. Here, we see that the
+type signature of the function created by giving the parse function our pbm
+specification is a function that takes in a list of bits and returns a matrix of
+bits with sizes bound by the natural numbers that we first specified in the file
+format. 
+
+\begin{figure}[h]
+    \caption{Example for Dependent Pairs taken from the Idris documentation.}
+    \label{dependentPairExample}
+    \begin{lstlisting}
+        vec : (n : Nat ** Vect n Int) vec = (2 ** [3, 4])
+    \end{lstlisting}
+\end{figure}
+
+\begin{figure}[h]
+    \caption{Format declaration of PBM \cite{power_of_pi}, Idris implementation
+    by \cite{idris_pop}.}
+    \label{spec_declaration}
+    \begin{lstlisting}
+        export pbm : Format pbm = char 'P' >> char '4' >> char ' ' >> Base NAT
+        >>= \n => char ' ' >> Base NAT >>= \m => char '\n' >> Base (VECT n (VECT
+        m BIT)) >>= \bs => End
+    \end{lstlisting}
+\end{figure}
+
+
+\begin{figure}[h]
+    \caption{Parser declaration \cite{power_of_pi}, Idris implementation by
+    \cite{idris_pop}.}
+    \label{parser}
+    \begin{lstlisting}
+        parse : (f : Format) -> List Bit -> Maybe (Fmt f, List Bit)
+        parse Bad bs       = Nothing
+        parse End bs       = Just ((), bs)
+        parse (Base u) bs  = read u bs
+        parse (Plus f1 f2) bs with (parse f1 bs)
+          | Just (x, cs)   = Just (Left x, cs)
+          | Nothing with (parse f2 bs)
+            | Just (y, ds) = Just (Right y, ds)
+            | Nothing      = Nothing
+        parse (Skip f1 f2) bs with (parse f1 bs)
+          | Nothing        = Nothing
+          | Just (_, cs)   = parse f2 cs
+        parse (Read f1 f2) bs with (parse f1 bs)
+          | Nothing        = Nothing
+          | Just (x, cs) with (parse (f2 x) cs)
+            | Nothing      = Nothing
+            | Just (y, ds) = Just ((x ** y), ds)
+    \end{lstlisting}
+\end{figure}
+
+\begin{figure}
+    \caption{Putting the PBM spec into Idris' REPL}
+    \label{repl}
+    \begin{lstlisting}
+        *Parser> :t parse pbm parse pbm : List Bit -> Maybe ( (x : Nat ** x1 :
+        Nat ** x2 : Vect x (Vect x1 Bit) ** ()) , List Bit)
+    \end{lstlisting}
+\end{figure}
+
+In this section, we show that dependent types allow us to create embedded data
+description languages inside of a dependently typed language. We can then
+generate well-typed, reliable parsers without having to rewrite a lot of code.
+Thus, using dependently typed languages to write parsers with embedded data
+description languages both demonstrates promise in brevity and also safety. 

@@ -3,6 +3,41 @@
 
 \begin{abstract}
 
-Text of the Abstract.
+Programs crash. Static type systems serve to make the life of a programmer
+easier by providing static compile-time guarantees of certain program behaviour,
+guaranteeing that a function will map from a domain to a co-domain. A
+dependently typed programming language gives a programmer even additional
+expressive power, allowing types to be expressed relative to values given at
+runtime. Thus, the co-domain of our function is dependent upon some value that is
+provided at runtime. 
+
+While research in dependent types has traditionally been in the domains of
+theoretical mathematics, where researchers use dependently typed theorem provers
+to write mathematical formulisms, dependent types have applications outside of
+such a theoretical domain. In my work, I seek to summarize the existing body of
+work around practical applications of dependent types. This review is a  tour of
+a potential application of dependent types. My review explores the following
+additional examples: 
+\begin{enumerate}
+  \item Complicated pattern matching in the Cryptol DSL for cryptographic
+  applications. \cite{power_of_pi}
+  \item Generating file format parsers from a data description language.
+  \cite{power_of_pi}
+  \item A relational database and algebra. \cite{power_of_pi, eisenberg2016}
+  \item An alternative to monadic transformations with an algebraic effects DSL
+  \cite{algebraic}
+  \item Programming distributed systems with F\* and dependent types.
+  \cite{fstar_distributed_programming}
+  \item A low-level domain-specific language demonstrating the applicability of
+  dependent types to systems programming. \cite{idris_systems_programming}
+\end{enumerate}
+
+Through a review of the practical applications of dependent types in existing
+and implemented functional programming languages, I demonstrate that while
+dependent types are often thought of as far-off and theoretical, they are
+accessible to the modern programmer. In addition to empowering constructive
+mathematicians with theorem provers, dependent types give a programmer ways to
+write extremely safe programs with certain compile-time guarantees of
+correctness. 
 
 \end{abstract}

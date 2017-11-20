@@ -4,41 +4,46 @@ easier by providing static compile-time guarantees of certain program behaviour,
 guaranteeing that a function will map from a domain to a co-domain. A
 dependently typed programming language gives a programmer even additional
 expressive power, allowing types to be expressed relative to values given at
-runtime. For example, consider a function replicate, that takes in any Peano
-natural $n$ and returns a vect of $n$ Peano natural of value 1 to $n$. We can
-express this in Idris, a dependently typed functional programming language, as
-follows in Figure ~\ref{replicate_in_idris}. 
+runtime. For example, consider a function \textit{replicate}, that takes in any
+Peano natural number $n$ and returns a length-indexed vector of $n$ Peano
+natural numbers of the value $n$. We can express this in Idris, a
+dependently typed functional programming language, as follows in Figure
+~\ref{replicate_in_idris}. 
 
 \begin{figure}[ht!]
   \caption{Implementation of Replicate in Idris}
   \label{replicate_in_idris}
   \begin{lstlisting}
+    -- replic 3 will give us (3 :: 3 :: 3 :: Nil)
     replic : (n : Nat) -> Vect n Nat
-    replic n = replicateHelper n n where
-      replicateHelper : (n : Nat) -> Nat -> Vect n Nat
-      replicateHelper Z _ = Nil
-      replicateHelper (S n) val = (val :: replicateHelper n val)
+    replic n = replHelp n n where
+      replHelp : (n : Nat) -> Nat -> Vect n Nat
+      replHelp Z _ = Nil
+      replHelp (S n) val = (val :: replHelp n val)
   \end{lstlisting}
 \end{figure}
 
 Thus, the co-domain of our function is dependent upon some value that is
 provided at runtime. Calling \texttt{replic 5} will limit the co-domain of the
-function to all Vects of length 5, etc. Thus, having written this type, a
-programmer now has compile-time guarantees of extreme correctness that would not
-be otherwise possible. 
+function to all length-indexed vectors of length 5, etc. Having written this
+type, a programmer now has compile-time guarantees that the logic for a function
+was expressed correctly and behaviour will correspond closer to what is
+expected.
 
 While research in dependent types has traditionally been in the domains of
 theoretical mathematics, where researchers use dependently typed theorem provers
-to write mathematical formulisms, dependent types have applications outside of
-such a theoretical domain. In my work, I seek to summarize the existing body of
-work around practical applications of dependent types. 
+to write mathematical formalisms, dependent types have applications outside of
+such a theoretical domain. In my work, I seek to find patterns in the existing
+body of literature around practical applications of dependent types. My goal is
+to enumerate signs that a programmer should look for that the solution to a
+problem could benefit from the use of dependent types. 
 
-\section{Additional Work}
-This review is a  tour of a potential application of dependent types. In this
+\section{Work Covered}
+This review is a tour of potential applications of dependent types. In this
 abstract, I have chosen a brief example, units of measurement, in order to
 demonstrate their potency. However, in addition to units of measurement,
-dependent types have far ranging applications. My review explores the following
-additional examples: 
+dependent types have far ranging applications. A poster of my research would
+contain a couple of the applications which I am exploring: 
 \begin{enumerate}
   \item Complicated pattern matching in the Cryptol DSL for cryptographic
   applications. \cite{power_of_pi}
@@ -47,129 +52,25 @@ additional examples:
   \item A relational database and algebra. \cite{power_of_pi, eisenberg2016}
   \item An alternative to monadic transformations with an algebraic effects DSL
   \cite{algebraic}
-  \item Programming distributed systems with F\* and dependent types.
+  \item Programming distributed systems with F* and dependent types.
   \cite{fstar_distributed_programming}
   \item A low-level domain-specific language demonstrating the applicability of
   dependent types to systems programming. \cite{idris_systems_programming}
 \end{enumerate}
 
 \section{Units of Measurement}
-A practical application for dependent types from is to eliminate bugs that can
-arise from improper unit conversions \cite{gundry2013}. Units of measurement are
-already implemented in Microsoft's F\# Programming Language
-(\cite{kennedy2009}). If numbers carry a type denoting their unit of measurement
-with them, we can ensure at compile time that improper unit conversions are not
-going to occur at runtime. These bugs can be catastrophic, as made evident by
-NASA's loss of a \$125-million \textit{Mars Climate Orbiter} when ``spacecraft
-engineers failed to convert from English to Metric units of measurement''
-\cite{hotz1999}. 
-
-\begin{figure}[ht!]
-  \caption{Displays a unit error that would be caught at compile-time with units of measurement.}
-  \label{unit_error}
-  \begin{lstlisting}
-    distanceTraveled : Quantity Inches
-    distanceTraveled = inches 20
-
-    distanceLeft : Quantity Metres
-    distanceLeft = (metres 1000) - distanceTraveled
-  \end{lstlisting}
-\end{figure}
-
-An implementation of units of measurement should have types that support
-decidable equality by definition. Two typed variables can only be equal because
-they have the same unit of measurement or derived unit of measurement and the
-same value. This means that if coding style guidelines enforce that all numeric
-values must be well-typed with units of measurement, there will be compile-time
-guarantees that errors of conversion between units of measurement will not
-occur. See Figure ~\ref{unit_error} for an example of a program that should
-error. 
-
-While units of measurement are implemented as a feature in the F\# language,
-which is not dependently typed, a dependently typed programming language would
-allow for a units of measurement system to be implemented \cite{gundry2013}.
-Gundry invites us to consider a system for describing units in terms of a
-constructor that allows us to both enumerate elementary units and also express
-derived units in terms of one another. 
-
-\begin{figure}[ht!]
-  \label{idris_code}
-  \caption{Basic SI unit declarations in adapted from Dependent Haskell to Idris \cite{gundry2013}}
-  \begin{lstlisting}
-    data Unit : Int -> Int -> Int -> Type
-    
-    Dimensionless : Type
-    Dimensionless = Unit 0 0 0
-    
-    Metres : Type
-    Metres = Unit 1 0 0
-    
-    Seconds : Type
-    Seconds = Unit 0 1 0
-    
-    Kilograms : Type
-    Kilograms = Unit 0 0 1
-    
-    data Quantity u = Q Double
-    
-    metres : Double -> Quantity Metres
-    metres v = (Q v)
-    
-    seconds : Double -> Quantity Seconds
-    seconds v = (Q v)
-    
-    kilograms : Double -> Quantity Kilograms
-    kilograms v = (Q v)
-    
-    plus : Quantity u -> Quantity u -> Quantity u
-    plus (Q x) (Q y) = Q (x + y)
-  \end{lstlisting}
-\end{figure}
-
-For now, unit only supports three elementary units (metres, seconds, kilograms),
-but one can imagine a full library implementing the entire SI Units system. Each
-elementary unit is implemented as a single 1 in the call to the Unit constructor
-with all entries as zero. Thus, we can express derived units in a call to the
-Unit constructor where negative integers would represent elementary units
-present in the denominator. 
-
-We can define quantities as a type containing a \texttt{Unit} and an integer.
-This then allows us to write simple constructors for the quantity type. We can
-then define well-typed multiplication and addition operations giving us similar
-guarantees to that which is given by units of measurement in F\#. 
-
-As defined above, this enforces well-typed addition, requiring that two
-additions be of the same type. we can also define operations that allow us to
-express fractional units. For example, a Newton of force is defined as a
-$kg\times ms^{-2}$. Therefore, if we are able to compose types through
-multiplication and division, we can express a Newton with our units system. See
-Figure ~\ref{division}. 
-
-\begin{figure}[h]
-  \caption{Definition of division and multiplication of dependently typed units
-  of measurement. Ported to Idris from \cite{gundry2013}}
-  \label{division}
-  \begin{lstlisting}
-    Newtons : Type
-    Newtons = Unit 1 -2 1
-
-    newtons : Double -> Quantity Newtons
-    newtons val = over 
-        (times (kilograms val) (metres 1)) 
-        (times (seconds 1) (seconds 1))
-  \end{lstlisting}
-\end{figure}
-
-What we've shown here is that while units of measurement can be first-class
-features in a programming language like F\#, a dependently typed language allows
-us to build certain functionality easily into the language without changing the
-language specification whatsoever. 
+\input{examples/units_of_measurement}
 
 \section{Conclusions}
 Through a review of the practical applications of dependent types in existing
 and implemented functional programming languages, I demonstrate that while
 dependent types are often thought of as far-off and theoretical, they are
-accessible to the modern programmer. In addition to empowering constructive
-mathematicians with theorem provers, dependent types give a programmer ways to
-write extremely safe programs with certain compile-time guarantees of
-correctness. 
+currently available in advanced functional programming languages and serve
+practical purposes. 
+
+I set out to look for patterns that signal to a programmer that dependent types
+would be particularly useful for their work. So far, I've found that the
+problems that I'm exploring seem to be focused around two main themes: the
+serializing and deserializing of data, and building domain-specific languages.
+As I continue my research, I will expand on these ideas and make the scenarios
+more concrete and identifiable to a programmer, which I hope to present at POPL.

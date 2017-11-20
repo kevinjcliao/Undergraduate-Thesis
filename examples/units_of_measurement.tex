@@ -1,0 +1,109 @@
+A practical application for dependent types from is to eliminate bugs that can
+arise from improper unit conversions \cite{gundry2013}. Units of measurement are
+already implemented in Microsoft's F\# Programming Language \cite{kennedy2009}.
+If numbers carry a type denoting their unit of measurement with them, we can
+ensure at compile time that improper unit conversions are not going to occur at
+runtime. These bugs can be catastrophic, as made evident by NASA's loss of the
+\$125-million Mars Climate Orbiter when ``spacecraft engineers failed to convert
+from English to Metric units of measurement'' \cite{hotz1999}. 
+
+\begin{figure}[ht!]
+  \caption{Displays a unit error that would be caught at compile-time with units of measurement.}
+  \label{unit_error}
+  \begin{lstlisting}
+    distanceTraveled : Quantity Inches
+    distanceTraveled = inches 20
+
+    distanceLeft : Quantity Metres
+    distanceLeft = (metres 1000) - distanceTraveled
+  \end{lstlisting}
+\end{figure}
+
+An implementation of units of measurement should have types that support
+decidable equality by definition. Two typed variables can only be equal because
+they have the same unit of measurement or derived unit of measurement and the
+same value. This means that if coding style guidelines enforce that all numeric
+values must be well-typed with units of measurement, there will be compile-time
+guarantees that errors of conversion between units of measurement will not
+occur. See Figure ~\ref{unit_error} for an example of a program that should
+error. 
+
+While units of measurement are implemented as a feature in the F\# language,
+which is not dependently typed, a dependently typed programming language would
+allow for a units of measurement system to be implemented \cite{gundry2013}.
+Gundry invites us to consider a system for describing units in terms of a
+constructor that allows us to both enumerate elementary units and also express
+derived units in terms of one another \cite{gundry2013}. 
+
+\begin{figure}[ht!]
+  \label{idris_code}
+  \caption{Basic SI unit declarations in adapted from Dependent Haskell to Idris \cite{gundry2013}}
+  \begin{lstlisting}
+    data Unit : Int -> Int -> Int -> Type
+    
+    Dimensionless : Type
+    Dimensionless = Unit 0 0 0
+    
+    Metres : Type
+    Metres = Unit 1 0 0
+    
+    Seconds : Type
+    Seconds = Unit 0 1 0
+    
+    Kilograms : Type
+    Kilograms = Unit 0 0 1
+    
+    data Quantity u = Q Double
+    
+    metres : Double -> Quantity Metres
+    metres v = (Q v)
+    
+    seconds : Double -> Quantity Seconds
+    seconds v = (Q v)
+    
+    kilograms : Double -> Quantity Kilograms
+    kilograms v = (Q v)
+    
+    plus : Quantity u -> Quantity u -> Quantity u
+    plus (Q x) (Q y) = Q (x + y)
+  \end{lstlisting}
+\end{figure}
+
+For now, our data declaration for \texttt{Unit} only supports three elementary
+units (metres, seconds, kilograms), but one can imagine a full library
+implementing the entire SI Units system. Each elementary unit is implemented as
+a single 1 in the call to the Unit constructor with all entries as zero. Thus,
+we can express derived units in a call to the Unit constructor where negative
+integers would represent elementary units present in the denominator. 
+
+We can define quantities as a type containing a \texttt{Unit} and an integer.
+This then allows us to write simple constructors for the quantity type. We can
+then define well-typed multiplication and addition operations giving us similar
+guarantees to that which is given by units of measurement in F\#. 
+
+As defined above, this enforces well-typed addition, requiring that two
+additions be of the same type. we can also define operations that allow us to
+express fractional units. For example, a Newton of force is defined as a
+$kg\times ms^{-2}$. Therefore, if we are able to compose types through
+multiplication and division, we can express a Newton with our units system. See
+Figure ~\ref{division}. 
+
+\begin{figure}[h]
+  \caption{Definition of division and multiplication of dependently typed units
+  of measurement. Ported to Idris from \cite{gundry2013}}
+  \label{division}
+  \begin{lstlisting}
+    Newtons : Type
+    Newtons = Unit 1 -2 1
+
+    newtons : Double -> Quantity Newtons
+    newtons val = over 
+        (times (kilograms val) (metres 1)) 
+        (times (seconds 1) (seconds 1))
+  \end{lstlisting}
+\end{figure}
+
+What we've shown here is that while units of measurement can be first-class
+features in a programming language like F\#, a dependently typed language allows
+us to build certain functionality easily into the language without changing the
+language specification whatsoever. 

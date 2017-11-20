@@ -1,0 +1,77 @@
+In functional programming, we want to isolate side effects as much as possible
+to keep our code clear. In Haskell and many other programming languages, side
+effects like IO, State, Random Number Generation, etc. are handled by Monads
+<CITATION NEEDED>. If we want to use several Monads at once (our code requires
+simultaneous handling of different side effects), we are often required to use
+monad transformers. While this approach works for programs that require one or
+two transformations between monads, as we bring in more and more side effects,
+the number of transformation monads we need to write increases quite quickly. 
+
+Work exists to sidestep the problem of handling increasingly complex monadic
+transformations by encoding algebraic effects as a domain-specific language in a
+dependently typed programming language \cite{algebraic}. We can start by
+defining an \texttt{EFFECT} type, as seen in Figure ~\ref{effects_def}. In order
+for a function to use our effects DSL, it will have to be of type \texttt{Eff},
+where Eff is a data declaration where the 'execution context' m (optionally a
+Monad) is specified, a list of side effects, and the program's return type. For
+example, a function that of the execution context \texttt{IO} that throws side
+effects, does work on STDIO, and maintains an integer state will look something
+like the function \texttt{example} in Figure ~\ref{effects_def}. 
+
+\begin{figure}[h]
+    \caption{Definition of effect type}
+    \label{effects_def}
+    \begin{lstlisting}
+        data EFFECT : Type where
+            STATE     : Type -> EFFECT
+            EXCEPTION : Type -> EFFECT
+            FILEIO    : Type -> EFFECT
+            STDIO     : EFFECT
+            RND       : EFFECT
+        
+        data Eff : (m : Type -> Type) -> (es : List EFFECT) -> 
+            (a : Type) -> Type
+    
+        example : Eff IO [EXCEPTION String, STDIO, STATE Int] ()
+    \end{lstlisting}
+\end{figure}
+
+We can now apply this small Effects DSL we have defined to work on some simple
+programs where we need to maintain a side effect of some sort. I will provide an
+example of a program where we tag each node of a binary tree with a unique ID. 
+
+\begin{figure}[h]
+    \caption{Tagging a binary tree with integers. Taken from Brady's work.
+    \cite{algebraic}}
+    \label{tag_def}
+    \begin{lstlisting}
+        -- Simple type def of binary tree in Idris
+        data Tree a = Leaf
+                    | Node (Tree a) a (Tree a)
+        
+        -- Takes in a tree and produces a tagged tree with
+        -- State containing an integer passed inside of
+        -- the function. 
+        tag : Tree a -> Eff m [STATE Int] (Tree (Int, a))
+        tag Leaf = return Leaf
+        tag (Node l x r) = do
+            l' <- tag l
+            lbl <- get; put (lbl + 1)
+            r' <- tag r
+            return (Node l' (lbl, x) r')
+        
+        get : Eff m [STATE x] x
+        
+        put : x -> Eff m [STATE x] ()
+        
+        EffM :  (m   : Type -> Type) ->
+                (es  : List EFFECT) ->
+                (es' : List EFFECT) ->
+                (a   : Type) -> Type
+        
+        runPure : Env id es -> EffM id es es' a -> a
+        
+        tagFrom : Int -> Tree a -> Tree (Int, a)
+        tagFrom x t = runPure [x] (tag t)
+    \end{lstlisting}
+\end{figure}
