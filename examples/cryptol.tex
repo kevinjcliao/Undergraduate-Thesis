@@ -21,6 +21,55 @@ into 4 separate vectors of 8 bits? This is where dependent types serve a
 practical purpose. By specifying types that split the length of the vector up
 into a multiple of two scalars, we can effectively implement this clever pattern
 match, allowing for powerful pattern matching required by the Cryptol language
-(\cite{power_of_pi}). 
+\cite{power_of_pi}. The final result looks like Figure ~\ref{swab}. 
 
-\textit{More coming in final draft of literature review}
+\begin{figure}[ht!]
+    \caption{Final swab function \protect\cite{power_of_pi}}
+    \label{swab}
+    \begin{lstlisting}
+        -- We specify in our type that we are splitting the
+        -- input word into 4 bytes. 
+        swab : Word 32 -> Word 32
+        swab xs with (splitView 8 4 xs)
+        swab _ | Split [a, b, c, d] = concat [b, a, c, d]
+
+        data SplitView : {n : Nat} -> (m : Nat) -> Vect (m * n) a -> Type where
+        Split : (xss : Vect m (Vect n a)) -> SplitView m (concat xss)
+        
+        splitConcatLemma : (xs : Vect (m * n) a) -> concat (split n m xs) = xs
+        
+        split : (n : Nat) -> (m : Nat) -> Vect (m * n) a -> Vect m (Vect n a)
+
+
+        splitView : (n, m : Nat) -> (xs : Vect (m * n) a) -> SplitView m xs
+        splitView n m xs =
+          let prf  = sym (splitConcatLemma xs {m = m} {n = n})
+              view = Split (split n m xs) {n = n} in
+          rewrite prf in view
+    \end{lstlisting}
+\end{figure}
+
+Idris and other dependently typed programming languages provide a \texttt{with}
+keyword that lets you pattern match on the results of applying the inputs of a
+function to another function. In this example, we are pattern matching on the
+results of feeding in the input word to a function called \texttt{splitview}
+that splits our word into 8 bytes. There are some constraints on such a
+function. We expect that \texttt{splitView 9 3} will be an illegal call because
+\texttt{splitView} takes in a 32-bit word yet this splitView is splitting a word
+of size 27 ($9 \times 3$). We'll spend the remainder of this section exploring
+what goes into implementing \texttt{splitView}. 
+
+\texttt{splitView}'s implementation is also shown in ~\ref{swab}. It is
+predicated on the existence of some function \texttt{split}, that splits up an
+input vector into appropriate-length pieces based on input. splitView is
+necessary because we cannot simply write \texttt{swab} as a call to
+\texttt{split}. If our function 'swab' were simply a call to split, there would
+be a problem. Since our swab function is a concatenation of the results of
+split, we have no way of guaranteeing to the compiler that the result length of
+that would be the same length as the input list. In other words, we cannot
+guarantee \texttt{concat (split n m xs) = xs}, where \texttt{xs} refers to the
+input 32-bit word. 
+
+Such a proof is provided by \texttt{splitConcatLemma}. The specifics of this
+inductive proof are provided in \cite{power_of_pi}. The example is provided to
+illustrate that the machinations to make difficult pattern matching possible with dependent types are non-trivial. However, once these proofs are implemented, someone writing future compilers can very easily draw on them simply by calling the \texttt{splitView} function to allow for the definition of complex pattern-matching. I'll reflect on why this is important in my conclusion. 

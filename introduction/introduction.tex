@@ -1,5 +1,5 @@
 
-\chapter{Literature Review}
+\chapter{Introduction}
 
 \section{Background}
 A dependently typed programming language can have functions with types that
@@ -29,16 +29,20 @@ Haskell type signature for this function would look like this:
 Let's imagine that we have a list data type signature that contains information
 not only about the type of the elements that the list contains, but also about
 the length of the list. That is to say, the type signature of a vect (list with
-length-in-type) can be expressed as: 
+length-in-type) can be expressed as Figure~\ref{vect}.
 
 \begin{figure}
     \caption{Using a Vect data type.}
+    \label{vect}
     \begin{lstlisting}
-        Vect :: Int -> Type -> Type -- A list has an integer denoting length, 
-        -- and the type of its elements. [1,2,3] :: Vect 3 Int
+        Vect :: Int -> Type -> Type 
+        -- A length-indexed vector has an integer denoting length, 
+        -- and the type of its elements. 
+        [1,2,3] :: Vect 3 Int
     \end{lstlisting}
 \end{figure} 
 
+% Replicate. 
 
 Now that we've introduced the length of the vect type as part of its type
 signature, we can write a much more strict and bug-free type signature for our

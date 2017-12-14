@@ -6,27 +6,26 @@ asks a user to send and receive a SQL query and as a string and to process a
 response given as a string. While this offers flexibility, it means that there
 is no compile-time guarantee of correctness and that poorly written SQL queries
 result in run-time crashes, rather than compile-time debugging. We would like to
-be able to easily compose types from a set of values (database schema), which
-would allow a programmer to easily compose type-safe queries with compile-time
-verification of correctness \cite{power_of_pi}. Many SQL interfaces do runtime
-type checking, meaning if we can avoid these type checks, there may be
-performance gains. 
+be able to easily compose types from database table schema, which would allow a
+programmer to easily compose type-safe queries with compile-time verification of
+correctness \cite{power_of_pi}. Many SQL interfaces do runtime type checking,
+meaning if we can avoid these type checks, there may be performance gains. 
 
 \begin{figure}[h]
     \caption{Declaration of schema. Idris adaption of code from Power of Pi \protect\cite{power_of_pi}}
     \label{schema}
     \begin{lstlisting}
-        Attribute : Type}
-        (String, U)}
+        Attribute : Type
+        (String, U)
 
-        Schema : Type}
-        List Attribute}
+        Schema : Type
+        List Attribute
 
-        Students : Schema}
+        Students : Schema
         Students = (   ("name", STRING)}
                     :: ("id", VECT 6 CHAR)} 
                     :: ("classyear", VECT 4 CHAR)}
-                    :: Nil)}
+                    :: Nil)
 
         data Row : Schema -> Type where
             EmptyRow : Row Nil
@@ -43,16 +42,15 @@ We can start by defining types to represent a database schema. A database table
 is a row of elements that correspond to a declared schema. A schema is a list of
 attributes that each element should have. An attribute is simply a column name
 and the type of what the column contains. Thus, we can declare an attributes and
-schemas as follows in Figure ~\ref{schema}. 
+schemas as follows in Figure ~\ref{schema}, where U refers to the universe that
+we built in an earlier example. 
 
-
-Where U refers to the universe that we built in an earlier example. Given that
-we built a schema, we are now able to define a schema to hold students. Take,
-for example, a schema that stores a student's name, student id, and class year.
-Our next job is to be able to express a database table with a row of instances
-of a schema. This is reflected in our declaration of the \texttt{Row} type,
-which lets us join rows together, ending in an EmptyRow. An example
-\texttt{kevin} is provided. 
+Given that we built a schema, we are now able to define a schema to hold
+students. Take, for example, a schema that stores a student's name, student id,
+and class year. Our next job is to be able to express a database table with a
+row of instances of a schema. This is reflected in our declaration of the
+\texttt{Row} type, which lets us join rows together, ending in an EmptyRow. An
+example \texttt{kevin} is provided. 
 
 \begin{figure}[ht!]
     \caption{Declaration of connect. Idris adaption of code from Power of Pi
@@ -79,7 +77,8 @@ which lets us join rows together, ending in an EmptyRow. An example
             Read : Handle s -> RA s
             Product : (So $ disjoint s s') => RA s -> RA s' -> RA (append s s')
         
-        -- Takes in a query written with our relational algebra and then sends back a table that corresponds to our schema. 
+        -- Takes in a query written with our relational algebra and then 
+        -- sends back a table that corresponds to our schema. 
         toSQL : RA s -> IO (List (Row s))
     \end{lstlisting}
 \end{figure}

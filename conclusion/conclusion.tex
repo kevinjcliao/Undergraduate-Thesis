@@ -45,3 +45,28 @@ measurement \cite{gundry2013}. In this wide-ranging review, I've demonstrated
 that as dependent types become brought into the mainstream, they have the
 potential to empower programmers to build safe, robust programs in ways that
 have not been possible before. 
+
+In all of these applications, I found something incredibly interesting that I'd
+like to reflect on. I don't deny that the process of understanding all of these
+papers at the undergraduate-level has not been an easy undertaking. This is
+important because the underlying discussion question about this literature review has been making dependent types accessible to a practical programmer. However, while writing out inductive proofs in Idris or building a relational algebra are difficult tasks, the result is surprisingly easy for a programmer to use. 
+\begin{enumerate}
+    \item A programmer looking to implement complicated pattern-matching for a domain-specific language like Cryptol can easily implement that complex pattern-matching, as well as many other complicated pattern-matching techniques once splitView and its associated lemmas are implemented. 
+    \item A programmer wanting to use well-typed units of measurement can simply import a library of SI units without having to worry about proving lemmas that demonstrate two derived units are the same. 
+    \item A programmer wanting to use a type-safe relational database simply has to express schemas and then write expressions in our relational algebra detailing the input and output schema. 
+    \item A programmer wanting to build a parser can simply describe the data using a provided data description language. 
+    \item A programmer who wants to use the algebraic effects DSL can just describe the side effects present in their function without worrying about the complex underlying dependently-typed machinations. 
+\end{enumerate}
+
+In other words, at the current state, I find dependent types to still be too
+complicated for the average programmer to understand. What people who understand
+dependent types can do however, is work on dependently typed libraries where the
+building blocks of what a programmer might use are dependently typed. A
+programmer who uses a dependently-typed relational algebra needn't understand
+the complex underlying machinations of building such a relational algebra. They
+merely need to understand that writing schemas and expressions in the relational
+algebra give way to type safety. In other words, the problem of getting every
+programmer to love and write programs with dependent types is certainly
+non-trivial, but providing dependently-typed libraries can be easily done. You
+can't make a kid love vegetables, but nothing's stopping you from slipping a
+little spinach into their dinner. 
