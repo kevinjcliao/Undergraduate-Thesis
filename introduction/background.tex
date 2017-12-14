@@ -1,0 +1,86 @@
+\section{Background}
+A dependently typed programming language can have functions with types that
+depend on a value. A function, at its core, is a map from a domain to a
+co-domain. In other words, we expect there to be a certain set of elements in
+the universe for which our function can give us a corresponding output. A way to
+remove certain bugs in programs is to ensure that a function in a program is
+indeed mapping from the correct set of potential inputs to the set of potential
+outputs. 
+
+One can consider static type systems as a way to narrow down the set of
+potential inputs to the set of possible outputs. For example, a function that
+takes in a string and outputs an integer gives certain compile-time guarantees
+to its programmer. If compilation succeeds, the domain of this function will be
+strictly limited to an element in the set of all possible strings in the
+universe and the output will be limited to an element of the set of all possible
+integers. 
+
+However, consider, for example, a function \texttt{replicate} that takes in an
+integer of value \texttt{b} and some element of type \texttt{a}. It then
+\textit{replicates} the element \texttt{b} times, producing of length \texttt{b}
+containing copies of the element of type \texttt{a}. The Haskell type signature
+for such a function could look like in Figure~\ref{replicate_dec}.
+
+\begin{figure}[ht!!!!!!!]
+    \caption{Non-dependently typed type signature for replicate}
+    \label{replicate_dec}
+    \begin{lstlisting}
+        replicate :: Int -> a -> [a]
+    \end{lstlisting}
+\end{figure} 
+
+
+Let's imagine that we have a list data type signature that contains information
+not only about the type of the elements that the list contains, but also about
+the length of the list. That is to say, the type signature of a length-indexed
+vector can be expressed as Figure~\ref{vect}.
+
+\begin{figure}
+    \caption{Using a length-indexed vector (Vect) data type.}
+    \label{vect}
+    \begin{lstlisting}
+        Vect :: Int -> Type -> Type 
+        -- A length-indexed vector has an integer denoting length, 
+        -- and the type of its elements. 
+        [1,2,3] :: Vect 3 Int
+    \end{lstlisting}
+\end{figure} 
+
+% Replicate. 
+
+Now that we've introduced the length of the vect type as part of its type
+signature, we can write a much tighter type signature for our replicate
+function. Essentially, any replicate function will take in an integer with some
+value \texttt{len}, some element \texttt{x} of type \texttt{elem}, and the
+function will produce some vector of length \texttt{len} holding elements of
+type \texttt{elem}. This type signature is shown in Figure~\ref{dtvect}. 
+
+\begin{figure}
+    \caption{Dependently typed type signature for replicate}
+    \label{dtvect}
+    \begin{lstlisting}
+        replicate : (len : Int) -> (x : elem) -> Vect len elem
+    \end{lstlisting}
+\end{figure} 
+
+What's peculiar about this is that the co-domain of this function is not
+particularly fixed. In fact, it depends on the value of its input. For example,
+if an integer of value 3 and some boolean is inputted, the co-domain of our
+function is the set of all length-indexed vectors with length 3 and type
+boolean. This is an example application of dependent types. What we've done is
+created a function where the co-domain varies as the input value varies. 
+
+The goal of dependent types is to write programs with extreme guarantees of
+compile-time safety. We can use the types of the parameters of a function to
+place tighter limits on the set that consists of its co-domain, with the
+co-domain varying depending on the values of the input parameters. 
+
+In this literature review, I will explore existing literature around practical
+real-world applications of dependent types. I'll take a look at three examples
+where a domain specific language can be built if a language can support full
+dependent types. I'll then show how dependent types can be applied to make
+systems programming and building distributed systems safer. I'll also take a
+look at how a dependently typed language can implement units of measurement,
+preventing a set of potentially costly and fatal human errors. The hope is to
+demonstrate that dependent types, long confined to theoretical mathematics, have
+tremendous promise in helping programmers build reliable and safe programs. 
