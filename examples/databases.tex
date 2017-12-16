@@ -11,6 +11,53 @@ programmer to easily compose type-safe queries with compile-time verification of
 correctness \cite{power_of_pi}. Many SQL interfaces do runtime type checking,
 meaning if we can avoid these type checks, there may be performance gains. 
 
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|c|}
+        Name : String & ID : Vect 6 Char & ClassYear : Vect 4 Char \\
+        Kevin Liao    & 123456           & 2018                    \\
+        David Smith   & 234567           & 2018
+    \end{tabular}
+    \caption{Comparison between Haskell type signatures and mathematical proofs to illustrate Curry-Howard Isomorphism}
+    \label{students}
+\end{table}
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|}
+        ClassName : String & ID : Vect 8 Char\\
+        Intro to CS        & CMSCH105        \\
+        Writing Sem        & WRPRH101
+    \end{tabular}
+    \caption{Comparison between Haskell type signatures and mathematical proofs to illustrate Curry-Howard Isomorphism}
+    \label{classes}
+\end{table}
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|}
+        Name : String & ID : Vect 6 Char & ClassYear : Vect 4 Char & ClassName :
+        String & ID : Vect 8 Char\\
+        Kevin Liao    & 123456           & 2018       & Intro to CS & CMSCH105 \\
+        Kevin Liao    & 123456           & 2018       & Writing Sem & WRPRH101 \\
+        David Smith   & 234567           & 2018       & Intro to CS & CMSCH105 \\
+        David Smith   & 234567           & 2018       & Writing Sem & WRPRH101 \\
+    \end{tabular}
+    \caption{Comparison between Haskell type signatures and mathematical proofs to illustrate Curry-Howard Isomorphism}
+    \label{cartesian_product}
+\end{table}
+
+In this example, we are going to build up a simple dependently-typed relational
+algebra in Idris. This relational algebra is going to allow us to read from a
+database and also do a simple cartesian product. Let's say, for example, that I
+am a registrar at a college have a table of students and a table of classes, and
+I want to enroll each student in all the classes in the class table. In other
+words I would want to compute the cartesian product of these tables, making sure
+that they contain disjoint schema. Such an operation is shown in the following
+tables. Table~\ref{students} shows a table of students, Table~\ref{classes} is a
+table of classes and Table~\ref{cartesian_product} is the cartesian product of
+the two tables.
+
 \begin{figure}[h]
     \caption{Declaration of schema. Idris adaption of code from Power of Pi \protect\cite{power_of_pi}}
     \label{schema}
@@ -64,7 +111,6 @@ example \texttt{kevin} is provided.
         connect : String -> String -> (s : Schema) -> IO (Handle s)
 
         -- Tells us if two schemas are disjoint. 
-        -- Implementation is not of importance at this moment. 
         disjoint : Schema -> Schema -> Bool
 
         -- A simple proposition that stops any false proposition from compiling
@@ -108,7 +154,9 @@ trivial to write a function \texttt{disjoint} that checks to see if two schemas
 are disjoint, we want to enforce that product is only a valid RA expression on
 disjoint schemas. Thus, we want the type of \texttt{Product} to enforce that its
 two schemas are disjoint. In addition, we have a simple proposition \texttt{So}
-that ensures that the schemas are disjoint. 
+that ensures that whatever proposition is supplied to it is valid. In the case
+of building a cartesian product, we are looking to make sure that the two
+schemas are disjoint. 
 
 In writing relational algebra expressions as such, we now ensure that they will
 be well-typed with safety guaranteed at compile-time. We know that input and

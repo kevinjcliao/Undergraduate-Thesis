@@ -1,38 +1,45 @@
+\section{History}
+
 Dependent types in programming languages have their roots in intuitionistic type
 theory or Martin-L\"{o}f Type Theory \cite{intro_martin_lof,ml_type_theory}.
 This type theory serves as a foundation for \textit{constructive mathematics}
 \cite{martin_lof}. Per Martin-L\"{o}f was interested in a type theory that could
 be used as a programming language, where all well-typed programs must terminate
 \cite{ml_type_theory}. His type theory is based on the principles of
-constructive mathematics, mainly the Curry-Howard isomorphism. The Curry-Howard
-isomorphism is the notion that there is a direct correspondence between
-mathematical proofs and type theory. In other words, a type signature is
-synonymous with a mathematical proposition, and if a valid program satisfying
-the constraints of such a type signature exists, then a proof proving the
-corresponding mathematical proposition \cite{martin_lof,ml_type_theory}. To
-illustrate this, consider the examples in Figure ~\ref{ml_type_theory_examples}
+constructive mathematics and is interesting because of the Curry-Howard
+isomorphism. The Curry-Howard isomorphism is the notion that there is a direct
+correspondence between mathematical proofs in constructive mathematics and
+programs. In other words, a type signature is synonymous with a mathematical
+proposition, and if a valid program satisfying the constraints of such a type
+signature exists, then it is a proof proving the corresponding mathematical
+proposition \cite{martin_lof,ml_type_theory}. To illustrate this, consider the
+examples in Figure ~\ref{ml_type_theory_examples}
 \footnote{These examples were provided by Prof. Richard Eisenberg in a
 discussion.}. 
 
-\begin{figure}[h]
+\begin{table}[h]
     \label{ml_type_theory_examples}
-    \caption{Comparison between Haskell type signatures and mathematical proofs to illustrate Curry-Howard Isomorphism}
-    \begin{tabular}{c|c|c|c}
+    \begin{tabular}{|c|c|c|c|}
         Haskell Type Signature & Math Proposition & Haskell type signature inhabited? & Proof exists? \\
         $\forall a. a \rightarrow a$ & $p \rightarrow p$ & True & True \\
         $\forall ab. (a,b) \rightarrow a$ & $ (p \wedge q) \rightarrow p$ & True & True \\
         $\forall ab. a \rightarrow b$ & $p\rightarrow q$ & False & False \\
         $\forall ab. a \rightarrow (a,b)$ & $p \rightarrow (p\wedge q)$ & False & False 
     \end{tabular}
-\end{figure}
+    \caption{Comparison between Haskell type signatures and mathematical proofs to illustrate Curry-Howard Isomorphism}
+\end{table}
 
-From the figure, we see the Curry-Howard isomorphism that forms the fundamentals
-of Martin-L\"{o}f's type theory. We see that in all four cases, if there is a
-function that inhabits the type signature, the mathematical proposition
-presented is valid and if a function does not exist, the proposition is invalid. 
+From the figure, we see examples of the Curry-Howard isomorphism that forms the
+fundamentals of Martin-L\"{o}f's type theory. We see that in all four cases, if
+there is a function that inhabits the type signature, the mathematical
+proposition presented is valid and if a function does not exist, the proposition
+is invalid. Proving the isomorphism is beyond the scope of this literature
+review but these are examples that should demonstrate that such an isomorphism
+exists such that a strong relationship between proving mathematical propositions
+and programming languages exists.
 
-Mathematicians took an interest in creating a programming language based on
-Curry-Howard isomorphism and Martin-L\"{o}f type theory, since Curry-Howard
+Mathematicians took an interest in creating a programming language based on the
+Curry-Howard isomorphism and Martin-L\"{o}f type theory, since the Curry-Howard
 isomorphism meant that a valid function that inhabits a type signature could be
 equivalent to a proof. A dependently typed programming language based on
 foundations in Martin-L\"{o}f Type Theory called NuPrl was first released in
@@ -40,13 +47,13 @@ foundations in Martin-L\"{o}f Type Theory called NuPrl was first released in
 mathematicians and programmers formalize proofs \cite{nuprl}. Dependently typed
 proof assistants like NuPrl found a home at the intersection between programming
 language enthusiasts interested in total program correctness and constructive
-mathematicians interested in systems where mathematical formulisms could be
+mathematicians interested in systems where mathematical formalisms could be
 systematically encoded. Other proof assistants with support for dependent types
 followed: Coq (1989) \cite{coquand1988calculus}, ALF (1990) \cite{alf}, Cayenne
 (1998) \cite{nuprl}, Agda (1999) \cite{norell:thesis}.
 
 While there are now robust theorem provers that incorporate dependent types,
-work now is primarily concerned with bringing them into mainstream programming
+recent work has emerged concerned with bringing them into mainstream programming
 and software development. Idris (2011) was designed with general purpose
 programming in mind \cite{tdd_book}. F* (2011) was introduced by Microsoft as a
 dependently typed language specifically designed around solving problems in

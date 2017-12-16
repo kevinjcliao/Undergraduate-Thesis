@@ -1,6 +1,6 @@
 In functional programming, we want to isolate side effects as much as possible
 to keep our code clear. In Haskell and many other programming languages, side
-effects like IO, State, Random Number Generation, etc. are handled by Monads
+effects like IO, state, random number generation, etc. are handled by monads
 \cite{realworldhaskell}\footnote{This part of the literature assumes that you
 are familiar with Monads, which is how the Haskell programming language handles
 side effects. For more information, I highly recommend reading O'Sullivan et.
@@ -16,7 +16,7 @@ transformations by encoding algebraic effects as a domain-specific language in a
 dependently typed programming language \cite{algebraic}. We can start by
 defining an \texttt{EFFECT} type, as seen in Figure ~\ref{effects_def}. In order
 for a function to use our effects DSL, it will have to be of type \texttt{Eff},
-where Eff is a data declaration where the 'execution context' m (optionally a
+where \texttt{Eff} is a data declaration where the 'execution context' m (optionally a
 Monad) is specified, a list of side effects, and the program's return type. For
 example, a function that of the execution context \texttt{IO} that throws side
 effects, does work on STDIO, and maintains an integer state will look something

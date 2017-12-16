@@ -18,8 +18,13 @@ integers.
 However, consider, for example, a function \texttt{replicate} that takes in an
 integer of value \texttt{b} and some element of type \texttt{a}. It then
 \textit{replicates} the element \texttt{b} times, producing of length \texttt{b}
-containing copies of the element of type \texttt{a}. The Haskell type signature
-for such a function could look like in Figure~\ref{replicate_dec}.
+containing copies of the element of type \texttt{a}. The Haskell type
+signature\footnote{This literature review assumes prior knowledge with
+Haskell/Idris-style type signatures, since all the examples I've provided are in
+this style. An introduction is available in the excellent \textit{Real World
+Haskell}, available here:
+http://book.realworldhaskell.org/read/types-and-functions.html} for such a
+function could look like in Figure~\ref{replicate_dec}.
 
 \begin{figure}[ht!!!!!!!]
     \caption{Non-dependently typed type signature for replicate}
@@ -35,7 +40,7 @@ not only about the type of the elements that the list contains, but also about
 the length of the list. That is to say, the type signature of a length-indexed
 vector can be expressed as Figure~\ref{vect}.
 
-\begin{figure}
+\begin{figure}[ht!!!]
     \caption{Using a length-indexed vector (Vect) data type.}
     \label{vect}
     \begin{lstlisting}

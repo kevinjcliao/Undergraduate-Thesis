@@ -1,17 +1,20 @@
-A practical application for dependent types from is to eliminate bugs that can
-arise from improper unit conversions \cite{gundry2013}. Units of measurement are
-already implemented in Microsoft's F\# Programming Language \cite{kennedy2009}.
-If numbers carry a type denoting their unit of measurement with them, we can
-ensure at compile time that improper unit conversions are not going to occur at
-runtime. These bugs can be catastrophic, as made evident by NASA's loss of the
-\$125-million Mars Climate Orbiter when ``spacecraft engineers failed to convert
-from English to Metric units of measurement'' \cite{hotz1999}. 
+My first example is to demonstrate how dependent types can eliminate bugs that
+can arise from improper unit conversions \cite{gundry2013}. Units of measurement
+are already implemented in Microsoft's F\# Programming Language
+\cite{kennedy2009}. If numbers carry a type denoting their unit of measurement
+with them, we can ensure at compile time that improper unit conversions are not
+going to occur at runtime. These bugs can be catastrophic, as made evident by
+NASA's loss of the \$125-million Mars Climate Orbiter when ``spacecraft
+engineers failed to convert from English to Metric units of measurement''
+\cite{hotz1999}. 
+
+In this
 
 \begin{figure}[ht!]
   \caption{Displays a unit error that would be caught at compile-time with units of measurement.}
   \label{unit_error}
   \begin{lstlisting}
-    distanceTraveled : Quantity Inches
+    distanceTraveled : Quantity Kilograms
     distanceTraveled = inches 20
 
     distanceLeft : Quantity Metres
