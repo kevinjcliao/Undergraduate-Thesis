@@ -9,7 +9,7 @@ around facilitating these operations and making them safe. A function that does
 this sort of low-level manipulation is the \texttt{swab} function, which takes
 in a 32-bit word and swaps the first two bytes \cite{cryptol_manual}.: 
 
-\texttt{swab :: Word 32 -> Word 32} \\
+\texttt{swab :: Word 32 -> Word 32}\\
 \texttt{swab [a b c d] = [b a c d]}
 
 Ideally, a word would be represented by a vector of 32-bits. We would be able to
@@ -32,15 +32,18 @@ match, allowing for powerful pattern matching required by the Cryptol language
         swab xs with (splitView 8 4 xs)
         swab _ | Split [a, b, c, d] = concat [b, a, c, d]
 
-        data SplitView : {n : Nat} -> (m : Nat) -> Vect (m * n) a -> Type where
+        data SplitView : {n : Nat} -> (m : Nat) 
+                        -> Vect (m * n) a -> Type where
         Split : (xss : Vect m (Vect n a)) -> SplitView m (concat xss)
         
-        splitConcatLemma : (xs : Vect (m * n) a) -> concat (split n m xs) = xs
+        splitConcatLemma : (xs : Vect (m * n) a) 
+                            -> concat (split n m xs) = xs
         
         split : (n : Nat) -> (m : Nat) -> Vect (m * n) a -> Vect m (Vect n a)
 
 
-        splitView : (n, m : Nat) -> (xs : Vect (m * n) a) -> SplitView m xs
+        splitView : (n, m : Nat) -> 
+                    (xs : Vect (m * n) a) -> SplitView m xs
         splitView n m xs =
           let prf  = sym (splitConcatLemma xs {m = m} {n = n})
               view = Split (split n m xs) {n = n} in

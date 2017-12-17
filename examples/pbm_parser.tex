@@ -87,9 +87,9 @@ Figure~\ref{dependentPairExample}. The type for the item on the right depends on
 the value of the item on the left. In this case, we are specifying that the list
 on the right must contain $n$ items, where $n$ is the value of the natural
 number on the left. A dependent pair (a : A ** P) means that the variable $a$ is
-of type A and can also occur in the type P \cite{tdd_book}. 
-
-In the case of \texttt{Read}, what we are specifying is that 
+of type A and can also occur in the type P \cite{tdd_book}. In the case of
+\texttt{Read}, what we are specifying is that the type of the value on the right
+may depend on the type of the value on the left. 
 
 \begin{figure}[ht!!!!!!]
     \caption{Format data type in Idris \protect\cite{power_of_pi}}
@@ -115,23 +115,14 @@ In the case of \texttt{Read}, what we are specifying is that
     \end{lstlisting}
 \end{figure}
 
-In the code of Figure~\ref{formatDeclaration} one thing noteworthy is the $(**)$
-operator, which is Idris syntactic sugar for a dependent pair. For example, consider Figure~\ref{dependentPairExample}.
-The example will only type check correctly iff the natural number present in the
-first element of the pair is the same as the length of the list. 
-
 Having specified a data type that lets us declare formats, we can then move on
 to creating a specification. In Figure ~\ref{spec_declaration}, a format for the
 PBM spec is provided. We are now able to write a parser that takes in a Format
 as a data type, and then is able to parse files to generate well-typed data. See
-Figure~\ref{parser}. This straightforward parsing code is aided by the types
-that we declared before, skipping, reading, and terminating where required by
-our file format specification. We can use Idris' REPL to see how the parser
-deals with our PBM specification in Figure ~\ref{repl}. Here, we see that the
-type signature of the function created by giving the parse function our pbm
-specification is a function that takes in a list of bits and returns a matrix of
-bits with sizes bound by the natural numbers that we first specified in the file
-format. 
+Figure~\ref{parser}. As visible in Figure~\ref{spec_declaration}, our PBM
+specification simply looks like a description of our file format. We skip over
+the header \texttt{P4}, and then read in a natural number m and n, before taking
+in the matrix of bits as a nested length-indexed vector of bits. 
 
 \begin{figure}[h]
     \caption{Example for Dependent Pairs taken from the Idris documentation.}
@@ -162,11 +153,6 @@ format.
         parse Bad bs       = Nothing
         parse End bs       = Just ((), bs)
         parse (Base u) bs  = read u bs
-        parse (Plus f1 f2) bs with (parse f1 bs)
-          | Just (x, cs)   = Just (Left x, cs)
-          | Nothing with (parse f2 bs)
-            | Just (y, ds) = Just (Right y, ds)
-            | Nothing      = Nothing
         parse (Skip f1 f2) bs with (parse f1 bs)
           | Nothing        = Nothing
           | Just (_, cs)   = parse f2 cs
@@ -182,12 +168,39 @@ format.
     \caption{Putting the PBM spec into Idris' REPL}
     \label{repl}
     \begin{lstlisting}
-        *Parser> :t parse pbm parse pbm : List Bit -> Maybe ( (x : Nat ** x1 :
+        *Parser> :t parse pbm 
+        parse pbm : List Bit -> Maybe ( (x : Nat ** x1 :
         Nat ** x2 : Vect x (Vect x1 Bit) ** ()) , List Bit)
     \end{lstlisting}
 \end{figure}
 
-\subsection{Comments}
+The parser in Figure~\ref{parser} recurses through our definition of the file
+format and input data as a list of bits and ensures that at each step of the
+way, the data in the list of bits conforms to the file format specification. Our
+binary \texttt{Skip} operator simply skips over the item on the left and calls
+parse on the right. \texttt{Read} first does a pattern match on the result of
+a recursive call to parse on the left side. If parse succeeds, it runs parse
+on the right side and builds a dependent pair relationship between the type
+of the left and the right. 
+
+We can use Idris' REPL to see how the parser deals with our PBM specification in
+Figure ~\ref{repl}. Here, we see that the type signature of the function created
+by giving the parse function our pbm specification is a function that takes in a
+list of bits and returns a matrix of bits with sizes bound by the natural
+numbers that we first specified in the file format. 
+
+What has this given us? The application of dependent types in this example is
+more salient than our previous examples. This entire example hinges on building
+up a type for parsed data through dependent pairs. We are able to establish the
+relationship between the values present in our file format description and the
+subsequent type of the parsed data. We know that our dependently typed parser
+will give us well-formed data that fits the constraints of our file description
+or nothing at all. A parser without dependent types could not enforce such
+constraints in its static type system. 
+
+Once the heavy-lifting of writing \texttt{parse}, \texttt{Fmt}, and
+\texttt{Format} has been done, a programmer has to specify a universe and the
+subsequent definition of a file format is not difficult.  
 
 In this section, we show that dependent types allow us to create embedded data
 description languages inside of a dependently typed language. We can then
