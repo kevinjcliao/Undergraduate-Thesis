@@ -9,9 +9,8 @@ around facilitating these operations and making them safe. A function that does
 this sort of low-level manipulation is the \texttt{swab} function, which takes
 in a 32-bit word and swaps the first two bytes \cite{cryptol_manual}.: 
 
-$$
 \texttt{swab :: Word 32 -> Word 32} \\
-\texttt{swab [a b c d] = [b a c d]} $$
+\texttt{swab [a b c d] = [b a c d]}
 
 Ideally, a word would be represented by a vector of 32-bits. We would be able to
 declare a pattern match with swab that looks similar to the declaration
@@ -21,7 +20,7 @@ into 4 separate vectors of 8 bits? This is where dependent types serve a
 practical purpose. By specifying types that split the length of the vector up
 into a multiple of two scalars, we can effectively implement this clever pattern
 match, allowing for powerful pattern matching required by the Cryptol language
-\cite{power_of_pi}. The final result looks like Figure ~\ref{swab}. 
+\cite{power_of_pi}. The final result looks like Figure~\ref{swab}. 
 
 \begin{figure}[ht!]
     \caption{Final swab function \protect\cite{power_of_pi}}
@@ -59,7 +58,7 @@ function. We expect that \texttt{splitView 9 3} will be an illegal call because
 of size 27 ($9 \times 3$). We'll spend the remainder of this section exploring
 what goes into implementing \texttt{splitView}. 
 
-\texttt{splitView}'s implementation is also shown in ~\ref{swab}. It is
+\texttt{splitView}'s implementation is also shown in Figure~\ref{swab}. It is
 predicated on the existence of some function \texttt{split}, that splits up an
 input vector into appropriate-length pieces based on input. splitView is
 necessary because we cannot simply write \texttt{swab} as a call to
@@ -72,4 +71,9 @@ input 32-bit word.
 
 Such a proof is provided by \texttt{splitConcatLemma}. The specifics of this
 inductive proof are provided in \cite{power_of_pi}. The example is provided to
-illustrate that the machinations to make difficult pattern matching possible with dependent types are non-trivial. However, once these proofs are implemented, someone writing future compilers can very easily draw on them simply by calling the \texttt{splitView} function to allow for the definition of complex pattern-matching. I'll reflect on why this is important in my conclusion. 
+illustrate that the machinations to make difficult pattern matching possible
+with dependent types are non-trivial. However, once these proofs are
+implemented, someone writing future compilers can very easily draw on them
+simply by calling the \texttt{splitView} function to allow for the definition of
+complex pattern-matching. I'll reflect on why this is important in my
+conclusion. 

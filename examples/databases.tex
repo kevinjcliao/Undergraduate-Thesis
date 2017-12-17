@@ -1,4 +1,4 @@
-Databases are one of the pillars of modern software. Databases are employed in
+Our second example is a type-safe relational algebra Databases are one of the pillars of modern software. Databases are employed in
 everything from social media software \cite{tao} to flight scheduling and
 booking \cite{flights}. Different programming languages have varying interfaces
 for querying an SQL database. Oftentimes, a query and response interface simply
@@ -18,7 +18,7 @@ meaning if we can avoid these type checks, there may be performance gains.
         Kevin Liao    & 123456           & 2018                    \\
         David Smith   & 234567           & 2018
     \end{tabular}
-    \caption{Comparison between Haskell type signatures and mathematical proofs to illustrate Curry-Howard Isomorphism}
+    \caption{Table of students.}
     \label{students}
 \end{table}
 
@@ -29,7 +29,7 @@ meaning if we can avoid these type checks, there may be performance gains.
         Intro to CS        & CMSCH105        \\
         Writing Sem        & WRPRH101
     \end{tabular}
-    \caption{Comparison between Haskell type signatures and mathematical proofs to illustrate Curry-Howard Isomorphism}
+    \caption{Table of classes.}
     \label{classes}
 \end{table}
 
@@ -49,9 +49,9 @@ meaning if we can avoid these type checks, there may be performance gains.
 
 In this example, we are going to build up a simple dependently-typed relational
 algebra in Idris. This relational algebra is going to allow us to read from a
-database and also do a simple cartesian product. Let's say, for example, that I
-am a registrar at a college have a table of students and a table of classes, and
-I want to enroll each student in all the classes in the class table. In other
+database and also do a cartesian product. Let's say, for example, that I am a
+registrar at a college have a table of students and a table of classes, and I
+want to enroll each student in all the classes in the class table. In other
 words I would want to compute the cartesian product of these tables, making sure
 that they contain disjoint schema. Such an operation is shown in the following
 tables. Table~\ref{students} shows a table of students, Table~\ref{classes} is a
@@ -86,11 +86,11 @@ the two tables.
 \end{figure}
 
 We can start by defining types to represent a database schema. A database table
-is a row of elements that correspond to a declared schema. A schema is a list of
-attributes that each element should have. An attribute is simply a column name
-and the type of what the column contains. Thus, we can declare an attributes and
-schemas as follows in Figure ~\ref{schema}, where U refers to the universe that
-we built in an earlier example. 
+refers to rows of data that correspond to a declared schema. A schema is a list
+of attributes that each element should have. An attribute is simply a column
+name and the type of what the column contains. Thus, we can declare an
+attributes and schemas as follows in Figure~\ref{schema}, where U refers to the
+universe that we built in an earlier example. 
 
 Given that we built a schema, we are now able to define a schema to hold
 students. Take, for example, a schema that stores a student's name, student id,
@@ -158,19 +158,36 @@ that ensures that whatever proposition is supplied to it is valid. In the case
 of building a cartesian product, we are looking to make sure that the two
 schemas are disjoint. 
 
-In writing relational algebra expressions as such, we now ensure that they will
-be well-typed with safety guaranteed at compile-time. We know that input and
-output from our database tables is guaranteed to be type-safe once an initial
-check is completed. We also can guarantee safety of composing relational
-algebras on various schema like our \texttt{Product} operation. 
+Let's say that I now have to do the registrar cartesian product that I described
+in the beginning of this section. What I'd first do is make two calls to the
+\texttt{connect} function. I will send the schema of my students table in one
+call and the schema of the classes call in another. If both connections succeed,
+I will be given two values of type \texttt{Handle Student}, \texttt{Handle
+Class} respectively, which give me the certainty that the table contains data
+conforming to such a schema. I can then feed these two \texttt{Handle} values into a
+\texttt{Read} expression, which will give me values of table rows of type
+\texttt{RA Student} and \texttt{RA Class}. I can then take the cartesian
+product. My \texttt{Product} expression first checks to make sure that the
+\texttt{Student} schema and \texttt{Class} schema are disjoint, which they are,
+before appending the \texttt{Class} schema to the \texttt{Student} schema to
+make the final schema that describes the rows of data held by the results of our
+cartesian product of two tables. 
 
 Thus, in this example, we've shown the potential for dependent types to build a
 type safe database, where if the schemas match on connection, all subsequent
 queries should be type safe. While there was some overhead in setting up the
 types, once the database software is written, declaring a schema with elements
-in our universe was pretty easy and I anticipate database queries not being
-significantly more difficult to compose and write. Thus, this is an exciting
-application of dependent types where programmers can potentially benefit from
-high-level use of dependently typed software once the more complex moving parts
-are written. 
+in our universe was pretty easy and database queries not significantly more
+difficult to compose and write. Thus, this is an exciting application of
+dependent types where programmers can potentially benefit from high-level use of
+dependently typed software once the more complex moving parts are written. 
+
+We circle back to a question that we've been asking earlier: in what ways does
+this overhead give us an advantage over an ordinary database driver? Earlier, we
+were discussing how an ordinary database driver will usually send a query over
+to the database as a string and receive data as a string. What this means is
+that a database driver will have to validate whether data conforms to the schema
+specified by a user on every read operation. By specifying type levels 
+
+
 

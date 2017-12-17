@@ -85,17 +85,31 @@ then define well-typed multiplication and addition operations giving us similar
 guarantees to that which is given by units of measurement in F\#. 
 
 As defined above, this enforces well-typed addition, requiring that two
-additions be of the same type. we can also define operations that allow us to
-express fractional units. For example, a Newton of force is defined as a
-$kg\times ms^{-2}$. Therefore, if we are able to compose types through
-multiplication and division, we can express a Newton with our units system. See
-Figure ~\ref{division}. 
+values be of the same type. we can also define operations that allow us to
+express fractional units. The types for \texttt{times} and \texttt{over}
+representing division and multiplication are shown in Figure~\ref{division}. In
+this code, we see that multiplying or dividing two units together at the
+value-level does an addition operation on all the elementary units at the type
+level. For example, a Newton of force is defined as a $kg\times ms^{-2}$.
+Therefore, if we are able to compose types through multiplication and division,
+we can express a Newton with our units system. See Figure ~\ref{division}. 
 
 \begin{figure}[h]
   \caption{Definition of division and multiplication of dependently typed units
   of measurement. Ported to Idris from \protect\cite{gundry2013}}
   \label{division}
   \begin{lstlisting}
+    times : Quantity (Unit m s g) -> Quantity (Unit m' s' g') 
+            -> Quantity (Unit (m + m') (s + s') (g + g'))
+    times (Q x) (Q y) = Q (x * y)
+
+    inverse : Quantity (Unit m s g) -> Quantity (Unit (-m) (-s) (-g))
+    inverse (Q x) = Q (1 / x)
+
+    over : Quantity (Unit m s g) -> Quantity (Unit m' s' g')
+            -> Quantity (Unit (m -m') (s - s') (g - g'))
+    over x y = times x (inverse y)
+
     Newtons : Type
     Newtons = Unit 1 -2 1
 
@@ -109,4 +123,18 @@ Figure ~\ref{division}.
 What we've shown here is that while units of measurement can be first-class
 features in a programming language like F\#, a dependently typed language allows
 us to build certain functionality easily into the language without changing the
-language specification whatsoever. 
+language specification whatsoever. This system is merely a simplistic
+proof-of-concept designed to demonstrate to the user that dependently-typed
+languages can implement units-of-measurement. By allowing integer values to
+appear as part of a type signature, we've written a rudimentary system that
+allows a user to write well-typed units. In addition, the user is able to define
+derived units (see our definition of Newton). 
+
+Since derived units have become type-level arithmetic, we know that we will be
+able to consistently derive units where required in contrast to other methods in
+non-dependently-typed programming languages. Our implementation is able to
+derive units for examples that F\# is unable to \cite{gundry2013,f_sharp_units}.
+At the same time, error messages remain very difficult to debug. Rather than
+showing the unit names for conversions that fail, Idris will show the type
+declaration (e.g. Instead of showing \texttt{Metres} in an error message, Idris
+will show \texttt{Unit 1 0 0}). 

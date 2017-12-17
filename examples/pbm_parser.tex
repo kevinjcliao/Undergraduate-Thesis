@@ -4,14 +4,30 @@ data and quickly generate a working parser \cite{power_of_pi}.  For example,
 consider the portable bitmap (pbm) file format, which consists simply of the
 characters ``P4'', followed by the dimensions of the image in pixels as $n, m$
 integers separated by a space. After a newline, the image is described as a
-string of $n\times m $ bits where 1 is black and 0 is white \cite{pmb_spec}. If
-a parser were generated from a data description language, we expect the parser
-to either return well-typed data (a vector of bits and the dimensions of the
-image) or to signal that the data is not well-formed. In other words, if we want
-to generate parsers through embedded data description languages, we could
+string of $n\times m $ bits where 1 is black and 0 is white \cite{pmb_spec}. A
+sample of a file that conforms to this specification is shown below where $n=3,
+m=4$. 
+
+If a parser were generated from a data description language, we expect the
+parser to either return well-typed data (a vector of bits and the dimensions of
+the image) or to signal that the data is not well-formed. In other words, if we
+want to generate parsers through embedded data description languages, we could
 specify the file format as a value. The type of the generated parser then, would
 depend on the file format as a value, making this an appropriate area to apply
 dependent types \cite{power_of_pi}. 
+
+\begin{figure}[h]
+    \centering
+    \caption{Sample PBM image}
+    \label{pbm_sample}
+    \begin{lstlisting}
+        P4 3 4
+        0 1 0
+        1 1 1
+        1 1 1
+        0 1 0
+    \end{lstlisting}
+\end{figure}
 
 We can start by defining our \textit{universe} (see Figure
 ~\ref{universe})\footnote{\label{idris_source}Original implementation in
@@ -54,16 +70,23 @@ generate a type for the file format from the second parameter. To read means to
 build a type from both parameters before moving on. We will need to define both
 these operations, a base operation that gives us a type, a terminal, and
 rejection if the input data is badly formed. We can declare such a type as
-shown in Figure ~\ref{formatDeclaration}.
+shown in Figure ~\ref{formatDeclaration}. 
+
+In this code, notice how \texttt{Fmt} lifts values of type \texttt{Format} to
+the type level. Data that is badly formatted will be of type \texttt{Void}, a
+type showing that it has zero inhabitants. \texttt{End} maps to the
+\texttt{Unit} type, which is a data type denoting one inhabitant. \texttt{Base}
+takes in a type at the value from our type universe and uses \texttt{el} to
+bring it to the type level. 
 
 \begin{figure}[ht!!!!!!]
     \caption{Format data type in Idris \protect\cite{power_of_pi}}
     \label{formatDeclaration}
     \begin{lstlisting}
         data Format : Type where 
-        Bad : Format End : Format 
+        Bad : Format 
+        End : Format
         Base : U -> Format
-        Plus : Format -> Format -> Format 
         Skip : Format -> Format -> Format 
         Read : (f : Format) -> (Fmt f -> Format) -> Format
 
@@ -71,7 +94,6 @@ shown in Figure ~\ref{formatDeclaration}.
         Fmt Bad = Void 
         Fmt End = Unit 
         Fmt (Base u) = el u
-        Fmt (Plus f1 f2) = Either (Fmt f1) (Fmt f2) 
         Fmt (Read f1 f2) = (x : Fmt f1 ** Fmt (f2 x)) 
         Fmt (Skip _ f) = Fmt f
 
