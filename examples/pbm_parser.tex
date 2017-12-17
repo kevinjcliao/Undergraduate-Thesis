@@ -32,12 +32,13 @@ dependent types \cite{power_of_pi}.
 We can start by defining our \textit{universe} (see Figure
 ~\ref{universe})\footnote{\label{idris_source}Original implementation in
 \cite{power_of_pi} was in Agda. An Idris implementation was sourced from
-https://github.com/yurrriq/the-power-of-pi/blob/master/src/Data/Cryptol.lidr },
-which contains all the types that our parser will be manipulating in some way.
-We also define a function \textit{el}, which will take any value of type U and
-maps it to an appropriate type. The combination of this data type declaration
-and this \textit{el} function is a definition of the relevant universe for this
-problem domain \cite{power_of_pi}. 
+https://github.com/yurrriq/the-power-of-pi/blob/master/src/Data/Cryptol.lidr.
+All Idris code in this section was adapted from this repository.}, which
+contains all the types that our parser will be manipulating in some way. We also
+define a function \textit{el}, which will take any value of type U and maps it
+to an appropriate type. The combination of this data type declaration and this
+\textit{el} function is a definition of the relevant universe for this problem
+domain \cite{power_of_pi}. 
 
 \begin{figure}[h]
     \caption{Universe declaration in Idris \protect\cite{power_of_pi}}
@@ -70,7 +71,7 @@ generate a type for the file format from the second parameter. To read means to
 build a type from both parameters before moving on. We will need to define both
 these operations, a base operation that gives us a type, a terminal, and
 rejection if the input data is badly formed. We can declare such a type as
-shown in Figure ~\ref{formatDeclaration}. 
+shown in Figure~\ref{formatDeclaration}. 
 
 In this code, notice how \texttt{Fmt} lifts values of type \texttt{Format} to
 the type level. Data that is badly formatted will be of type \texttt{Void}, a
@@ -78,6 +79,17 @@ type showing that it has zero inhabitants. \texttt{End} maps to the
 \texttt{Unit} type, which is a data type denoting one inhabitant. \texttt{Base}
 takes in a type at the value from our type universe and uses \texttt{el} to
 bring it to the type level. 
+
+The definition of \texttt{Read} is a little curious. The use of the $(**)$
+operator deserves some comment. This is the Idris syntactic sugar for a
+dependent pair. A simple example for what dependent pairs are is shown in
+Figure~\ref{dependentPairExample}. The type for the item on the right depends on
+the value of the item on the left. In this case, we are specifying that the list
+on the right must contain $n$ items, where $n$ is the value of the natural
+number on the left. A dependent pair (a : A ** P) means that the variable $a$ is
+of type A and can also occur in the type P \cite{tdd_book}. 
+
+In the case of \texttt{Read}, what we are specifying is that 
 
 \begin{figure}[ht!!!!!!]
     \caption{Format data type in Idris \protect\cite{power_of_pi}}
@@ -103,25 +115,20 @@ bring it to the type level.
     \end{lstlisting}
 \end{figure}
 
-In the code of Figure ~\ref{formatDeclaration}\footnotemark[\ref{idris_source}]
-one thing noteworthy is the $(**)$ operator, which is Idris syntactic sugar for
-a dependent pair. A dependent pair (a : A ** P) means that the variable $a$
-is of type A and can also occur in the type P \cite{tdd_book}. For example,
-consider Figure ~\ref{dependentPairExample}. The example will only type check
-correctly iff the natural number present in the first element of the pair is the
-same as the length of the list. 
+In the code of Figure~\ref{formatDeclaration} one thing noteworthy is the $(**)$
+operator, which is Idris syntactic sugar for a dependent pair. For example, consider Figure~\ref{dependentPairExample}.
+The example will only type check correctly iff the natural number present in the
+first element of the pair is the same as the length of the list. 
 
 Having specified a data type that lets us declare formats, we can then move on
-to creating a specification. In Figure
-~\ref{spec_declaration}\footnotemark[\ref{idris_source}], a format for the PBM
-spec is provided. We are now able to write a parser that takes in a Format as a
-data type, and then is able to parse files to generate well-typed data. See
-Figure ~\ref{parser}\footnotemark[\ref{idris_source}]. This straightforward
-parsing code is aided by the types that we declared before, skipping, reading,
-and terminating where required by our file format specification. We can use
-Idris' REPL to see how the parser deals with our PBM specification in Figure
-~\ref{repl}\footnotemark[\ref{idris_source}]. Here, we see that the type
-signature of the function created by giving the parse function our pbm
+to creating a specification. In Figure ~\ref{spec_declaration}, a format for the
+PBM spec is provided. We are now able to write a parser that takes in a Format
+as a data type, and then is able to parse files to generate well-typed data. See
+Figure~\ref{parser}. This straightforward parsing code is aided by the types
+that we declared before, skipping, reading, and terminating where required by
+our file format specification. We can use Idris' REPL to see how the parser
+deals with our PBM specification in Figure ~\ref{repl}. Here, we see that the
+type signature of the function created by giving the parse function our pbm
 specification is a function that takes in a list of bits and returns a matrix of
 bits with sizes bound by the natural numbers that we first specified in the file
 format. 
