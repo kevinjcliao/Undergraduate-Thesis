@@ -78,5 +78,17 @@ illustrate that the machinations to make difficult pattern matching possible
 with dependent types are non-trivial. However, once these proofs are
 implemented, someone writing future compilers can very easily draw on them
 simply by calling the \texttt{splitView} function to allow for the definition of
-complex pattern-matching. I'll reflect on why this is important in my
-conclusion. 
+complex pattern-matching. 
+
+What have dependent types bought us here? We are able to specify the constraints
+on the dimensions of splitting our word. We know that the goal of
+\texttt{split} is to be able to separate our input word into separate sizes. One
+might argue that this is unnecessary overhead to introduce for the limited
+certainty that the constituencies we aim to divide our word into make sense
+(8*4=32). However, it's important to note that \texttt{swab} is a simple
+function in Cryptol, and more complex functions do exist where whether the
+function is implemented correctly is known with less certainty. Dependent types
+provide a way to split and manipulate low-level bits while guaranteeing safety
+through tightness of types. Given that Cryptol is a language for low-level
+cryptography, a domain where bugs are both common, and incredibly dangerous, the
+advantage of code with tighter constraints on types becomes apparent. 

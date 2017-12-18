@@ -187,7 +187,10 @@ We can use Idris' REPL to see how the parser deals with our PBM specification in
 Figure ~\ref{repl}. Here, we see that the type signature of the function created
 by giving the parse function our pbm specification is a function that takes in a
 list of bits and returns a matrix of bits with sizes bound by the natural
-numbers that we first specified in the file format. 
+numbers that we first specified in the file format. Keep in mind that there is a
+dependent pair relationship in the type that makes this all possible. We'd be
+able to parse the image in Figure~\ref{pbm_sample}, producing a value of type
+\texttt{(3 : Nat ** 4 : Nat ** x2 : Vect 3 (Vect 4 Bit))}. 
 
 What has this given us? The application of dependent types in this example is
 more salient than our previous examples. This entire example hinges on building
