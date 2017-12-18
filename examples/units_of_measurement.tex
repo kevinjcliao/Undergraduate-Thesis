@@ -1,3 +1,7 @@
+\textit{This section is adapted from Adam Gundry's Ph.D Dissertation
+\cite{gundry2013}, among other resources for well-typed unit measurements with
+dependent types.}
+
 My first example is to demonstrate how dependent types can eliminate bugs that
 can arise from improper unit conversions \cite{gundry2013}. Units of measurement
 are already implemented in Microsoft's F\# Programming Language
@@ -7,8 +11,6 @@ going to occur at runtime. These bugs can be catastrophic, as made evident by
 NASA's loss of the \$125-million Mars Climate Orbiter when ``spacecraft
 engineers failed to convert from English to Metric units of measurement''
 \cite{hotz1999}. 
-
-In this
 
 \begin{figure}[ht!]
   \caption{Displays a unit error that would be caught at compile-time with units of measurement.}
@@ -29,7 +31,10 @@ same value. This means that if coding style guidelines enforce that all numeric
 values must be well-typed with units of measurement, there will be compile-time
 guarantees that errors of conversion between units of measurement will not
 occur. See Figure ~\ref{unit_error} for an example of a program that should
-error. 
+error \footnote{This example should error in the case we've described here,
+where quantities are indexed by their \textit{unit} and not their
+\textit{dimension}, however, if the latter is done, a compiler could do a
+conversion implicitly. This is explored in \cite{eisenberg2014}.}
 
 While units of measurement are implemented as a feature in the F\# language,
 which is not dependently typed, a dependently typed programming language would

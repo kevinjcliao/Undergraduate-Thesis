@@ -13,12 +13,11 @@ programs. In other words, a type signature is synonymous with a mathematical
 proposition, and if a valid program satisfying the constraints of such a type
 signature exists, then it is a proof proving the corresponding mathematical
 proposition \cite{martin_lof,ml_type_theory}. To illustrate this, consider the
-examples in Figure ~\ref{ml_type_theory_examples}
+examples in Figure~\ref{ml_type_theory_examples}. 
 \footnote{These examples were provided by Prof. Richard Eisenberg in a
 discussion.}. 
 
 \begin{table}[h]
-    \label{ml_type_theory_examples}
     \begin{tabular}{|c|c|c|c|}
         Haskell Type Signature & Math Proposition & Haskell type signature inhabited? & Proof exists? \\
         $\forall a. a \rightarrow a$ & $p \rightarrow p$ & True & True \\
@@ -27,6 +26,7 @@ discussion.}.
         $\forall ab. a \rightarrow (a,b)$ & $p \rightarrow (p\wedge q)$ & False & False 
     \end{tabular}
     \caption{Comparison between Haskell type signatures and mathematical proofs to illustrate Curry-Howard Isomorphism}
+    \label{ml_type_theory_examples}
 \end{table}
 
 From the figure, we see examples of the Curry-Howard isomorphism that forms the
@@ -49,8 +49,8 @@ proof assistants like NuPrl found a home at the intersection between programming
 language enthusiasts interested in total program correctness and constructive
 mathematicians interested in systems where mathematical formalisms could be
 systematically encoded. Other proof assistants with support for dependent types
-followed: Coq (1989) \cite{coquand1988calculus}, ALF (1990) \cite{alf}, Cayenne
-(1998) \cite{nuprl}, Agda (1999) \cite{norell:thesis}.
+followed: Coq (1989) \cite{coquand1988calculus}, ALF (1990) \cite{alf}, Agda
+(1999) \cite{norell:thesis}.
 
 While there are now robust theorem provers that incorporate dependent types,
 recent work has emerged concerned with bringing them into mainstream programming

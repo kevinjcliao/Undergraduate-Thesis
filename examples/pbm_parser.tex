@@ -1,3 +1,6 @@
+\textit{This section is a summary of one of the sections from Oury & Swierstra's
+"Power of Pi" \cite{power_of_pi}}
+
 Work also exists to use dependent types in creating embedded data description
 languages, which are languages where a programmer can describe the structure of
 data and quickly generate a working parser \cite{power_of_pi}.  For example,
@@ -196,7 +199,11 @@ relationship between the values present in our file format description and the
 subsequent type of the parsed data. We know that our dependently typed parser
 will give us well-formed data that fits the constraints of our file description
 or nothing at all. A parser without dependent types could not enforce such
-constraints in its static type system. 
+constraints in its static type system. Our data parser will either give us
+\texttt{Nothing}, or well-typed, well-formed code. An ordinary parser will
+only be able to give us data in the form of an untyped blob. In other words, 
+we've gotten both safety and convenience out of the application of dependent
+types. 
 
 Once the heavy-lifting of writing \texttt{parse}, \texttt{Fmt}, and
 \texttt{Format} has been done, a programmer has to specify a universe and the

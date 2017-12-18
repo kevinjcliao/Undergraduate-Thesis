@@ -1,3 +1,6 @@
+\textit{This section is a summary of Edwin Brady's "Programming and Reasoning
+with Algebraic Effects and Dependent Types" \cite{algebraic}}
+
 In functional programming, we want to isolate side effects as much as possible
 to keep our code clear. In Haskell and many other programming languages, side
 effects like IO, state, random number generation, etc. are handled by monads
@@ -14,13 +17,18 @@ the number of transformation monads we need to write increases quite quickly.
 Work exists to sidestep the problem of handling increasingly complex monadic
 transformations by encoding algebraic effects as a domain-specific language in a
 dependently typed programming language \cite{algebraic}. We can start by
-defining an \texttt{EFFECT} type, as seen in Figure ~\ref{effects_def}. In order
-for a function to use our effects DSL, it will have to be of type \texttt{Eff},
-where \texttt{Eff} is a data declaration where the 'execution context' m (optionally a
-Monad) is specified, a list of side effects, and the program's return type. For
-example, a function that of the execution context \texttt{IO} that throws side
-effects, does work on STDIO, and maintains an integer state will look something
-like the function \texttt{example} in Figure ~\ref{effects_def}. 
+defining an \texttt{EFFECT} type, as seen in Figure~\ref{effects_def}. This
+\texttt{EFFECT} data type enumerates the different kinds of side effects that an
+Effects DSL could need to handle. In order for a function to use our effects
+DSL, it will have to be of type \texttt{Eff}, where \texttt{Eff} is a data
+declaration where the 'execution context' m (optionally a Monad) is specified, a
+list of side effects, and the program's return type. For example, a function
+that of the execution context \texttt{IO} that throws side effects, does work on
+STDIO, and maintains an integer state will look something like the function
+\texttt{example} in Figure~\ref{effects_def}. 
+
+The code in Figure~\ref{effects_def} provides an example definition for
+\texttt{State}. 
 
 \begin{figure}[ht!!!!]
     \caption{Definition of effect type}
@@ -37,8 +45,77 @@ like the function \texttt{example} in Figure ~\ref{effects_def}.
             (a : Type) -> Type
     
         example : Eff IO [EXCEPTION String, STDIO, STATE Int] ()
+
+
+        data State : Effect where
+            Get : State a a a
+            Put : b -> State a b ()
+
+        get : Eff m [STATE x] x
+        get = mkEffect Get
+
+        put : x -> Eff m [STATE x] ()
+        put val = mkEffect (Put val)
     \end{lstlisting}
 \end{figure}
+
+\texttt{EFFECT} enumerates different side effects that we'd expect an effects
+DSL to handle for us. We want to define an \texttt{Effect} type which we can
+express our side effects in terms of, and also, a type class \texttt{Handler}
+that allows us to run expressions in a certain computational context. The
+definition of these two items are given in Figure~\ref{state_def}. Notice how
+\texttt{Effect} is parameterized by an input type, output type, and type of the
+computation. Handler allows us to specify some computational context and then
+run relevant effects. These definitions will become more clear as we implement
+a \texttt{State} effect. 
+
+The example that we will be dealing with later uses the \texttt{STATE} effect,
+so we can look at its implementation. We want \texttt{STATE} to have a
+\texttt{get} and {put} operation, of which, we expect \texttt{get} to be able to
+be called an unlimited amount of times without any impact on the type of state.
+We would like \texttt{put} to potentially mutate the type of \texttt{STATE}. We
+therefore, define our two effects in the data class, where Get does not modify
+the resource held in \texttt{State} whatsoever, so its effect looks exactly
+paramaters are all the same type. \texttt{Put}'s mutation takes in a value of
+type \texttt{b} and changes the type held by \texttt{State}. As a put operation,
+we expect nothing to be returned, so the type of the computation is \texttt{()}.
+
+Functions with different side effects are invoked from an execution context
+\texttt{Env}. The specifics of how execution contexts are defined are not
+important, however, we can note that different effects require different
+execution contexts. \texttt{STATE}, for example, is strictly locally confined
+and thus its execution context does not matter. Meanwhile, \texttt{STDIO} does
+IO operations, and therefore its execution context must be inside of the IO
+Monad. We can specify a type class \texttt{Handler}. All effects should be
+instances of this type class. \texttt{Handler} enforces that the environment we
+invoke a function from is the correct one. In other words, if I attempted to
+invoke a \texttt{runpure} function that had an \texttt{STDIO} side effect, the
+program will not compile. 
+
+
+\begin{figure}[ht!!!!]
+    \caption{Declaring handlers for side effects. Taken from Brady's work.
+    \protect\cite{algebraic}}
+    \label{handlers}
+    \begin{lstlisting}
+        Effect : Type
+        Effect = (res : Type) -> (res' : Type) -> (t : Type) -> Type
+
+        class Handler (e : Effect) (m : Type -> Type) where
+            handle : res -> (eff : e res res' t) -> (res' -> t -> m a) -> m add
+        
+        instance Handler State m where
+            handle st Get     k = k st st
+            handle st (Put n) k = k n ()
+        
+        instance Handler StdIO IO where
+            handle () (PutStr s) k = do putStrs; k () ()
+            handle () GetStr     k = do x <- getLine; k () x
+    \end{lstlisting}
+\end{figure}
+
+
+
 
 We can now apply this small Effects DSL we have defined to work on some simple
 programs where we need to maintain a side effect of some sort. I will provide an
@@ -64,10 +141,6 @@ example of a program where we tag each node of a binary tree with a unique ID.
             r' <- tag r
             return (Node l' (lbl, x) r')
         
-        get : Eff m [STATE x] x
-        
-        put : x -> Eff m [STATE x] ()
-        
         EffM :  (m   : Type -> Type) ->
                 (es  : List EFFECT) ->
                 (es' : List EFFECT) ->
@@ -81,47 +154,13 @@ example of a program where we tag each node of a binary tree with a unique ID.
 \end{figure}
 
 This tagging program is a simple function that recurses through a tree. The
-function 'gets' from and 'puts' to a state that is kept alive for the duration
-of the program. Since this side effect is 'created' at function call-time and
-'destroyed' on termination, it makes sense to say that this function can be
-invoked as a pure function. Thus, we have a function with internal side effects
-that have been clearly specified. We can see here how specifying side effects as
-a list of effects rather than with monad transformers means that we can easily
-add or remove side effects as required. 
-
-\begin{figure}[ht!!!!]
-    \caption{Declaring handlers for side effects. Taken from Brady's work.
-    \protect\cite{algebraic}}
-    \label{handlers}
-    \begin{lstlisting}
-        Effect : Type
-        Effect = (res : Type) -> (res' : Type) -> (t : Type) -> Type
-
-        class Handler (e : Effect) (m : Type -> Type) where
-            handle : res -> (eff : e res res' t) -> (res' -> t -> m a) -> m add
-        
-        instance Handler State m where
-            handle st Get     k = k st st
-            handle st (Put n) k = k n ()
-        
-        instance Handler StdIO IO where
-            handle () (PutStr s) k = do putStrs; k () ()
-            handle () GetStr     k = do x <- getLine; k () x
-    \end{lstlisting}
-\end{figure}
-
-Having specified how this Effects DSL works, how then should we implement it?
-Functions with different side effects are invoked from an execution context
-\texttt{Env}. The specifics of how execution contexts are defined are not
-important, however, we can note that different effects require different
-execution contexts. \texttt{STATE}, for example, is strictly locally confined
-and thus its execution context does not matter. Meanwhile, \texttt{STDIO} does
-IO operations, and therefore its execution context must be inside of the IO
-Monad. We can specify a type class \texttt{Handler}. All effects should be
-instances of this type class. \texttt{Handler} enforces that the environment we
-invoke a function from is the correct one. In other words, if I attempted to
-invoke a \texttt{runpure} function that had an \texttt{STDIO} side effect, the
-program will not compile. 
+function \texttt{get}s from and \texttt{put}s to a state that is kept alive for
+the duration of the program. Since this side effect is 'created' at function
+call-time and 'destroyed' on termination, it makes sense to say that this
+function can be invoked as a pure function. Thus, we have a function with
+internal side effects that have been clearly specified. We can see here how
+specifying side effects as a list of effects rather than with monad transformers
+means that we can easily add or remove side effects as required. 
 
 Isolating side effects is a form of best practice and doing so is not easy.
 While monads provide a way to handle side effects, programs multiple side
