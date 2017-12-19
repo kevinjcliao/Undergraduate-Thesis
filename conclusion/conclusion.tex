@@ -7,14 +7,26 @@ While I'm still uncertain about the direction to proceed, I'm interested in
 looking at elections and e-voting and whether or not we can provide guarantees
 of correctness to vote counting software written in dependently typed languages.
 I take a particular interest in the Australian Senate voting verification
-process because verification of vote count is an NP-complete problem
-\cite{aus_senate}. 
+process because vote count is an NP-complete problem \cite{aus_senate}. 
 
 Currently, the Australian government uses proprietary code to count Australian
 senate ballots and has refused to release the source code after a Freedom of
 Information Act request \cite{aus_senate_news}. If an open-sourced, verifiably
 correct counting program were devised, we could greatly protect the integrity of
-Australian elections. 
+Australian elections. I think dependent types would lend themselves well to an
+application in this context. First of all, one would have to parse large amounts
+of data, which we know from one of our examples, can be done with an embedded
+data description language. We will also have to count votes and redistribute
+voting preferences from candidate to candidate. Such operations could be
+complex, and enforcing tight constraints at the type level could mean that a
+good-faith programmer or someone browsing the open-source code can know at a
+quick glance that the operations are implemented correctly. 
+
+All in all, counting votes in the Australian senate is a complicated operation
+with a lot of moving parts, and I believe that the examples that we've looked at
+over the course of this literature review have shown to me that there is a
+certain degree of promise in implementing a dependently-typed Australian senate
+vote counter. 
 
 \section{Conclusion}
 While many literature reviews begin by looking examining a problem and looking
@@ -26,36 +38,30 @@ constructivist mathematicians, are increasingly becoming realistic tools to
 write code with necessary guarantees of correctness. In other words, dependent
 types are a solution in search of a problem. 
 
-In this literature review, I offered a brief summary as to what dependent types
-are and what languages exist where dependent type functionality is available. I
-then moved on to describe different applications of dependently typed
-programming that exist in literature. I started by looking at Cryptol, a DSL for
-cryptography, and showed how dependent types allow for implementing complex
-pattern-matching that the language requires \cite{power_of_pi}. I then moved on
-to discuss embedded data description languages, showing how one can describe how
-data is structured and generate a parser out of such a description
-\cite{power_of_pi}. I also examined the potential of dependent types to build a
-typesafe database, eliminating runtime typechecking and thus reducing error and
-increasing performance \cite{power_of_pi,eisenberg2016}. 
-
-Outside of domain specific languages, I also showed the application of dependent
-types to systems programming \cite{idris_systems_programming}, building
-distributed systems \cite{fstar_distributed_programming} and units of
-measurement \cite{gundry2013}. In this wide-ranging review, I've demonstrated
-that as dependent types become brought into the mainstream, they have the
-potential to empower programmers to build safe, robust programs in ways that
-have not been possible before. 
-
 In all of these applications, I found something incredibly interesting that I'd
 like to reflect on. I don't deny that the process of understanding all of these
 papers at the undergraduate-level has not been an easy undertaking. This is
-important because the underlying discussion question about this literature review has been making dependent types accessible to a practical programmer. However, while writing out inductive proofs in Idris or building a relational algebra are difficult tasks, the result is surprisingly easy for a programmer to use. 
+important because the underlying discussion question about this literature
+review has been making dependent types accessible to a practical programmer.
+However, while writing out inductive proofs in Idris or building a relational
+algebra are difficult tasks, the result is surprisingly easy for a programmer to
+use. 
 \begin{enumerate}
-    \item A programmer looking to implement complicated pattern-matching for a domain-specific language like Cryptol can easily implement that complex pattern-matching, as well as many other complicated pattern-matching techniques once splitView and its associated lemmas are implemented. 
-    \item A programmer wanting to use well-typed units of measurement can simply import a library of SI units without having to worry about proving lemmas that demonstrate two derived units are the same. 
-    \item A programmer wanting to use a type-safe relational database simply has to express schemas and then write expressions in our relational algebra detailing the input and output schema. 
-    \item A programmer wanting to build a parser can simply describe the data using a provided data description language. 
-    \item A programmer who wants to use the algebraic effects DSL can just describe the side effects present in their function without worrying about the complex underlying dependently-typed machinations. 
+    \item A programmer wanting to use well-typed units of measurement can simply
+    import a library of SI units without having to worry about proving lemmas
+    that demonstrate two derived units are the same. 
+    \item A programmer wanting to build a parser can simply describe the data
+    using a provided data description language. 
+    \item A programmer wanting to use a type-safe relational database simply has
+    to express schemas and then write expressions in our relational algebra
+    detailing the input and output schema. 
+    \item A programmer looking to implement complicated pattern-matching for a
+    domain-specific language like Cryptol can easily implement that complex
+    pattern-matching, as well as many other complicated pattern-matching
+    techniques once splitView and its associated lemmas are implemented. 
+    \item A programmer who wants to use the algebraic effects DSL can just
+    describe the side effects present in their function without worrying about
+    the complex underlying dependently-typed machinations. 
 \end{enumerate}
 
 In other words, at the current state, I find dependent types to still be too
@@ -70,3 +76,13 @@ programmer to love and write programs with dependent types is certainly
 non-trivial, but providing dependently-typed libraries can be easily done. You
 can't make a kid love vegetables, but nothing's stopping you from slipping a
 little spinach into their dinner. 
+
+Eventually however, the libraries that we've described will still require a
+programmer to deal with increasingly complex error messages. Programmers using
+dependently-typed libraries will eventually need to dig down and fight with the
+compiler. However, dependently-typed libraries that are easy to use provide
+entry points for programmers to become familiar with the safety provided by
+dependent types. In other words, as work continues on mainstreaming dependent
+types, programmers and academics with a deep understanding of dependent types
+who wish to see its proliferation should work on providing well-written
+libraries that encourage practical programmers to give dependent types a shot.

@@ -17,14 +17,14 @@ integers.
 
 However, consider, for example, a function \texttt{replicate} that takes in an
 integer of value \texttt{b} and some element of type \texttt{a}. It then
-\textit{replicates} the element \texttt{b} times, producing of length \texttt{b}
-containing copies of the element of type \texttt{a}. The Haskell type
-signature\footnote{This literature review assumes prior knowledge with
-Haskell/Idris-style type signatures, since all the examples I've provided are in
-this style. An introduction is available in the excellent \textit{Real World
-Haskell}, available here:
+\textit{replicates} the element \texttt{b} times, producing a length-indexed
+vector of length \texttt{b} containing copies of the element of type \texttt{a}.
+The Haskell type signature\footnote{This literature review assumes prior
+knowledge with Haskell/Idris-style type signatures, since all the examples I've
+provided are in this style. An introduction is available in the excellent
+\textit{Real World Haskell}, available here:
 http://book.realworldhaskell.org/read/types-and-functions.html} for such a
-function could look like in Figure~\ref{replicate_dec}.
+function could look like the one provided in Figure~\ref{replicate_dec}.
 
 \begin{figure}[ht!!!!!!!]
     \caption{Non-dependently typed type signature for replicate}
@@ -53,12 +53,13 @@ vector can be expressed as Figure~\ref{vect}.
 
 % Replicate. 
 
-Now that we've introduced the length of the vect type as part of its type
-signature, we can write a much tighter type signature for our replicate
-function. Essentially, any replicate function will take in an integer with some
-value \texttt{len}, some element \texttt{x} of type \texttt{elem}, and the
-function will produce some vector of length \texttt{len} holding elements of
-type \texttt{elem}. This type signature is shown in Figure~\ref{dtvect}. 
+Now that we've introduced the length of the \texttt{vect} type as part of its
+type signature, we can write a much tighter type signature for our
+\texttt{replicate} function. Essentially, the \texttt{replicate} function will
+take in an integer with some value \texttt{len}, some element \texttt{x} of type
+\texttt{elem}, and the function will produce some vector of length \texttt{len}
+holding elements of type \texttt{elem}. This type signature is shown in
+Figure~\ref{dtvect}. 
 
 \begin{figure}
     \caption{Dependently typed type signature for replicate}
@@ -77,15 +78,15 @@ created a function where the co-domain varies as the input value varies.
 
 The goal of dependent types is to write programs with extreme guarantees of
 compile-time safety. We can use the types of the parameters of a function to
-place tighter limits on the set that consists of its co-domain, with the
-co-domain varying depending on the values of the input parameters. 
+place tighter limits on the set of its co-domain, with the co-domain varying
+depending on the values of the input parameters. 
 
 In this literature review, I will explore existing literature around practical
-real-world applications of dependent types. I'll take a look at three examples
-where a domain specific language can be built if a language can support full
-dependent types. I'll then show how dependent types can be applied to make
-systems programming and building distributed systems safer. I'll also take a
-look at how a dependently typed language can implement units of measurement,
-preventing a set of potentially costly and fatal human errors. The hope is to
-demonstrate that dependent types, long confined to theoretical mathematics, have
-tremendous promise in helping programmers build reliable and safe programs. 
+real-world applications of dependent types. I'll look at five examples to
+illustrate these real-world applications. They range in domain from relational
+databases to low-level bit manipulation. The hope is to demonstrate that
+dependent types, long confined to theoretical mathematics, have tremendous
+promise in helping programmers build reliable and safe programs. I'll end by
+reflecting on the difficulty of this task and how my experience as an
+undergraduate undertaking this research speaks to how researchers can
+proliferate dependent types.

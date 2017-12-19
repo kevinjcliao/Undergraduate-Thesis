@@ -1,17 +1,17 @@
-\textit{This section is a summary of one of the sections from Oury & Swierstra's
-"Power of Pi" \cite{power_of_pi}}
+\textit{This section is a summary of one of the sections from Oury \& Swierstra's
+"The Power of Pi" \cite{power_of_pi}}
 
-Our second example is a type-safe relational algebra Databases are one of the
+Our second example is a type-safe relational algebra. Databases are one of the
 pillars of modern software. Databases are employed in everything from social
 media software \cite{tao} to flight scheduling and booking \cite{flights}.
 Different programming languages have varying interfaces for querying an SQL
-database. Oftentimes, a query and response interface simply asks a user to send
-and receive a SQL query and as a string and to process a response given as a
-string. While this offers flexibility, it means that there is no compile-time
-guarantee of correctness and that poorly written SQL queries result in run-time
+database. Oftentimes, a query and response interface simply asks a client to
+send an SQL query as a string and to process a response given as a string. While
+this offers flexibility, it means that there is no compile-time guarantee of
+correctness. This means that poorly written SQL queries result in run-time
 crashes, rather than compile-time debugging. We would like to be able to easily
 compose types from database table schema, which would allow a programmer to
-easily compose type-safe queries with compile-time verification of correctness
+write type-safe queries with compile-time verification of correctness
 \cite{power_of_pi}. Many SQL interfaces do runtime type checking, meaning if we
 can avoid these type checks, there may be performance gains. 
 
@@ -96,12 +96,12 @@ name and the type of what the column contains. Thus, we can declare an
 attributes and schemas as follows in Figure~\ref{schema}, where U refers to the
 universe that we built in an earlier example. 
 
-Given that we built a schema, we are now able to define a schema to hold
-students. Take, for example, a schema that stores a student's name, student id,
-and class year. Our next job is to be able to express a database table with a
-row of instances of a schema. This is reflected in our declaration of the
-\texttt{Row} type, which lets us join rows together, ending in an EmptyRow. An
-example \texttt{kevin} is provided. 
+Given that we built a \texttt{schema} type, we are now able to define a schema
+to hold students. Take, for example, a schema that stores a student's name,
+student id, and class year. Our next job is to be able to express a database
+table with a row of instances of a schema. This is reflected in our declaration
+of the \texttt{Row} type, which lets us join rows together, ending in an
+EmptyRow. An example \texttt{kevin} is provided. 
 
 \begin{figure}[ht!]
     \caption{Declaration of connect. Idris adaption of code from Power of Pi
@@ -135,47 +135,49 @@ example \texttt{kevin} is provided.
 
 Now that we've defined the schema and tables, it's time to show how we connect
 and query the table. Usually this means that we have a function \texttt{connect}
-that takes in a servername and tablename as strings, and a SQL query as a
-string, before returning a string in an IO monad. Now that we've defined a
+that takes in a server name and table name as strings, and a SQL query as a
+string, before returning a string in an IO monad. We can contrast that unsafe
+kind of database access with the one we're building here. Since we've defined a
 schema type, we can build a well-typed database connection that validates that
 the database table we are connecting to is of the same schema as the schema we
-are requesting. If connection succeeds, that means that all subsequent requests
-with the \texttt{Handle schema} type returned by the connect function must be
-safe, because we know that the schemas we are reading or writing from the table
-must correspond to the schema in our code. This connect function is defined in
-Figure ~\ref{connect}. 
+are requesting. Our version of \texttt{connect} takes in the server name and
+table name and a schema. If connection succeeds, that means that all subsequent
+requests with the \texttt{Handle schema} type returned by the connect function
+must be safe, because we know that the schemas we are reading or writing from
+the table must correspond to the schema in our code. 
 
 Finally, we define a type \texttt{RA} which denotes expressions in our
 relational algebra. For the sake of brevity, we've limited it to \texttt{Read}
-and \texttt{Product}. We then have a function that does an IO operation on a
-database, taking in a query of type Relational Algebra, to return us a database
-table of consisting of the results of our query. 
+and \texttt{Product}. We then have a function \texttt{toSQL} that does an IO
+operation on a database, taking in an expression in \texttt{RA}, to return us a
+database table of consisting of the results of our query. 
 
 \texttt{Product} computes the Cartesian product of two tables, producing a
 larger table where each row in the first table maps to every row in the second
 table. This operation only works if the two schemas are disjoint. While it is
 trivial to write a function \texttt{disjoint} that checks to see if two schemas
-are disjoint, we want to enforce that product is only a valid RA expression on
-disjoint schemas. Thus, we want the type of \texttt{Product} to enforce that its
-two schemas are disjoint. In addition, we have a simple proposition \texttt{So}
-that ensures that whatever proposition is supplied to it is valid. In the case
-of building a cartesian product, we are looking to make sure that the two
-schemas are disjoint. 
+are disjoint, we want to enforce this at the type level. Thus, we want the type
+of \texttt{Product} to enforce that its two schemas are disjoint. In addition,
+we have a simple proposition \texttt{So} that ensures that whatever proposition
+is supplied to it is valid. This is another example of an application of
+dependent types. Whether a \texttt{Product} expression compiles is dependent
+upon a check on the two schema values to ensure that its disjoint. Once again,
+values are creating tighter bounds at the type level. 
 
 Let's say that I now have to do the registrar cartesian product that I described
 in the beginning of this section. What I'd first do is make two calls to the
 \texttt{connect} function. I will send the schema of my students table in one
-call and the schema of the classes call in another. If both connections succeed,
-I will be given two values of type \texttt{Handle Student}, \texttt{Handle
-Class} respectively, which give me the certainty that the table contains data
-conforming to such a schema. I can then feed these two \texttt{Handle} values into a
-\texttt{Read} expression, which will give me values of table rows of type
-\texttt{RA Student} and \texttt{RA Class}. I can then take the cartesian
-product. My \texttt{Product} expression first checks to make sure that the
-\texttt{Student} schema and \texttt{Class} schema are disjoint, which they are,
-before appending the \texttt{Class} schema to the \texttt{Student} schema to
-make the final schema that describes the rows of data held by the results of our
-cartesian product of two tables. 
+call and the schema of the classes table in another. If both connections
+succeed, I will be given two values of type \texttt{Handle Student},
+\texttt{Handle Class} respectively, which give me the certainty that the table
+contains data conforming to my specified schemas. I can then feed these two
+\texttt{Handle} values into a \texttt{Read} expression, which will give me
+values of table rows of type \texttt{RA Student} and \texttt{RA Class}. I can
+then take the cartesian product. My \texttt{Product} expression first checks to
+make sure that the \texttt{Student} schema and \texttt{Class} schema are
+disjoint, which they are, before appending the \texttt{Class} schema to the
+\texttt{Student} schema to make the final schema that describes the rows of data
+held by the results of our cartesian product of two tables. 
 
 The crux of how dependent types are applicable in this example lies in the
 \texttt{connect} function. In this example, we can see how the type of the
@@ -196,13 +198,3 @@ in our universe was pretty easy and database queries not significantly more
 difficult to compose and write. Thus, this is an exciting application of
 dependent types where programmers can potentially benefit from high-level use of
 dependently typed software once the more complex moving parts are written. 
-
-We circle back to a question that we've been asking earlier: in what ways does
-this overhead give us an advantage over an ordinary database driver? Earlier, we
-were discussing how an ordinary database driver will usually send a query over
-to the database as a string and receive data as a string. What this means is
-that a database driver will have to validate whether data conforms to the schema
-specified by a user on every read operation. 
-
-
-

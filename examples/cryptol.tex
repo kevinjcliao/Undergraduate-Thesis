@@ -1,5 +1,5 @@
-\textit{This section is a summary of one of the sections from Oury & Swierstra's
-"Power of Pi" \cite{power_of_pi}}
+\textit{This section is a summary of one of the sections from Oury \&
+Swierstra's "The Power of Pi" \cite{power_of_pi}}
 
 Dependent type systems have potential applications in easily implementing domain
 specific languages (DSLs). Cryptol, for example, is a domain-specific language
@@ -16,7 +16,7 @@ in a 32-bit word and swaps the first two bytes \cite{cryptol_manual}.:
 \texttt{swab [a b c d] = [b a c d]}
 
 Ideally, a word would be represented by a vector of 32-bits. We would be able to
-declare a pattern match with swab that looks similar to the declaration
+declare a pattern match with \texttt{swab} that looks similar to the declaration
 presented by Oury and Swiestra above. How then does the compiler understand that
 this pattern match declaration means we expect the input vector to be divided
 into 4 separate vectors of 8 bits? This is where dependent types serve a
@@ -37,7 +37,7 @@ match, allowing for powerful pattern matching required by the Cryptol language
 
         data SplitView : {n : Nat} -> (m : Nat) 
                         -> Vect (m * n) a -> Type where
-        Split : (xss : Vect m (Vect n a)) -> SplitView m (concat xss)
+            Split : (xss : Vect m (Vect n a)) -> SplitView m (concat xss)
         
         splitConcatLemma : (xs : Vect (m * n) a) 
                             -> concat (split n m xs) = xs
@@ -54,20 +54,29 @@ match, allowing for powerful pattern matching required by the Cryptol language
     \end{lstlisting}
 \end{figure}
 
-Idris and other dependently typed programming languages provide a \texttt{with}
-keyword that lets you pattern match on the results of applying the inputs of a
-function to another function. In this example, we are pattern matching on the
-results of feeding in the input word to a function called \texttt{splitview}
-that splits our word into 8 bytes. There are some constraints on such a
-function. We expect that \texttt{splitView 9 3} will be an illegal call because
-\texttt{splitView} takes in a 32-bit word yet this splitView is splitting a word
-of size 27 ($9 \times 3$). We'll spend the remainder of this section exploring
-what goes into implementing \texttt{splitView}. 
+In this example, our swab function does a pattern match on the results of a
+\texttt{splitView} function, specifying the dimensions with which we are
+splitting up our 32-bit word. It then concatenates the result of this split. 
+
+Specifying the constraints of the \texttt{splitView} is where we see the use of
+dependent types in this example. Idris and other dependently typed programming
+languages provide a \texttt{with} keyword that lets you pattern match on the
+results of applying the inputs of a function to another function. In this
+example, we are pattern matching on the results of feeding in the input word to
+a function called \texttt{splitview} that splits our word into 8 bytes. There
+are some constraints on such a function. We expect that \texttt{splitView 9 3}
+will be an illegal call because \texttt{splitView} takes in a 32-bit word yet
+this splitView is splitting a word of size 27 ($9 \times 3$). In other words,
+the type signature of Split hinges on the values that are given to
+\texttt{splitView}, showing how values alter the co-domain of a function,
+flexing the muscles of a dependently-typed programming language. We'll spend the
+remainder of this section exploring what goes into implementing
+\texttt{splitView}. 
 
 \texttt{splitView}'s implementation is also shown in Figure~\ref{swab}. It is
 predicated on the existence of some function \texttt{split}, that splits up an
-input vector into appropriate-length pieces based on input. splitView is
-necessary because we cannot simply write \texttt{swab} as a call to
+input vector into appropriate-length pieces based on input. \texttt{splitView}
+is necessary because we cannot simply write \texttt{swab} as a call to
 \texttt{split}. If our function 'swab' were simply a call to split, there would
 be a problem. Since our swab function is a concatenation of the results of
 split, we have no way of guaranteeing to the compiler that the result length of
@@ -76,12 +85,12 @@ guarantee \texttt{concat (split n m xs) = xs}, where \texttt{xs} refers to the
 input 32-bit word. 
 
 Such a proof is provided by \texttt{splitConcatLemma}. The specifics of this
-inductive proof are provided in \cite{power_of_pi}. The example is provided to
-illustrate that the machinations to make difficult pattern matching possible
-with dependent types are non-trivial. However, once these proofs are
-implemented, someone writing future compilers can very easily draw on them
-simply by calling the \texttt{splitView} function to allow for the definition of
-complex pattern-matching. 
+inductive proof are provided in Oury \& Swiestra's "The Power of Pi"
+\cite{power_of_pi}. The example is provided to illustrate that the machinations
+to make difficult pattern matching possible with dependent types are
+non-trivial. However, once these proofs are implemented, someone writing future
+compilers can very easily draw on them simply by calling the \texttt{splitView}
+function to allow for the definition of complex pattern-matching. 
 
 What have dependent types bought us here? We are able to specify the constraints
 on the dimensions of splitting our word. We know that the goal of
