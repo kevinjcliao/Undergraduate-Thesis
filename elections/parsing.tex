@@ -1,0 +1,11 @@
+\section{Parsing}
+
+\subsection{Data Format}
+
+At its core, the goal of \textit{Palpatine} is to take in a list of ballots.
+Each ballot denotes the voter's list of preferences. We also should know a list
+of all candidates because that cannot be derived from the list of preferences.
+There is a scenario where a candidate gets not a single preference from not a
+single voter. To express this, we have a file format, that is a modified version
+of the one defined in \cite{stv_haskell}. Currently, their work requires that
+candidates be declared in a Haskell GADT, whereas we 

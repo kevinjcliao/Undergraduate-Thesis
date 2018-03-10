@@ -345,3 +345,73 @@
  acmid = {1687707},
  publisher = {VLDB Endowment},
 }
+
+@InProceedings{stv_haskell,
+author="Ghale, Milad K.
+and Gor{\'e}, Rajeev
+and Pattinson, Dirk",
+editor="Krimmer, Robert
+and Volkamer, Melanie
+and Braun Binder, Nadja
+and Kersting, Norbert
+and Pereira, Olivier
+and Sch{\"u}rmann, Carsten",
+title="A Formally Verified Single Transferable Voting Scheme with Fractional Values",
+booktitle="Electronic Voting",
+year="2017",
+publisher="Springer International Publishing",
+address="Cham",
+pages="163--182",
+abstract="We formalise a variant of the Single Transferable Vote scheme with fractional transfer values in the theorem prover Coq. Our method advocates the idea of vote counting as application of a sequence of rules. The rules are an intermediate step for specifying the protocol for vote-counting in a precise symbolic language. We then formalise these rules in Coq. This reduces the gap between the legislation and formalisation so that, without knowledge of formal methods, one can still validate the process. Moreover our encoding is modular which enables us to capture other Single Transferable Vote schemes without significant changes. Using the built-in extraction mechanism of Coq, a Haskell program is extracted automatically. This program is guaranteed to meet its specification. Each run of the program outputs a certificate which is a precise, independently checkable record of the trace of computation and provides all relevant details of how the final result is obtained. This establishes correctness, reliability, and verifiability of the count.",
+isbn="978-3-319-68687-5"
+}
+
+@INPROCEEDINGS{prom1,
+author={D. Cansell and J. P. Gibson and D. Mery},
+booktitle={Fifth IEEE International Conference on Software Engineering and Formal Methods (SEFM 2007)},
+title={Formal verification of tamper-evident storage for e-voting},
+year={2007},
+volume={},
+number={},
+pages={329-338},
+keywords={formal verification;politics;security of data;e-voting;election unauthorised votes;electronic voting systems;formal methods;formal verification;reusable formal design pattern;tamper-evident storage;transparency degree;votes security;Application software;Electronic voting;Electronic voting systems;Formal verification;Nominations and elections;PROM;Risk analysis;Secure storage;Security;Software engineering},
+doi={10.1109/SEFM.2007.21},
+ISSN={1551-0255},
+month={Sept},}
+
+@INPROCEEDINGS{prom2,
+author={D. Molnar and T. Kohno and N. Sastry and D. Wagner},
+booktitle={2006 IEEE Symposium on Security and Privacy (S P'06)},
+title={Tamper-evident, history-independent, subliminal-free data structures on PROM storage -or- how to store ballots on a voting machine},
+year={2006},
+volume={},
+number={},
+pages={6 pp.-370},
+keywords={PROM;data privacy;data structures;public administration;PROM storage;Programmable Read Only Memory;ballot storage;electronic voting machine;history-independent data structures;subliminal-free data structures;subliminal-free representation;tamper-evident data structures;vote storage unit;voter privacy;write-once storage medium;Computer crashes;Costs;Data structures;Electronic voting;Electronic voting systems;Nominations and elections;PROM;Privacy;Proposals;Protection},
+doi={10.1109/SP.2006.39},
+ISSN={1081-6011},
+month={May},}
+
+@article{margin_of_victory,
+author = {Xia, Lirong},
+year = {2012},
+month = {06},
+pages = {},
+title = {Computing the margin of victory for various voting rules},
+booktitle = {Proceedings of the ACM Conference on Electronic Commerce}
+}
+
+@article{strategic,
+ ISSN = {01761714, 1432217X},
+ URL = {http://www.jstor.org/stable/41105995},
+ abstract = {We give evidence that Single Tranferable Vote (STV) is computationally resistant to manipulation : It is NP-complete to determine whether there exists a (possibly insincere) preference that will elect a favored candíate, even in an election for a single seat. Thus strategic voting under STV is qualitatively more difficult than under other commonly-used voting schemes. Furthermore, this resistance to manipulation is inherent to STV and does not depend on hopeful extraneous assumptions like the presumed difficulty of learning the preferences of the other voters. We also prove that it is NP-complete to recognize when an STV election violates monotonicity. This suggests that non-monotonicity in STV elections might be perceived as less threatening since it is in effect "hidden" and hard to exploit for strategic advantage.},
+ author = {John J. Bartholdi and James B. Orlin},
+ journal = {Social Choice and Welfare},
+ number = {4},
+ pages = {341-354},
+ publisher = {Springer},
+ title = {Single transferable vote resists strategic voting},
+ volume = {8},
+ year = {1991}
+}
+
