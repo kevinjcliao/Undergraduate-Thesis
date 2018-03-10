@@ -1,11 +1,121 @@
 \section{Parsing}
 
-\subsection{Data Format}
-
 At its core, the goal of \textit{Palpatine} is to take in a list of ballots.
 Each ballot denotes the voter's list of preferences. We also should know a list
 of all candidates because that cannot be derived from the list of preferences.
 There is a scenario where a candidate gets not a single preference from not a
-single voter. To express this, we have a file format, that is a modified version
+single voter. To express this, I have a file format, that is a modified version
 of the one defined in \cite{stv_haskell}. Currently, their work requires that
-candidates be declared in a Haskell GADT, whereas we 
+candidates be declared in a Haskell GADT. One can imagine that the PBM Data
+Description Language described in chapter 2.2 of the literature review could
+parse and build such a data type, however I find that we can simply include the
+total list of candidates at the top of the file. 
+
+The file format consists of a list of the candidates (in parentheses to denote
+that it is ont a ballot). A ballot is a list of preferences with the leftmost
+preference representing the most desired candidate. Our ballots from our earlier
+example in this data format is shown in Figure~\ref{stv_format}
+
+\begin{figure}[ht!!!!!!!]
+    \caption{Data format}
+    \label{stv_format}
+    \begin{lstlisting}
+        (A,B,C):2
+        [A,C]
+        [A,B,C]
+        [A,C,B]
+        [B,A]
+        [C,B,A]
+    \end{lstlisting}
+\end{figure}
+
+We will be storing our total list of candidates in a length-indexed vector,
+where candidate corresponds to the string name. We want to parse our ballots
+such that as we elect a candidate, we remove preferences for that candidate from
+all of our ballots. The best way to do that is to have ballots be a list of
+\textit{Finite Numbers}, \texttt{Fin}. The type \texttt{Fin n} refers to a
+natural number that is in the set of all natural numbers between \texttt{Zero}
+and $n$. Each preference of type \texttt{Fin n} in our ballot corresponds to an
+index in our \texttt{candidates} vector. As we elect a candidate and remove them
+from our \texttt{candidates} vector, we reindex all of the ballots, changing the
+\texttt{Fin}s to reflect the new indices of our now smaller vector of
+candidates. How this high-level description looks like in terms of data types is
+shown in Figure~\ref{stv_data_types}.
+
+\begin{figure}[ht!!!!!!]
+    \caption{Data types for \textit{Palpatine}}
+    \label{stv_data_types}
+    \begin{lstlisting}
+        Candidate : Type
+        Candidate = String
+
+        Candidates : Nat -> Type
+        Candidates n = Vect n Candidate
+        
+        VoteValue : Type
+        VoteValue = Double
+
+        -- New ballot type has a list of fins and
+        -- a double as a pair. 
+        total
+        Ballot : Nat -> Type
+        Ballot n = (List (Fin n), VoteValue)
+    \end{lstlisting}
+\end{figure}
+
+We can parse a vector by using a dependent pair. We will not be able to derive
+the type of the vector from elsewhere in our program given that it is data that
+is derived through I/O. Thus, if we had our input file as a string, a
+\texttt{getCandidates} function would have the following type signature:
+\texttt{getCandidates : String -> (n ** Candidates n)}, where $n$ refers to the
+number of candidates. We can then take the \texttt{Candidates n} produced and
+parse for the ballots. The overall function \texttt{parseBallots} has the type
+signature: \texttt{parseBallots : String -> Candidates n -> List \$ Ballot n}.
+
+Thus, we generate a \texttt{List \$ Ballot n} containing the ballots which
+reflect user preferences and a \texttt{Candidates n} which is a length-indexed
+vector of candidates. 
+
+\section{Counting}
+
+\textit{This section is currently rough. It is an outline of existing and
+planned work. It is mostly based on an outline of the STV counter provided in}
+\cite{stv_haskell}.
+
+
+We store our vote count as a hashmap with Strings as Keys representing each one
+of our candidates and \texttt{VoteValue} (Doubles) as the values. In other words, we define a type: 
+
+\texttt{VoteCount : Type} \\
+\texttt{VoteCount = SortedMap Candidate VoteValue}
+
+We start by
+defining a function to calculate the Droop Quota and the surplus transfer.
+\cite{stv_haskell} separates the vote counting process for the STV system into
+the following formal steps: 
+
+\subsection{Start}
+We start by calculating the Droop Quota with a function \texttt{droopQuota : Nat
+-> Nat -> Nat}. We then instantiate our VoteCount with a function
+\texttt{instantiateVc : Candidates n -> VoteCount}, that simply instantiates a
+VoteCount Map with all votecounts set at zero. 
+
+\subsection{Count}
+
+
+
+\subsection{Elect}
+
+\subsection{Ewin}
+
+\subsection{Hwin}
+
+\subsection{Transfer}
+
+\subsection{Elim}
+
+List of potential improvements(?)
+\begin{enumerate}
+    \item Type level guarantees of correctness from the Droop Quota and Surplus Quota functions?
+    \item Using type level rationals instead?
+\end{enumerate}
