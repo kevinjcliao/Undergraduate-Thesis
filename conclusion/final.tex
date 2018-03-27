@@ -1,0 +1,26 @@
+\chapter{Final Conclusions}
+
+\section{Dependently Typed Programming is Difficult.}
+
+\section{STV is an Algorithm in Need of a Declaration Specification}
+
+\section{Totality Checkers Are Good.}
+
+Guarantees of termination are good for the user. STV vote counting can take a
+while. When running the code from Ghale, Gore and Pattinson, counting STV
+ballots for an election of the Australian Capital Territory took 3 days
+\cite{stv_haskell}. The point is, counting STV elections can be difficult. More
+than once, I wondered if the program was not going to terminate. Idris provides
+a built-in totality checker, which as specified above, means that there are
+compile-time guarantees of termination. This means proofs of termination are not
+required. 
+
+% TODO: Papers on totality checker in Haskell? 
+
+While significant, non-trivial barriers exist to implementing a totality checker
+in Haskell, the experience I had with implementing an STV counter in Idris leads
+me to believe that Haskell would benefit significantly from such a totality
+checker. As such, I encourage and add my voice to encourage the people who are
+working towards this noble goal. 
+
+\section{Better Programming Languages Enable Safer Code.}

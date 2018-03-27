@@ -8,6 +8,63 @@ level elections across the United Kingdom and the United States. Many variants
 of the system exist and I concern myself with the method of STV currently used
 to count votes in the Australian Senate. 
 
+\section{How STV works}
+
+At a high level, STV works by first calculating the `score' of each candidate
+and what they've received, knows as the \textit{Droop Quota}. If a candidate has
+a total tallied vote value of higher than the Droop Quota, the candidate is
+considered elected. We start by exhaustively counting the first preference on
+everyone's ballot. When we finish counting these preferences, we see if any
+candidate has met the Droop Quota. If such a candidate has met the Droop Quota,
+we calculate their surplus (the surplus number of votes they received over the
+Droop Quota). We then redistribute the ballots that voted for this winning
+candidate by removing the ballots' first preference and lowering its value. If
+after such a redistribution has taken place, another candidate reaches the Droop
+Quota, we recount their preferences and so on. This process continues until no
+count of next preferences will bring another candidate over the Droop Quota. 
+
+When we have counted each ballot and redistributed accordingly and no candidates
+will be brought over the line through a redistribution, we now eliminate the
+candidate with the lowest `score' and we redistribute ballots that have voted
+for that candidate to their next preferences. This continues until a candidate
+hits the droop quota, after which we reallocate their surplus again. 
+
+There are two termination conditions for this algorithm. The first is that all
+seats are filled and there are leftover candidates. In such a case, we just
+accept that the election is complete and discard the leftover candidates. The
+second is that there are the same number or less number of leftover candidates
+than there are seats available. In that case, we elect the leftover candidates
+and close the election. Pseudocode for this algorithm is given below. This
+pseudocode is modified from pseudocode provided by Sellstr\"om and T\~onisson
+\cite{stv_pseudocode}. 
+
+\begin{algorithm}
+    \SetKwFunction{stv}{stv}
+    \SetKwProg{Fn}{Function}{}{}
+    \Fn{\stv{ballots, seats, candidates}}{
+        let $dq$ = droopQuota\\
+        let $vc$ denote the total vote score of each candidate where $vc_i$ is
+        the score for candidate $i$\\
+        let elected = empty list \\
+        // Now we begin the first count. \\
+        \For{each ballot b in ballots}{
+            let $i$ = first preference of b\\
+            $vc_i$ = $vc_i$ + 1\\
+        }
+        \While{length of elected < seats}{
+            \While{There are candidates where $vc_i$ > $dq$}{
+                let $i$ = candidate with maximum $vc_i$ value\\
+                \If{$vc_i$ > $dq$}{
+                    add $i$ to elected\\
+                    let $t$ = transfer value for $i$\\
+                    divide the votes for $i$ amongst its second preferences
+                }
+            }
+        }
+    }
+\end{algorithm}
+
+
 \section{A sample STV election}
 \textit{This is an application of a description of the Australian Senate STV Counting Process as described by the Australian Electoral Commision.}
 
@@ -88,9 +145,9 @@ by $\frac{1}{3}$. In other words, our ballots now look like:
         ([C,B], 1/3)
         ([B], 1)
         ([C,B], 1)
-
+        
         elected: [A]
-
+        
         scores: 
         (B, 1)
         (C, 1)
@@ -108,9 +165,9 @@ We then immediately start counting the surplus transfer from our elected candida
         ([B], 1/3)
         ([B], 1)
         ([C,B], 1)
-
+        
         elected: [A]
-
+        
         scores: 
         (B, 4/3)
         (C, 5/3)
@@ -140,3 +197,4 @@ away.''
 
 \chapter{Introducing Palpatine: An STV Vote Counter in Idris.}
 \input{elections/parsing}
+\input{elections/counting}

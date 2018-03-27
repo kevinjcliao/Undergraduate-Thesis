@@ -1,0 +1,161 @@
+\section{Counting}
+
+\textit{This section is currently rough. It is an outline of existing and
+planned work. It is mostly based on an outline of the STV counter provided in}
+\cite{stv_haskell} and code that I've implemented. 
+
+
+We store our vote count as a hashmap with Strings as Keys representing each one
+of our candidates and \texttt{VoteValue} (Doubles) as the values. In other
+words, we define a type: 
+
+\texttt{VoteCount : Type} \\
+\texttt{VoteCount = SortedMap Candidate VoteValue}
+
+After we have a list of ballots, we will want to distribute ballots between each
+candidate. As each candidate is eliminated, we redistribute their ballots. In
+other words, we should probably maintain another data structure, a Map of
+Candidates to a list of ballots that correspond to the votes for that candidate.
+
+The type for this data structure looks like as follows: 
+
+\texttt{BallotDist : Nat -> Type} \\
+\texttt{BallotDist n = SortedMap Candidate (List \$ Ballot n)}
+
+All in all, it suffices to say that at every point in time, we will maintain a
+list of elected candidates, a VoteCount map, a length-indexed vector of the
+number of $n$ candidates left, and the number of $s$ seats to be filled. So, we
+can define a constructor for the overall state of our STV election called the
+\texttt{Election}. \texttt{Election} takes in two type variables, $n$ for the
+candidates left and $s$ for the number of seats still available. The code for
+such a type looks like this: 
+
+\texttt{-- A tuple that stores: Number of candidates, list of ballots, seats available.}
+\texttt{Election : Nat -> Nat -> Type}
+\texttt{Election n s = (Candidates n, BallotDist n, s, VoteCount)}
+
+We start by defining a function to calculate the Droop Quota and the surplus
+transfer. \cite{stv_haskell} separates the vote counting process for the STV
+system into the following formal steps: 
+
+\subsection{Start}
+We start by calculating the Droop Quota with a function \texttt{droopQuota : Nat
+-> Nat -> Nat}. We then instantiate our VoteCount with a function
+\texttt{instantiateVc : Candidates n -> VoteCount}, that simply instantiates a
+VoteCount Map with all votecounts set at zero. As a start, we execute the
+\texttt{count} step defined below for all the ballots. 
+
+\subsection{Count}
+
+\texttt{Count} takes the the \texttt{List \$ Ballot n} and splits them up by
+first preference candidates. We see each ballot's first preferences and divide
+the ballots into different piles, creating a \texttt{BallotDist n}. We then
+build our \texttt{Election n s}, since we now have the candidates, number of
+seats, the list of ballots and the votecount all instantiated.  As a
+precondition, we check to make sure that neither $n$ and $s$ are not zero, and
+that $n$ is greater than $s$, since if there are less candidates than the number
+of seats available, all candidates are by default, elected. 
+
+\begin{figure}[ht!!!!!!!]
+    \caption{Count function}
+    \label{firstcount}
+    \begin{lstlisting}
+        ||| firstCount runs through the ballots for the first time. It then
+        ||| inserts the value into the VoteCount SortedMap. 
+        ||| addVote is sort of an insertion function into the VoteCount sortedMap
+        ||| addVote : Fin n -> Candidates n -> VoteValue -> VoteCount -> VoteCount
+        total
+        firstCount : Candidates n -> List (Ballot n) -> VoteCount -> VoteCount
+        firstCount cands [] vc = vc
+        firstCount cands (bal :: rest) vc = 
+            firstCount cands rest newVc where
+            newVc : VoteCount
+            newVc = case bal of
+                ((cand :: _), val) => addVote cand cands val vc
+                ([], _)            => vc
+    \end{lstlisting}
+\end{figure}
+
+
+\subsection{Elect}
+
+After a \texttt{count} takes place, we now reach the \texttt{Elect} stage. The
+Elect stage iterates through the VoteCount and checks to see which candidates
+have now hit the Droop Quota. Candidates that have hit the quota are outputted
+in a List of Candidates. I'm still uncertain how we would develop a type
+signature for this, as we are unsure how many candidates could be eliminated and
+elected in any given count so we don't know to what extent we will be
+deprecating the natural numbers in the type of \texttt{Election n s}. I do know
+that some \texttt{Election} data type will be outputted and a list of
+candidates. The candidates will be removed from the candidate vector in the
+Election and they will be added to the list of elected candidates. 
+
+\begin{figure}[ht!!!!!!!]
+    \caption{elect candidates}
+    \label{electcands}
+    \begin{lstlisting}
+        total
+        getElectedCands : Candidates n -> VoteCount -> Int -> (p ** Candidates p)
+        getElectedCands cands vc dq = filter isOverQuota cands where
+            isOverQuota : Candidate -> Bool
+            isOverQuota cand = case getVoteVal cand vc of 
+                Just voteVal => voteVal >= cast dq
+                Nothing => False
+    \end{lstlisting}
+\end{figure}
+
+\subsection{Transfer}
+After we declare a winner, we transfer surplus ballots. This involves
+calculating the surplus transfer value and modifying all of the ballots to no
+longer preference the candidates that were just eliminated by mapping to the new
+candidate vector that's inputted. We then move them to the new appropriate
+BallotDist key for their next preference. 
+
+\subsection{Elim}
+\texttt{elim : Election (S n) s -> Election n s}. We eliminate a candidate when
+we've exhausted the possible preferences. We run through the VoteCount,
+determine which candidate has the least amount of votes and we go through our
+BallotDist and redistribute their ballots. We then remove them from the
+length-indexed vector of candidates. 
+
+\subsection{Complete}
+The base case for our algorithm is when there are no seats left to be elected,
+or there are no candidates left to be elected. The \texttt{complete} function
+has the type signature \texttt{Election n s -> List Candidate}. Essentially, we
+pattern match on the number of seats left and the number of available
+candidates. If either are zero, we have hit a base case, and we simply return
+the list of elected candidates. 
+
+By running \texttt{count}, \texttt{elect}, \texttt{transfer} continuously until
+we can no longer do so, and then running \texttt{elim} before iterating through
+\texttt{count}, \texttt{elect}, \texttt{transfer}. I assert that this algorithm
+must terminate. How such a termination will be proven will be discussed in the
+next section.
+
+\subsection{Final Algorithm for STV}
+
+\begin{figure}[ht!!!!!!!]
+    \caption{Final STV type signature. }
+    \label{stv_idris}
+    \begin{lstlisting}
+        total
+        ||| Running an STV election involves taking in the candidates, the seats, the
+        ||| ballots and producing a list of candidates to take that seat. 
+        stv : Candidates n 
+            -> List $ Ballots n 
+            -> (seats : Nat) 
+            -> (Candidates seats, Candidates, n - seats)
+    \end{lstlisting}
+\end{figure}
+
+The final code for STV guarantees means we are guaranteed that upon termination,
+we will elect the correct number of seats to the senate and the sum of the
+eliminated candidates and the elected candidates will equal the number of input
+candidates. 
+
+List of potential improvements(????)
+\begin{enumerate}
+    \item Type level guarantees of correctness from the Droop Quota and Surplus Quota functions?
+    \item Using type level rationals instead?
+    \item Could we enforce that these two lists of candidates are disjoint at the type level?
+\end{enumerate}
