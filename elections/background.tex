@@ -39,6 +39,26 @@ pseudocode is modified from pseudocode provided by Sellstr\"om and T\~onisson
 \cite{stv_pseudocode}. 
 
 \begin{algorithm}
+    \SetKwFunction{transferDown}{transferDown}
+    \SetKwProg{Fn}{Function}{}{}
+    \Fn{\transferDown{candidate}}{
+        votes = $cand_{score}$\\
+        excess = votes - droopQuota\\
+        transferValue = excess/votes\\
+        \For{ballot in ballots}{
+            \If{ballot first preference is for candidate}{
+                $ballot_{value}$ = transferValue
+            }
+            removeCandFromBallot
+        }
+    }
+    \SetKwFunction{transferUp}{transferUp}
+    \SetKwProg{Fn}{Function}{}{}
+    \Fn{\transferUp{candidate}}{
+        \For{ballot in ballots}{
+            remove candidate from ballot
+        }
+    }
     \SetKwFunction{stv}{stv}
     \SetKwProg{Fn}{Function}{}{}
     \Fn{\stv{ballots, seats, candidates}}{
@@ -51,16 +71,20 @@ pseudocode is modified from pseudocode provided by Sellstr\"om and T\~onisson
             let $i$ = first preference of b\\
             $vc_i$ = $vc_i$ + 1\\
         }
-        \While{length of elected < seats}{
-            \While{There are candidates where $vc_i$ > $dq$}{
-                let $i$ = candidate with maximum $vc_i$ value\\
-                \If{$vc_i$ > $dq$}{
-                    add $i$ to elected\\
-                    let $t$ = transfer value for $i$\\
-                    divide the votes for $i$ amongst its second preferences
-                }
+        \While{ len(elected) < seats}{
+            countNextBallots\\
+            leader = getMaxCandScore(vc)\\
+            \eIf{leader has higher score than droop Quota}{
+                elected.append(leader)\\
+                candidates.remove(leader)\\
+                transferDown(leader)\\
+            }{
+                loser = getMinCandScore\\
+                candidates.remove(loser)\\
+                transferUp(loser)
             }
         }
+        \Return{elected}
     }
 \end{algorithm}
 
@@ -92,7 +116,9 @@ to number all candidates.
     \end{lstlisting}
 \end{figure}
 
-The first thing to calculate is the \textit{Droop Quota}. This represents the voting `score' a candidate must have before they are elected. The Droop Quota is calculated in the Australian Senate by a formula shown below. 
+The first thing to calculate is the \textit{Droop Quota}. This represents the
+voting `score' a candidate must have before they are elected. The Droop Quota is
+calculated in the Australian Senate by a formula shown below. 
 
 $$
 S = floor(\frac{b}{n + 1}) + 1
@@ -154,7 +180,10 @@ by $\frac{1}{3}$. In other words, our ballots now look like:
     \end{lstlisting}
 \end{figure}
 
-We then immediately start counting the surplus transfer from our elected candidates. In other words, C gets an increase in score of $\frac{2}{3}$ and $B$ gets an increase in score of $\frac{1}{3}$. The scores of these ballots remain the same. 
+We then immediately start counting the surplus transfer from our elected
+candidates. In other words, C gets an increase in score of $\frac{2}{3}$ and $B$
+gets an increase in score of $\frac{1}{3}$. The scores of these ballots remain
+the same. 
 
 \begin{figure}[ht!!!!!!!!]
     \caption{Ballots with initial score.}

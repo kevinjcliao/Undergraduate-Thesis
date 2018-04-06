@@ -117,6 +117,31 @@ we've exhausted the possible preferences. We run through the VoteCount,
 determine which candidate has the least amount of votes and we go through our
 BallotDist and redistribute their ballots. We then remove them from the
 length-indexed vector of candidates. 
+\begin{figure}[ht!!!!!!!]
+    \caption{Candidate elimination}
+    \label{eliminate_idris}
+    \begin{lstlisting}
+        ||| Maps through the HashMap and chooses the least popular candidate
+        ||| to eliminate. Returns the candidate eliminated, and the new VoteCount. 
+        chooseToEliminate : VoteCount 
+                        -> Candidates (S n) 
+                        -> (Candidate, VoteCount, Candidates n)
+        chooseToEliminate {n} vc cands = (lowestCand, newVc, newCandidates) where
+            getVal : Candidate -> VoteValue
+            getVal cand = case getVoteVal cand vc of
+                Just val => val
+                Nothing  => -1
+            candVoteVals : Vect (S n) VoteValue
+            candVoteVals = map getVal cands
+            lowestCand : Candidate
+            lowestCand = case getLowestIndex cands of
+                (lowestVal, lowestIndex) => getCand lowestIndex cands
+            newVc : VoteCount
+            newVc = deleteCandidate lowestCand vc
+            newCandidates : Candidates n
+            newCandidates = removeCand lowestCandIndex cands
+    \end{lstlisting}
+\end{figure}
 
 \subsection{Complete}
 The base case for our algorithm is when there are no seats left to be elected,
