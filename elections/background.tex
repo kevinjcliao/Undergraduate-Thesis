@@ -160,7 +160,9 @@ where $v$ is the surplus transfer value, $s$ is the surplus ballots and $n$ is
 the total number of ballots that preferenced the candidate first. By applying
 this formula, the Droop Quota is 2, there are 3 votes for $A$ and so there is a
 surplus of 1. $B, C$ each received one vote. This means the surplus is expressed
-by $\frac{1}{3}$. In other words, our ballots now look like: 
+by $\frac{1}{3}$. By removing all instances of A from the ballots, setting
+ballots that preferenced A first to the transfer value, and removing all the
+heads of the ballots.
 
 \begin{figure}[ht!!!!!!!!]
     \caption{Ballots with initial score.}
@@ -169,8 +171,8 @@ by $\frac{1}{3}$. In other words, our ballots now look like:
         ([C], 1/3)
         ([B,C], 1/3)
         ([C,B], 1/3)
+        ([], 1)
         ([B], 1)
-        ([C,B], 1)
         
         elected: [A]
         
@@ -180,38 +182,30 @@ by $\frac{1}{3}$. In other words, our ballots now look like:
     \end{lstlisting}
 \end{figure}
 
-We then immediately start counting the surplus transfer from our elected
-candidates. In other words, C gets an increase in score of $\frac{2}{3}$ and $B$
-gets an increase in score of $\frac{1}{3}$. The scores of these ballots remain
-the same. 
+Now, we count again the first preferences of each ballot. This results in the
+following ballots: 
 
 \begin{figure}[ht!!!!!!!!]
-    \caption{Ballots with initial score.}
-    \label{sample_election3}
+    \caption{Ballots after second count}
+    \label{sample_election2}
     \begin{lstlisting}
         ([], 1/3)
         ([C], 1/3)
         ([B], 1/3)
-        ([B], 1)
-        ([C,B], 1)
+        ([], 1)
+        ([], 1)
         
         elected: [A]
         
         scores: 
-        (B, 4/3)
+        (B, 7/3)
         (C, 5/3)
     \end{lstlisting}
 \end{figure}
 
-Now, given we have exhausted the surplus of elected candidates and there is
-still one vacancy available, we remove the candidate with the lowest score,
-which is $B$. We look at the votes that went to candidate $B$. There is one
-exhausted ballot $[]$, and another ballot: $[C]$ with transfer value $1/3$. We
-transfer this ballot over to $C$. We now have one candidate left in the running
-and one seat open. This means that $C$ is elected by virtue of being the only
-candidate left. 
-
-The result of our election is thus, $[A,C]$ being elected to the senate.  
+Now, we see that B has passed the droop quota and is elected. With no seats
+left, C is eliminated. \footnote{This is different from the result in Ghale et.
+al. because they use a different droop quota formula.}
 
 \section{Why STV?}
 \textit{Coming in final draft of the thesis.} \\

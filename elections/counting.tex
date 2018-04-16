@@ -1,182 +1,203 @@
 \section{Counting}
 
-\textit{This section is currently rough. It is an outline of existing and
-planned work. It is mostly based on an outline of the STV counter provided in}
-\cite{stv_haskell} and code that I've implemented. 
+\subsection{Functional Paradigm Pseudocode for the STV Algorithm}
 
+The pseudocode given in the previous section describes, in an imperative sense,
+what implementing the single transferrable vote would be like. For the purposes
+of implementing STV in a dependently typed functional programming language, it
+is necessary for us to translate such an algorithm into the functional style,
+substituting the imperative loops for recursion and avoiding mutability. The
+rough pseudocode for this is given below. 
 
-We store our vote count as a hashmap with Strings as Keys representing each one
-of our candidates and \texttt{VoteValue} (Doubles) as the values. In other
-words, we define a type: 
+\begin{algorithm}
+    \SetKwFunction{stv}{stv}
+    \SetKwProg{Fn}{Function}{}{}
+    \Fn{\stv{ballots, seats, candidates, judged}}{
+        \eIf{candidates is not empty}{
+            \eIf{highestCandidate >= droopQuota}{
+                let next := elect(highestCandidate)\\
+                ballots = transferDown(ballots, highestCandidate)
+            }{
+                let next := elim(lowestCandidate)
+                ballots = transferUp(ballots, lowestCandidate)
+            }
+            judged.append(next)\\
+            candidates.remove(next)\\
+            stv(ballots, seats, candidates, judged)
+        }{
+            judged
+        }
+    }
+\end{algorithm}
 
-\texttt{VoteCount : Type} \\
-\texttt{VoteCount = SortedMap Candidate VoteValue}
+To implement STV, we choose to iterate through a list of candidates, and make
+judgments on each candidate. In other words, rather than build up a list of
+candidates, we simply iterate through our candidates, assigning them a judgment
+of either elected or unelected. Our overall code (ignore the types for the time
+being), ends up looking like in Figure~\ref{overall_code}. Just simply think of
+\texttt{Election} as a GADT where its first natural number paramater refers to
+the number of remaining candidates left and the second natural number refers to
+the number of candidates that have been judged. 
 
-After we have a list of ballots, we will want to distribute ballots between each
-candidate. As each candidate is eliminated, we redistribute their ballots. In
-other words, we should probably maintain another data structure, a Map of
-Candidates to a list of ballots that correspond to the votes for that candidate.
-
-The type for this data structure looks like as follows: 
-
-\texttt{BallotDist : Nat -> Type} \\
-\texttt{BallotDist n = SortedMap Candidate (List \$ Ballot n)}
-
-All in all, it suffices to say that at every point in time, we will maintain a
-list of elected candidates, a VoteCount map, a length-indexed vector of the
-number of $n$ candidates left, and the number of $s$ seats to be filled. So, we
-can define a constructor for the overall state of our STV election called the
-\texttt{Election}. \texttt{Election} takes in two type variables, $n$ for the
-candidates left and $s$ for the number of seats still available. The code for
-such a type looks like this: 
-
-\texttt{-- A tuple that stores: Number of candidates, list of ballots, seats available.}
-\texttt{Election : Nat -> Nat -> Type}
-\texttt{Election n s = (Candidates n, BallotDist n, s, VoteCount)}
-
-We start by defining a function to calculate the Droop Quota and the surplus
-transfer. \cite{stv_haskell} separates the vote counting process for the STV
-system into the following formal steps: 
-
-\subsection{Start}
-We start by calculating the Droop Quota with a function \texttt{droopQuota : Nat
--> Nat -> Nat}. We then instantiate our VoteCount with a function
-\texttt{instantiateVc : Candidates n -> VoteCount}, that simply instantiates a
-VoteCount Map with all votecounts set at zero. As a start, we execute the
-\texttt{count} step defined below for all the ballots. 
-
-\subsection{Count}
-
-\texttt{Count} takes the the \texttt{List \$ Ballot n} and splits them up by
-first preference candidates. We see each ballot's first preferences and divide
-the ballots into different piles, creating a \texttt{BallotDist n}. We then
-build our \texttt{Election n s}, since we now have the candidates, number of
-seats, the list of ballots and the votecount all instantiated.  As a
-precondition, we check to make sure that neither $n$ and $s$ are not zero, and
-that $n$ is greater than $s$, since if there are less candidates than the number
-of seats available, all candidates are by default, elected. 
-
-\begin{figure}[ht!!!!!!!]
-    \caption{Count function}
-    \label{firstcount}
-    \begin{lstlisting}
-        ||| firstCount runs through the ballots for the first time. It then
-        ||| inserts the value into the VoteCount SortedMap. 
-        ||| addVote is sort of an insertion function into the VoteCount sortedMap
-        ||| addVote : Fin n -> Candidates n -> VoteValue -> VoteCount -> VoteCount
-        total
-        firstCount : Candidates n -> List (Ballot n) -> VoteCount -> VoteCount
-        firstCount cands [] vc = vc
-        firstCount cands (bal :: rest) vc = 
-            firstCount cands rest newVc where
-            newVc : VoteCount
-            newVc = case bal of
-                ((cand :: _), val) => addVote cand cands val vc
-                ([], _)            => vc
-    \end{lstlisting}
-\end{figure}
-
-
-\subsection{Elect}
-
-After a \texttt{count} takes place, we now reach the \texttt{Elect} stage. The
-Elect stage iterates through the VoteCount and checks to see which candidates
-have now hit the Droop Quota. Candidates that have hit the quota are outputted
-in a List of Candidates. I'm still uncertain how we would develop a type
-signature for this, as we are unsure how many candidates could be eliminated and
-elected in any given count so we don't know to what extent we will be
-deprecating the natural numbers in the type of \texttt{Election n s}. I do know
-that some \texttt{Election} data type will be outputted and a list of
-candidates. The candidates will be removed from the candidate vector in the
-Election and they will be added to the list of elected candidates. 
-
-\begin{figure}[ht!!!!!!!]
-    \caption{elect candidates}
-    \label{electcands}
-    \begin{lstlisting}
-        total
-        getElectedCands : Candidates n -> VoteCount -> Int -> (p ** Candidates p)
-        getElectedCands cands vc dq = filter isOverQuota cands where
-            isOverQuota : Candidate -> Bool
-            isOverQuota cand = case getVoteVal cand vc of 
-                Just voteVal => voteVal >= cast dq
-                Nothing => False
-    \end{lstlisting}
-\end{figure}
-
-\subsection{Transfer}
-After we declare a winner, we transfer surplus ballots. This involves
-calculating the surplus transfer value and modifying all of the ballots to no
-longer preference the candidates that were just eliminated by mapping to the new
-candidate vector that's inputted. We then move them to the new appropriate
-BallotDist key for their next preference. 
-
-\subsection{Elim}
-\texttt{elim : Election (S n) s -> Election n s}. We eliminate a candidate when
-we've exhausted the possible preferences. We run through the VoteCount,
-determine which candidate has the least amount of votes and we go through our
-BallotDist and redistribute their ballots. We then remove them from the
-length-indexed vector of candidates. 
-\begin{figure}[ht!!!!!!!]
-    \caption{Candidate elimination}
-    \label{eliminate_idris}
-    \begin{lstlisting}
-        ||| Maps through the HashMap and chooses the least popular candidate
-        ||| to eliminate. Returns the candidate eliminated, and the new VoteCount. 
-        chooseToEliminate : VoteCount 
-                        -> Candidates (S n) 
-                        -> (Candidate, VoteCount, Candidates n)
-        chooseToEliminate {n} vc cands = (lowestCand, newVc, newCandidates) where
-            getVal : Candidate -> VoteValue
-            getVal cand = case getVoteVal cand vc of
-                Just val => val
-                Nothing  => -1
-            candVoteVals : Vect (S n) VoteValue
-            candVoteVals = map getVal cands
-            lowestCand : Candidate
-            lowestCand = case getLowestIndex cands of
-                (lowestVal, lowestIndex) => getCand lowestIndex cands
-            newVc : VoteCount
-            newVc = deleteCandidate lowestCand vc
-            newCandidates : Candidates n
-            newCandidates = removeCand lowestCandIndex cands
-    \end{lstlisting}
-\end{figure}
-
-\subsection{Complete}
-The base case for our algorithm is when there are no seats left to be elected,
-or there are no candidates left to be elected. The \texttt{complete} function
-has the type signature \texttt{Election n s -> List Candidate}. Essentially, we
-pattern match on the number of seats left and the number of available
-candidates. If either are zero, we have hit a base case, and we simply return
-the list of elected candidates. 
-
-By running \texttt{count}, \texttt{elect}, \texttt{transfer} continuously until
-we can no longer do so, and then running \texttt{elim} before iterating through
-\texttt{count}, \texttt{elect}, \texttt{transfer}. I assert that this algorithm
-must terminate. How such a termination will be proven will be discussed in the
-next section.
-
-\subsection{Final Algorithm for STV}
-
-\begin{figure}[ht!!!!!!!]
-    \caption{Final STV type signature. }
-    \label{stv_idris}
-    \begin{lstlisting}
-        total
-        ||| Running an STV election involves taking in the candidates, the seats, the
-        ||| ballots and producing a list of candidates to take that seat. 
-        stv : Candidates n 
-            -> List $ Ballots n 
-            -> (seats : Nat) 
-            -> (Candidates seats, Candidates, n - seats)
-    \end{lstlisting}
-\end{figure}
-
-The final code for STV guarantees means we are guaranteed that upon termination,
-we will elect the correct number of seats to the senate and the sum of the
-eliminated candidates and the elected candidates will equal the number of input
+In essence, our \texttt{stv} function repeatedly iterates over our
+\texttt{Election} GADT, calling \texttt{processOne} repeatedly.
+\texttt{processOne} checks to see if the highest scoring candidate is above the
+droopQuota. If the candidate is above the droopQuota, we elect the candidate. If
+not, we eliminate a candidate. If there are no seats left, as shown in the
+second parameter of the first pattern match, we run \texttt{notElectedHead},
+which just eliminates one candidate. If there are no seats left,
+\texttt{notElectedHead} is called repeatedly until we eliminate all the
 candidates. 
+
+\begin{figure}[ht!!!!!!!!]
+    \caption{Ballots with initial score.}
+    \label{overall_code}
+    \begin{lstlisting}
+        total
+        processOne : Election (S r) j -> Election r (S j)
+        processOne election@(_, Z, _, _, _)          = notElectedHead election
+        processOne election@(dq, (S n), _, _, _) = case count election of
+            counted@(_, _, _, cands, _) => if weCanElect dq cands
+                then electOne counted
+                else elimOne counted
+
+        ||| Running an STV election involves taking in the candidates, the seats, the
+        ||| ballots and producing a list of candidates to take the seats. 
+        ||| Returns a tuple of elected candidates and unelected candidates.
+        total
+        stv : Election r j -> Election Z (r + j)
+        stv         e@(_, _, _, Nil, _)      = e
+        stv {r=(S n)} {j} e@(_, _, _, (_ :: _), _) = 
+            rewrite plusSuccRightSucc n j in stv $ processOne e
+    \end{lstlisting}
+\end{figure}
+
+\subsection{The Election Data Type}
+
+We essentially need to store several pieces of information. This section
+describes the data structures we will be using in our STV vote counter. 
+
+\begin{enumerate}
+    \item We need to store the candidates remaining and also the score of each
+    candidate. 
+    \item We need to store a series of ballots. As we revalue ballots, we need
+    to revalue the ballots based on what each one of the ballots has voted for
+    when a given candidate is elected. In other words, each ballot contains
+    unexhausted preferences for candidates, candidates that the ballot has voted
+    for, and the value of the ballot. 
+    \item We need to store the judgments. In other words, we need to store a
+    growing list of each candidate that contains the judgment that the candidate
+    was either elected or not elected. 
+    \item We need to store the seats remaining.
+\end{enumerate}
+
+\subsubsection{Candidates Data Type}
+
+We choose to represent each candidate as a record type\footnote{Record Types are
+present in Haskell so discussing them is assumed as background knowledge. As
+always, Real World Haskell serves as a good primer for Record Types. }. Our
+declaration for a record type contains its \texttt{CandidateName}, a type alias
+for \texttt{String}, and its \texttt{VoteValue}, a type alias for
+\texttt{Double}. The candidates who have not been judged yet are represented by
+\texttt{Candidates}, a length-indexed vector with elements of the type
+\texttt{Candidate}. In addition, we provide several accessors for our
+\texttt{Candidates} type that will become useful later. While we have generic
+getters and setters as well as incrementors and decrementors for the VoteValue
+of a candidate, we also have a function \texttt{getHighestIndex} that takes in
+an element of type \texttt{Candidates (S n)} and returns the index of the
+candidate with the highest score. This index is represented by a number of type
+\texttt{Fin (S n)}. \texttt{Fin (S n)} is a type that represents the set of
+numbers between zero and the natural number \texttt{S n}. In other words, this
+type signature guarantees to us that the index we return will be within bounds
+of our length-indexed vector. We'll be using a lot more of \texttt{Fin}s
+elsewhere in \textit{Palpatine}. 
+
+As an aside here, unlike Haskell, Idris does not support the automatic
+\textit{deriving} keyword which allows a programmer to easily extend a type to
+support type classes. I had to define the implementations for \texttt{Eq, Ord,
+Show} for \texttt{Candidate} and all subsequent custom data types by hand. All
+the code relevant to candidates is shown in Figure~\ref{candidates_code}
+
+\begin{figure}[ht!!!!!!!!!!!!!!]
+    \caption{Candidates data type with relevant accessors and setters}
+    \label{candidates_code}
+    \begin{lstlisting}
+        CandidateName : Type
+        CandidateName = String
+
+        VoteValue : Type
+        VoteValue = Double
+
+        record Candidate where
+            constructor MkCandidate
+            candName : CandidateName
+            candValue : VoteValue
+        
+        Candidates : Nat -> Type
+        Candidates n = Vect n Candidate
+
+        ||| Returns the index and score of the candidate with the highest score. 
+        getHighestIndex : Candidates (S n) -> (Fin (S n), VoteValue)
+
+        ||| Returns the index and score of the candidate with the lowest score. 
+        getLowestIndex : Candidates (S n) -> (Fin (S n), VoteValue)
+
+        ||| Adds a votevalue to the score of a candidate. 
+        addVoteVal : Fin n -> Candidates n -> VoteValue -> Candidates n
+        
+        ||| Decrements a votevalue from the score of a candidate. 
+        decVoteVal : Fin n -> Candidates n -> VoteValue -> Candidates n
+
+        ||| Removes a candidate from the vector of candidates. 
+        removeCand : Fin (S n) -> Candidates (S n) -> Candidates n
+
+        ||| Makes a new candidate with score 0. 
+        makeNewCandidate : CandidateName -> Candidate
+    \end{lstlisting}
+\end{figure}
+
+\subsubsection{Judgments Data Type}
+
+Like \texttt{Candidate}, we also choose to represent each judgment as a record
+type. A judgment consists of a candidate name and whether or not that candidate
+was elected. To represent that, we must declare a new Abstract Data Type called
+\texttt{Judgment}. \texttt{Judgment} simply contains two values and is in a way
+analogous to \texttt{Bool}. It simply tells us if a \texttt{candidate} is
+\texttt{Elected} or \texttt{NotElected}. We then have a \texttt{Results} data
+type that is a length-indexed vector containing elements of type
+\texttt{Judgment}. Like \texttt{Candidate} and \texttt{Candidates}, I also had
+to write implementations for the various type classes. It was especially
+frustrating for \texttt{Judgment}, which I felt was a very generic ADT that
+Haskell's \texttt{deriving} keyword would've handled just fine. The code is
+given in Figure~\ref{judgments_code}
+
+The \texttt{Judged} data type is a record type that contains an element of type
+\texttt{CandidateName} (recall this is a type alias for a string) and an element
+of type \texttt{Judgment}. \texttt{Results} of our STV counter are stored in a
+length-indexed vector containing elements of type \texttt{Judged}.
+
+\begin{figure}[ht!!!!!!!!!!!!!!]
+    \caption{Results data type with relevant accessors and setters}
+    \label{judgments_code}
+    \begin{lstlisting}
+        data Judgment = Elected | NotElected
+        
+        implementation Eq Judgment where
+            (==) Elected Elected = True
+            (==) NotElected NotElected = True
+            (==) _ _ = False
+
+        implementation Show Judgment where
+            show Elected = "Elected"
+            show NotElected = "NotElected"
+
+        record Judged where
+            constructor MkJudgment
+            candName : CandidateName
+            judgment : Judgment
+    \end{lstlisting}
+\end{figure}
+
 
 List of potential improvements(????)
 \begin{enumerate}
