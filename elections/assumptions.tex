@@ -1,7 +1,7 @@
 \section{Simplifying Assumptions}
 
 There are a lot of simplifying assumptions in this text. We operate under the
-assumption that a list of ballots that accurately describe the honest
+assumption that a list of ballots that accurately describe the accurate
 preferences of the voters can be found. This in-and-of-itself means a lot of
 simplifying assumptions which represent ongoing problems in online voting. If
 paper ballots are employed, one must be certain that the paper ballots are read
@@ -13,24 +13,8 @@ and they fall outside of the scope of this thesis. Work, for example, exists on
 using formal methods to produce hardware-verifiable tamper-proof ballots with
 PROM \cite{prom1}, \cite{prom2}. 
 
-The question of whether ballots are \textit{honest} is a class of interesting
-problems. In a traditional first-past-the-post, single-choiced ballot voting
-system, one might decide to vote for a majority-party candidate with a larger
-chance of winning instead of a candidate with a lower chance of winning. Third
-party candidates become `vote spoilers' and voters are forced to engage in
-`strategic voting'. They must choose a candidate that not necessarily best
-reflects their political beliefs, but reflects the pragmatic reality of the
-electoral system that they are presented with. Now, having introduced the
-ability to rank, the question of whether a ballot \textit{honesty} takes on a
-deeper meaning. Could someone maliciously preference the ballot in such a way
-that the voting algorithm would favor a dishonest candidate preference? (e.g. to
-elect candidate A, it is better to preference B, A, C instead of A, B, C). It
-turns out that calculating dishonest preferences to game an STV election is an
-NP-Complete problem \cite{strategic}. Calculating the margin of votes require to
-game an STV election is also NP-Complete \cite{margin_of_victory}. 
-
 I proceed with these assumptions in mind, that someone running a piece of ballot
-counting software possesses a list of honest preferences that are protected from
+counting software possesses a list of accurate preferences that are protected from
 tampering end-to-end. I acknowledge that there are significant challenges to
 guarantee each one of these simplifications, but they are outside the scope of
 my thesis. 

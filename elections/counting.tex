@@ -181,23 +181,32 @@ length-indexed vector containing elements of type \texttt{Judged}.
     \label{judgments_code}
     \begin{lstlisting}
         data Judgment = Elected | NotElected
+
+        Results : Nat -> Type
+        Results n = Vect n Judged
         
-        implementation Eq Judgment where
-            (==) Elected Elected = True
-            (==) NotElected NotElected = True
-            (==) _ _ = False
+        emptyResults : Results Z
+        emptyResults = Nil
 
-        implementation Show Judgment where
-            show Elected = "Elected"
-            show NotElected = "NotElected"
+        elect : Candidate -> Judged
+        elect cand = MkJudgment (candName cand) Elected
 
-        record Judged where
-            constructor MkJudgment
-            candName : CandidateName
-            judgment : Judgment
+        dontElect : Candidate -> Judged
+        dontElect cand = MkJudgment (candName cand) NotElected
     \end{lstlisting}
 \end{figure}
 
+\subsubsection{Storing Ballots}
+
+A ballot contains, as described above, three things. A list of unexhausted
+preferences, representing candidates the ballot has yet to vote for, a value,
+denoting the current score of the ballot, and a list of candidates that the
+ballot has already voted for. This can be represented as a record type. The
+record type is broken because the 
+
+\subsubsection{The Election GADT}
+
+Now we can group together the final 
 
 List of potential improvements(????)
 \begin{enumerate}

@@ -1,34 +1,8 @@
 
 \chapter{Conclusion}
 
-\section{Proposal for Future Work}
+\section{Conclusions on the Literature Review of Dependent Types}
 
-While I'm still uncertain about the direction to proceed, I'm interested in
-looking at elections and e-voting and whether or not we can provide guarantees
-of correctness to vote counting software written in dependently typed languages.
-I take a particular interest in the Australian Senate voting verification
-process because vote count is an NP-complete problem \cite{aus_senate}. 
-
-Currently, the Australian government uses proprietary code to count Australian
-senate ballots and has refused to release the source code after a Freedom of
-Information Act request \cite{aus_senate_news}. If an open-sourced, verifiably
-correct counting program were devised, we could greatly protect the integrity of
-Australian elections. I think dependent types would lend themselves well to an
-application in this context. First of all, one would have to parse large amounts
-of data, which we know from one of our examples, can be done with an embedded
-data description language. We will also have to count votes and redistribute
-voting preferences from candidate to candidate. Such operations could be
-complex, and enforcing tight constraints at the type level could mean that a
-good-faith programmer or someone browsing the open-source code can know at a
-quick glance that the operations are implemented correctly. 
-
-All in all, counting votes in the Australian senate is a complicated operation
-with a lot of moving parts, and I believe that the examples that we've looked at
-over the course of this literature review have shown to me that there is a
-certain degree of promise in implementing a dependently-typed Australian senate
-vote counter. 
-
-\section{Conclusion}
 While many literature reviews begin by looking examining a problem and looking
 for existing solutions, this literature review takes an opposite approach. The
 broader problem we are trying to answer is one that crosses various domains and
@@ -86,3 +60,27 @@ dependent types. In other words, as work continues on mainstreaming dependent
 types, programmers and academics with a deep understanding of dependent types
 who wish to see its proliferation should work on providing well-written
 libraries that encourage practical programmers to give dependent types a shot.
+
+\section{Conclusions from Writing Palpatine}
+
+\subsection{STV is an Algorithm in Need of a Declaration Specification}
+\subsection{Totality Checkers Are Good.}
+
+Guarantees of termination are good for the user. STV vote counting can take a
+while. When running the code from Ghale, Gore and Pattinson, counting STV
+ballots for an election of the Australian Capital Territory took 3 days
+\cite{stv_haskell}. The point is, counting STV elections can be difficult. More
+than once, I wondered if the program was not going to terminate. Idris provides
+a built-in totality checker, which as specified above, means that there are
+compile-time guarantees of termination. This means proofs of termination are not
+required. 
+
+% TODO: Papers on totality checker in Haskell? 
+
+While significant, non-trivial barriers exist to implementing a totality checker
+in Haskell, the experience I had with implementing an STV counter in Idris leads
+me to believe that Haskell would benefit significantly from such a totality
+checker. As such, I encourage and add my voice to encourage the people who are
+working towards this noble goal. 
+
+\subsection{Better Programming Languages Enable Safer Code.}
