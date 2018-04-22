@@ -548,3 +548,80 @@ all the ballots, changing their value if they voted for the candidate. Finally,
 we reindex the ballots according to the newly created, one size smaller
 length-indexed vector of remaining candidates. We then rebuild our election, now
 of type \texttt{Election r (S j)}
+
+\subsubsection{Why call rewrite?}
+
+
+\begin{figure}[ht!!!!!!!!]
+	\caption{STV code without rewrite}
+	\label{no_rewrite_code}
+    \begin{lstlisting}
+        total
+        stv : Election r j -> Election Z (r + j)
+        stv         e@(_, _, _, Nil, _) = e
+        stv e@(_, _, _, (_ :: _), _)    = stv $ processOne e
+    \end{lstlisting}
+\end{figure}
+
+\begin{figure}[ht!!!!!!!!]
+	\caption{Error message produced by Idris compiler.}
+	\label{idris_error_code}
+    \begin{lstlisting}
+        When checking right hand side of stv with expected type
+                Election 0 (S len + j)
+
+        Type mismatch between
+                Election 0 (len + S j) (Type of stv (processOne e))
+        and
+                (Int,
+                 Nat,
+                 List (Ballot 0),
+                 Vect 0 Candidate,
+                 Vect (S (plus len j)) Judged) (Expected type)
+
+        Specifically:
+                Type mismatch between
+                        plus len (S j)
+                and
+                        S (plus len j)
+    \end{lstlisting}
+\end{figure}
+
+The last item to explain in the code of our STV function is why we call
+\texttt{rewrite}. If we didn't call it, the code for \texttt{stv} would look
+like the code given in Figure~\ref{no_rewrite_code}. The Idris compiler produces
+an error, telling us that it is unable to compile. This error message is
+reproduced in Figure~\ref{idris_error_code}.
+
+What does this error message mean? It means that this function has an output of
+\texttt{Election 0 (S len + j)}. However, the function makes a recursive call to
+\texttt{processOne}, which produces an Election of type \texttt{Election len (S
+j)}. The Idris compiler is unable to deduce that \texttt{(S len + j)} is the
+same as \texttt{len + (S j)}. Luckily, there is a function in the Idris Prelude
+that operates on Natural Numbers that proves this equality for us. It is called
+\texttt{plusSuccRightSucc}. What we need to do is use this proof to rewrite some
+of our type variables. \texttt{plusSuccRightSucc} has type signature:
+\texttt{total plusSuccRightSucc : (left : Nat) -> (right : Nat) -> S (left +
+right) = left + (S right)}. 
+
+\begin{figure}[ht!!!!!!!!]
+	\caption{STV code with the rewrite.}
+	\label{with_rewrite_code}
+	\begin{lstlisting}
+        total
+        stv : Election r j -> Election Z (r + j)
+        stv         e@(_, _, _, Nil, _)      = e
+        stv {r=(S n)} {j} e@(_, _, _, (_ :: _), _) = 
+            rewrite plusSuccRightSucc n j in stv $ processOne e
+    \end{lstlisting}
+\end{figure}
+
+Thus, to call this function to demonstrate the necessary equality, we need to
+call \texttt{plusSuccRightSucc} with \texttt{len} and $j$, where \texttt{len}
+refers to the natural number preceeding $r$ and $j$ refers to the number of
+judgments in the input \texttt{Election}. Thus, we call \texttt{rewrite} to
+allow the Idris compiler to recognize this equality and our code ends up looking
+like in Figure~\ref{with_rewrite_code}. 
+
+Thus, in this section, we have introduced all the code that Palpatine uses to
+count STV ballots. 
