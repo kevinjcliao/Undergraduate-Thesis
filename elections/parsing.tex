@@ -1,26 +1,21 @@
 \section{Parsing}
 
-At its core, the goal of \textit{Palpatine} is to take in a list of ballots.
-Each ballot denotes the voter's list of preferences. We also should know a list
-of all candidates because that cannot be derived from the list of preferences.
-There is a scenario where a candidate gets not a single preference from not a
-single voter. To express this, I have a file format, that is a modified version
-of the one defined in \cite{stv_haskell}. Currently, their work requires that
-candidates be declared in a Haskell GADT. One can imagine that the PBM Data
-Description Language described in chapter 2.2 of the literature review could
-parse and build such a data type, however I find that we can simply include the
-total list of candidates at the top of the file. 
-
-The file format consists of a list of the candidates (in parentheses to denote
-that it is ont a ballot). A ballot is a list of preferences with the leftmost
-preference representing the most desired candidate. Our ballots from our earlier
-example in this data format is shown in Figure~\ref{stv_format}
+Having now discussed how Palpatine calculates the results of an STV election, we
+now move to parsing data files to build the values required as parameters for an
+STV election. Our file format is a variant of the one defined in
+\cite{stv_haskell}. The file format consists of a list of the candidates on the
+first line, followed by a colon and a number denoting the number of seats to
+elect. A ballot is a list of preferences with the leftmost preference
+representing the most desired candidate. The remainder of our file after our
+first line consists of a list of ballot preferences with each line denoting a
+separate ballot. Our ballots from our earlier example in this data format is
+shown in Figure~\ref{stv_format}
 
 \begin{figure}[ht!!!!!!!]
     \caption{Data format}
     \label{stv_format}
     \begin{lstlisting}
-        (A,B,C):2
+        [A,B,C]:2
         [A,C]
         [A,B,C]
         [A,C,B]
@@ -29,49 +24,149 @@ example in this data format is shown in Figure~\ref{stv_format}
     \end{lstlisting}
 \end{figure}
 
-We will be storing our total list of candidates in a length-indexed vector,
-where candidate corresponds to the string name. We want to parse our ballots
-such that as we elect a candidate, we remove preferences for that candidate from
-all of our ballots. The best way to do that is to have ballots be a list of
-\textit{Finite Numbers}, \texttt{Fin}. The type \texttt{Fin n} refers to a
-natural number that is in the set of all natural numbers between \texttt{Zero}
-and $n$. Each preference of type \texttt{Fin n} in our ballot corresponds to an
-index in our \texttt{candidates} vector. As we elect a candidate and remove them
-from our \texttt{candidates} vector, we reindex all of the ballots, changing the
-\texttt{Fin}s to reflect the new indices of our now smaller vector of
-candidates. How this high-level description looks like in terms of data types is
-shown in Figure~\ref{stv_data_types}.
+In order to read this file format, we must first read the first line, building
+the total length-indexed vector of the number of candidates remaining and the
+number of seats remaining. We then read each ballot, building a list of ballots
+and indexing each according to the length-indexed vector of candidates
+remaining. We'll go through the code for doing each of these actions. 
 
-\begin{figure}[ht!!!!!!]
-    \caption{Data types for \textit{Palpatine}}
-    \label{stv_data_types}
+\subsection{Reading Line 1}
+
+\begin{figure}[ht!!!!!!!]
+    \caption{Data format}
+    \label{read_first_line_code}
     \begin{lstlisting}
-        Candidate : Type
-        Candidate = String
+        ExVect : Type -> Type
+        ExVect t = (n ** Vect n t)
 
-        Candidates : Nat -> Type
-        Candidates n = Vect n Candidate
-        
-        VoteValue : Type
-        VoteValue = Double
-
-        -- New ballot type has a list of fins and
-        -- a double as a pair. 
         total
-        Ballot : Nat -> Type
-        Ballot n = (List (Fin n), VoteValue)
+        readFirstLine : String -> Maybe (ExVect Candidate, Nat)
+        readFirstLine input = do
+            let lines = splitToLines input
+            firstLine <- head' lines
+            let splitted =split (== ':') firstLine
+            strCand <- head' splitted
+            strNum <- last' splitted
+            listCand <- parseList strCand
+            let cands = map (\x => MkCandidate x 0) listCand
+            seats <- parsePositive strNum
+            pure $ ((toVec cands), cast seats)
     \end{lstlisting}
 \end{figure}
 
-We can parse a vector by using a dependent pair. We will not be able to derive
-the type of the vector from elsewhere in our program given that it is data that
-is derived through I/O. Thus, if we had our input file as a string, a
-\texttt{getCandidates} function would have the following type signature:
-\texttt{getCandidates : String -> (n ** Candidates n)}, where $n$ refers to the
-number of candidates. We can then take the \texttt{Candidates n} produced and
-parse for the ballots. The overall function \texttt{parseBallots} has the type
-signature: \texttt{parseBallots : String -> Candidates n -> List \$ Ballot n}.
+The code for \texttt{readFirstLine} is given in
+Figure~\ref{read_first_line_code}. The \texttt{readFirstLine} function takes in
+a string which contains the contents of our data file and it outputs two items
+contained by the first line. The first is an \texttt{ExVect} containing all the
+candidates possible, and the second is a natural number that denotes the number
+of seats available to elect. Most of the code above is self-explanatory. We
+start by taking the first line of our file. We split according to the colon. The
+first element is then run through a function parseList, which takes items in the
+format ``[a,b,c]'' and returns a list containing the strings $a, b,c$. In other
+words, we produce a list containing the names of the candidates as strings. We
+then map over this list with our  \texttt{MkCandidate} function, producing a
+candidate with a score of 0. The second element is the number of seats
+available, and the function \texttt{parsePositive} takes a string. 
 
-Thus, we generate a \texttt{List \$ Ballot n} containing the ballots which
-reflect user preferences and a \texttt{Candidates n} which is a length-indexed
-vector of candidates. 
+Something important to note here is the \texttt{ExVect} data type. We discussed
+the concept of \textit{Dependent Pairs} earlier on in the literature review
+section of this thesis. The \texttt{ExVect} is a dependent pair between a
+natural number on the left and a length-indexed vector on the right. That is,
+the vector on the right must have the length $n$, the same length as the value
+of the natural number on the left. If we don't know the length of a vector in
+advance, the Existential Vector, or \texttt{ExVect} is a way to create a vector
+wrapped inside of a dependent pair. We can pattern match on the an ExVect to
+remove the length-indexed vector wrapped inside of it later. Otherwise, since
+the length of the \texttt{ExVect} depends purely on another natural number to
+its left, \texttt{ExVect}s often function analogously to lists. 
+
+All of these operations take place in the syntactic sugar of \textit{do}
+notation afforded to us by the \texttt{Maybe} Monad. That is, if a single one of
+these operations fails, our whole function will return \texttt{Nothing}. 
+
+\subsection{Reading Ballots}
+
+\begin{figure}[ht!!!!!!!]
+    \caption{Data format}
+    \label{parse_ballots_code}
+    \begin{lstlisting}
+        total
+        parseBallot : Candidates x -> List CandidateName -> Ballot x
+        parseBallot {x} cands strs = MkBallot [] prefs 1 where
+            getCandAsFin : CandidateName -> Maybe $ Fin x
+            getCandAsFin cand = findIndex (\x => candName x == cand) cands
+            prefs : List $ Fin x
+            prefs = mapMaybe getCandAsFin strs
+
+        total
+        readBallots : String -> Candidates y -> Ballots y
+        readBallots input cands = map (parseBallot cands) listOfPrefs where
+            lines : List String
+            lines = drop 1 $ splitToLines input
+            listOfPrefs : List $ List String
+            listOfPrefs = mapMaybe parseList lines
+    \end{lstlisting}
+\end{figure}
+
+The code for \texttt{readBallots} is given above in
+Figure~\ref{parse_ballots_code}. \texttt{readBallots} takes in a string
+containing the contents of the file, the length-indexed vector containing our
+candidates, and it produces a list of ballots. To do this, we drop the first
+line which we have read already, and we map our \texttt{parseList} function,
+described in our previous section on parsing line 1, on each line. This creates
+a list of lists of strings. Each list of strings corresponds to the preferences
+of a ballot. Finally we map our function \texttt{parseBallot} over each list of
+strings, which takes each string preference and tries to find the equivalent
+index of the candidate in the length-indexed vector of candidates to elect.
+Finally, it calls the constructor for the \texttt{Ballot} record type, assigning
+each ballot it creates a \texttt{VoteValue} of 1. 
+
+\section{Running Palpatine}
+
+\begin{figure}[ht!!!!!!!]
+    \caption{Data format}
+    \label{main_code}
+    \begin{lstlisting}
+        total
+        runElection : String -> IO ()
+        runElection fileName = do
+            Right str <- readFile fileName
+            | Left err => putStrLn "ERROR: ReadFile Failed."
+            case readFirstLine str of
+                Just ((p ** cands), seats) => do 
+                    let ballots = readBallots str cands
+                    let dq = (droopQuota (length ballots) (cast seats))
+                    case stv
+                        ( makeElection 
+                          dq
+                          seats
+                          ballots
+                          cands
+                          emptyResults
+                        ) of
+                        e@(_,_,_,_,results) => do
+                            putStrLn "Done running the election. The results are:"
+                            putStrLn $ show results
+        Nothing => putStrLn "Parse error."
+    \end{lstlisting}
+\end{figure}
+
+Palpatine takes in a filename and calls the \texttt{readFile} function in the
+Idris standard library, taking in a string containing the file name and
+producing an \texttt{IO String}. We then want the candidates and the ballots
+from the first line. To produce this, we call our \texttt{readLine} function
+which produces an ExVect of candidates, and a natural number denoting the number
+of seats encapsulated inside of the Maybe Monad. If parsing line 1 does not
+succeed, producing a value \texttt{Nothing}, we simply error. If it does, we
+pattern match on the ExVect that is produced, extracting the length-indexed
+vector that is produced and the natural number of seats. We then run
+\texttt{readBallots} with the length-indexed vector we just extracted from the
+\texttt{ExVect}. We now have enough information to invoke our STV counter. The
+code for \texttt{runElection} is given in Figure ~\ref{main_code}. 
+
+At this point, Idris successfully parses small text files containing data that
+conforms to my file format specification. However, reading large files (hundreds
+of kilobytes) produces a segmentation fault that is a result of an error in the
+\texttt{readFile} function in the Idris Prelude. As such, it is currently not
+possible to run \textit{Palpatine} on large election-scale text files. A bug
+report has been opened with the developers of Idris. 

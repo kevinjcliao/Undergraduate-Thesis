@@ -1,4 +1,15 @@
 \section{Background}
+In this thesis, I will explore existing literature around practical real-world
+applications of dependent types. I'll look at five examples to illustrate these
+real-world applications. They range in domain from relational databases to
+low-level bit manipulation. The hope is to demonstrate that dependent types,
+long confined to theoretical mathematics, have tremendous promise in helping
+programmers build reliable and safe programs. I will then review STV, a
+preferential voting algorithm for electing multiple candidates to multiple seats
+based on the ranked choices of the constituency. Finally, I will introduce
+\textit{Palpatine}, a STV Vote Counter with verification of cardinality built in
+Idris, a dependently-typed programming language. 
+
 A dependently typed programming language can have functions with types that
 depend on a value. A function, at its core, is a map from a domain to a
 co-domain. In other words, we expect there to be a certain set of elements in
@@ -80,14 +91,3 @@ The goal of dependent types is to write programs with extreme guarantees of
 compile-time safety. We can use the types of the parameters of a function to
 place tighter limits on the set of its co-domain, with the co-domain varying
 depending on the values of the input parameters. 
-
-In this thesis, I will explore existing literature around practical real-world
-applications of dependent types. I'll look at five examples to illustrate these
-real-world applications. They range in domain from relational databases to
-low-level bit manipulation. The hope is to demonstrate that dependent types,
-long confined to theoretical mathematics, have tremendous promise in helping
-programmers build reliable and safe programs. I will then introduce STV, a
-preferential voting algorithm for electing multiple candidates to multiple seats
-based on the ranked choices of the constituency. Finally, I will introduce
-\textit{Palpatine}, a STV Vote Counter with verification of cardinality built in
-Idris, a dependently-typed programming language. 

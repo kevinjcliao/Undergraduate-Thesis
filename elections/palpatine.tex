@@ -1,4 +1,16 @@
 \chapter{Introducing Palpatine: An STV Vote Counter in Idris.}
-\input{elections/parsing}
+
+In the following section, I introduce \textit{Palpatine}. \textit{Palpatine}
+takes in a list of candidates, seats, and ballots reflecting constituent
+preferences and produces a list of judgments. Each candidate is either
+eliminated or elected. In this section, I will discuss the code behind
+\textit{Palpatine}, first the code that counts ballots and then the code that
+parses data files. 
+
 \input{elections/counting}
-\input{termination/proof}
+\newpage
+\input{elections/parsing}
+\newpage
+\input{elections/comments}
+\newpage
+\input{elections/verified}

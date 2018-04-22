@@ -63,7 +63,32 @@ libraries that encourage practical programmers to give dependent types a shot.
 
 \section{Conclusions from Writing Palpatine}
 
+The second portion of this senior thesis, the writing of \textit{Palpatine},
+taught me a great deal as well. Some of the conclusions I've written below. 
+
 \subsection{STV is an Algorithm in Need of a Declaration Specification}
+
+I'm incredibly concerned by the fact that there does not currently exist an
+official, Australian Electoral Commision sanctioned specification of STV.
+Legislation serves as something close to a \textit{formal specification}, but as
+has been noted in literature, there are gaps. For example, legislation currently
+has no specification for tiebreaking behaviour \cite{stv_haskell}. Currently,
+\textit{Palpatine} will choose the leftmost, first occurring highest scored
+candidate and elect that one. This is obviously unfair, but occurs within the
+confines of a legislative system that does not account for the unlikely event of
+a tie. 
+
+Given that there is no formal AEC sanctioned specification, I had to go about
+finding pseudocode based on a high-level description of counting ballots
+provided on their website. Furthermore, in addition to a formal specification of
+the algorithm's behaviour, I could not find a formal specification for the
+algorithm's intent. What does it mean for the STV algorithm to ``succed''? Why
+is it optimal to eliminate and elect candidates in the order we do? What is the
+definition of an optimally accurate election result and how does STV reflect
+that? These questions blur the line between Mathematics, Computer Science and
+Policy, but they are important questions and deserve to be addressed and must be
+addressed. 
+
 \subsection{Totality Checkers Are Good.}
 
 Guarantees of termination are good for the user. STV vote counting can take a
@@ -75,8 +100,6 @@ a built-in totality checker, which as specified above, means that there are
 compile-time guarantees of termination. This means proofs of termination are not
 required. 
 
-% TODO: Papers on totality checker in Haskell? 
-
 While significant, non-trivial barriers exist to implementing a totality checker
 in Haskell, the experience I had with implementing an STV counter in Idris leads
 me to believe that Haskell would benefit significantly from such a totality
@@ -84,3 +107,32 @@ checker. As such, I encourage and add my voice to encourage the people who are
 working towards this noble goal. 
 
 \subsection{Better Programming Languages Enable Safer Code.}
+
+The constraints that type systems create force programmers to write better code.
+For example, in the interest of satisfying totality, as described above, there
+were many points during the writing of \textit{Palpatine} where I was forced to
+employ usage of Monads to encapsulate side effects, or the possibility of the
+lack of a return value. By forcing me towards complete case coverage, and by
+writing tighter type constraints, I became a better programmer. Over time, I
+embraced the concept of \textit{Type Driven Development} and would write out my
+types in advance, filling the code in with typed holes and then progressively
+expanding out until I had code that satisfied my type. While in the beginning, I
+found this an exercise in frustration, over time I found it to be a powerful and
+almost joyful paradigm to work in. 
+
+\subsection{Verification is Hard}
+
+I started this senior thesis with the intent of fully `verifying' the STV vote
+counting algorithm. This senior thesis has been a process of humbling myself and
+of realizing that the problems that I'm trying to solve are incredibly
+difficult. As I learned what \textit{verification} truly was, I realized that I
+could not find a formal specification for STV that would be conducive to the
+process of \textit{verification}. Even after I found such a specification for
+the counting of ballots, I found that verification of everything I expected
+proved to be more difficult than I thought. In the end, I have produced a vote
+counter that merely verifies the cardinality of two data structures. It does not
+verify that the outcome is correct, nor does it verify in any way that we have
+even elected the correct number of candidates. While from one perspective, this
+could be seen as frustrating, I actually found it to be ultimately rewarding. I
+gained even more respect for the noble goal of verification and a deeper
+understanding of what it means for code to be correct. 

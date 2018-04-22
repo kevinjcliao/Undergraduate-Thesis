@@ -1,0 +1,57 @@
+\chapter{What have we verified?}
+
+Having gone through the trouble of building \textit{Palpatine}, the question we
+now ask is: by building it, what have we verified? What compile-time guarantees
+does Palpatine give us? In this section, I assert that \textit{Palpatine} has
+guarantees of termination and of the cardinality of judgments and remaining
+candidates. 
+
+\section{Termination}
+
+One of the advantages of using Idris is its built in \texttt{total} keyword. If
+a function declaration is prepended with the \texttt{total} keyword, the Idris
+compiler will check at compile-time for \textit{totality}. 
+
+This definition of Totality is taken from \cite{tdd_book}. 
+\begin{enumerate}
+    \item A total function must cover all inputs. That is, our patterns must
+    match every element in the set denoted by the type of our input.
+    \item A total function must be \textit{well-founded}. That is, for all
+    recursive calls or mutually recursive calls, ``it must be shown that one of
+    its arguments has decreased''. 
+    \item Our function must not have any arguments or produce any arguments that
+    are data types that are \textit{strictly positive}. A data type $D$ that is
+    not strictly positive would have a constructor with $D$ to the left of any
+    arrow. 
+    \item Finally, a total function must not call any other non-total function.
+    It obviously follows that calling any non-total code ruins totality. 
+\end{enumerate}
+
+To prove that \textit{Palpatine} terminates, I can thus use Idris' built-in
+totality checker. If my code compiles and all functions are annotated with the
+\texttt{total} keyword, then it follows that all of my code must satisfy all
+four of these conditions and thus it must terminate. 
+
+\section{Cardinality of Candidates and Judgment}
+
+Let's look at the type signature for \texttt{stv} and the guarantees that it
+gives us. The function has type signature: \texttt{stv : Election r j ->
+Election Z (r + j)}. What that means is, to put it quite simply, if \texttt{stv}
+compiles, it is guaranteed that invoking STV with a list of candidates of
+length-indexed vector of length $r$ and a vector of judgments of length $j$ will
+produce a length-indexed vector of judgments that is exactly $r$ longer. 
+
+\section{Future Work}
+
+Having verified this, there are next steps we can take to further verify
+correctness of our implementation of Palpatine. Perhaps if we separated out the
+\texttt{Results} length-indexed vector into a \texttt{Eliminated} and
+\texttt{Elected} length-indexed vector, we could stipulate in our type signature
+that our output \texttt{Elected} candidates must contain the same number of
+elements as the number of seats allocated. Since the seats allocated is not
+statically known and is given to us at compile-time, this would be an instance
+where we can use dependent types. Further, we have no current guarantees that
+the current set of candidates and the set of elected candidates each contain
+unique elements. To take this even further, work in that area could bring us to
+verify that the candidates that are elected are the ones expected in a run of
+the algorithm. 
