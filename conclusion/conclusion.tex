@@ -61,78 +61,112 @@ types, programmers and academics with a deep understanding of dependent types
 who wish to see its proliferation should work on providing well-written
 libraries that encourage practical programmers to give dependent types a shot.
 
+\clearpage
+
 \section{Conclusions from Writing Palpatine}
 
 The second portion of this senior thesis, the writing of Palpatine,
 taught me a great deal as well. Some of the conclusions I've written below. 
 
-\subsection{STV is an Algorithm in Need of a Declaration Specification}
+\subsection{STV is an Algorithm in Need of a Declarative Specification}
 
 I'm incredibly concerned by the fact that there does not currently exist an
 official, Australian Electoral Commision sanctioned specification of STV.
 Legislation serves as something close to a \textit{formal specification}, but as
-has been noted in literature, there are gaps. For example, legislation currently
-has no specification for tiebreaking behaviour \cite{stv_haskell}. Currently,
-Palpatine will choose the leftmost, first occurring highest scored
-candidate and elect that one. This is obviously unfair, but occurs within the
+there are gaps. For example, legislation currently has no specification for
+tiebreaking behaviour \cite{stv_haskell}. Currently, Palpatine will choose the
+leftmost, first occurring highest scored candidate and elect that one. This
+decision is found in the function \texttt{getHighestIndex} for our
+\texttt{Candidates}, and whether or not if it sees two candidates with the same
+score, it changes the highest index to the second occuring one or not. If it
+chooses the first, it favours candidates on the left. If not, it favours
+candidates on the right. This is obviously unfair, but occurs within the
 confines of a legislative system that does not account for the unlikely event of
 a tie. 
 
 Given that there is no formal AEC sanctioned specification, I had to go about
-finding pseudocode based on a high-level description of counting ballots
+implementing Palpatine based on a high-level description of counting ballots
 provided on their website. Furthermore, in addition to a formal specification of
-the algorithm's behaviour, I could not find a formal specification for the
-algorithm's intent. What does it mean for the STV algorithm to ``succed''? Why
-is it optimal to eliminate and elect candidates in the order we do? What is the
-definition of an optimally accurate election result and how does STV reflect
-that? These questions blur the line between Mathematics, Computer Science and
-Policy, but they are important questions and deserve to be addressed and must be
-addressed. 
+the algorithm's behaviour, I could not find a formal, declarative specification
+for the algorithm's intent. What does it mean for the STV algorithm to
+``succeed''? Why is it optimal to eliminate and elect candidates in the order we
+do? What is the definition of an optimally accurate election result and how does
+STV reflect that? These questions blur the line between mathematics, computer
+Science and policy, but they are important questions and must be addressed. 
 
 \subsection{Totality Checkers Are Good.}
 
 Guarantees of termination are good for the user. STV vote counting can take a
 while. When running the code from Ghale, Gore and Pattinson, counting STV
 ballots for an election of the Australian Capital Territory took 3 days
-\cite{stv_haskell}. The point is, counting STV elections can be difficult. More
-than once, I wondered if the program was not going to terminate. Idris provides
-a built-in totality checker, which as specified above, means that there are
-compile-time guarantees of termination. This means proofs of termination are not
-required. 
+\cite{stv_haskell}. I'm uncertain of why that is the case, but it potentially
+has to do with inefficiencies of the Coq-to-Haskell extraction process used in
+the paper. More than once, I wondered if the program was not going to terminate.
+Idris provides a built-in totality checker, which as specified above, means that
+there are compile-time guarantees of termination. This means that if I use the
+totality checker, my program \textit{is} a proof of termination. 
 
 While significant, non-trivial barriers exist to implementing a totality checker
 in Haskell, the experience I had with implementing an STV counter in Idris leads
 me to believe that Haskell would benefit significantly from such a totality
-checker. As such, I encourage and add my voice to encourage the people who are
-working towards this noble goal. 
+checker. As such, I add my voice to encourage the people who are working towards
+this noble goal. 
 
 \subsection{Better Programming Languages Enable Safer Code.}
 
 The constraints that type systems create force programmers to write better code.
 For example, in the interest of satisfying totality, as described above, there
-were many points during the writing of Palpatine where I was forced to
-employ usage of Monads to encapsulate side effects, or the possibility of the
-lack of a return value. By forcing me towards complete case coverage, and by
-writing tighter type constraints, I became a better programmer. Over time, I
-embraced the concept of \textit{Type Driven Development} and would write out my
+were many points during the writing of Palpatine where I was forced to employ
+usage of \texttt{Maybe} to account for the possibility of the lack of a return
+value. By forcing me towards complete case coverage, and by writing tighter type
+constraints, I became a better programmer. Over time, I embraced the concept of
+\textit{Type Driven Development}, introduced by Brady, and would write out my
 types in advance, filling the code in with typed holes and then progressively
-expanding out until I had code that satisfied my type. While in the beginning, I
-found this an exercise in frustration, over time I found it to be a powerful and
-almost joyful paradigm to work in. 
+expanding out until I had code that satisfied my type \cite{tdd_book}. While in
+the beginning, I found this an exercise in frustration, over time I found it to
+be a powerful and enjoyable paradigm to work in. 
+
+\subsection{Idris Has Slight Rough Edges}
+
+While I greatly enjoyed working in Idris, it still does not enjoy certain
+features that Haskell does. Unlike Haskell, Idris does not support the automatic
+\textit{deriving} keyword which allows a programmer to easily extend a type to
+support type classes. I had to define the implementations for \texttt{Eq, Ord,
+Show} for \texttt{Candidate} and all subsequent custom data types by hand. It
+was especially frustrating for \texttt{Judgment}, which I felt was a very
+generic ADT that Haskell's \texttt{deriving} keyword would've handled just fine.
+
+Idris currently has no standardized package manager and I ended up using a build
+tool called Idrin. I would love for the community to standardize around a single
+build tool like Idrin and work on building a package repository so that we can
+easily share dependently-typed programs and libraries. 
+
+At this point, Idris successfully parses small text files containing data that
+conforms to my file format specification. However, reading large files (hundreds
+of kilobytes) produces a segmentation fault that is a result of an error in the
+\texttt{readFile} function in the Idris Prelude. As such, it is currently not
+possible to run Palpatine on large election-scale text files. A bug report has
+been opened with the developers of Idris \footnote{The bug report is available
+here: https://github.com/idris-lang/Idris-dev/issues/4419}. 
 
 \subsection{Verification is Hard}
 
 I started this senior thesis with the intent of fully `verifying' the STV vote
-counting algorithm. This senior thesis has been a process of humbling myself and
-of realizing that the problems that I'm trying to solve are incredibly
-difficult. As I learned what \textit{verification} truly was, I realized that I
-could not find a formal specification for STV that would be conducive to the
-process of \textit{verification}. Even after I found such a specification for
-the counting of ballots, I found that verification of everything I expected
-proved to be more difficult than I thought. In the end, I have produced a vote
-counter that merely verifies the cardinality of two data structures. It does not
-verify that the outcome is correct, nor does it verify in any way that we have
-even elected the correct number of candidates. While from one perspective, this
-could be seen as frustrating, I actually found it to be ultimately rewarding. I
-gained even more respect for the noble goal of verification and a deeper
-understanding of what it means for code to be correct. 
+counting algorithm. This past year has been a process of humbling myself and of
+realizing that the problems that I'm trying to solve are incredibly difficult.
+As I learned what \textit{verification} truly was, I realized that I could not
+find a formal specification for STV that would be conducive to the process of
+\textit{verification}. Indeed, even with a formal specification, the task of
+verification can often be incredibly difficult. The creators of COMPCERT, a
+verified compiler for a subset of the C language written in Coq, note that the
+Coq verification portion of their compiler was six times larger than the
+compiler implementation itself \cite{compcert}. These problems are difficult,
+but it has been liberating to know that I'm not alone in finding them difficult.
+
+
+In the end, I have produced a vote counter that merely verifies the cardinality
+of two data structures. It does not verify that the outcome is correct, nor does
+it verify in any way that we have even elected the correct number of candidates.
+While from one perspective, this could be seen as frustrating, I actually found
+it to be ultimately rewarding. I gained even more respect for the noble goal of
+verification and a deeper understanding of what it means for code to be correct.

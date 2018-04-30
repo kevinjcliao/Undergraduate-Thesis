@@ -3,32 +3,47 @@
 \subsection{Functional Paradigm Pseudocode for the STV Algorithm}
 
 The pseudocode given in the previous section describes, in an imperative sense,
-what implementing the single transferrable vote would be like. For the purposes
-of implementing STV in a dependently typed functional programming language, it
-is necessary for us to translate such an algorithm into the functional style,
-substituting the imperative loops for recursion and avoiding mutability. The
-rough pseudocode for this is given in Algorithm~\ref{functional_stv}.
+what implementing the single transferable vote would be like. For the purposes
+of implementing STV in a functional programming language, it is necessary for us
+to translate such an algorithm into the functional style. Such pseudocode is
+given in Algorithm~\ref{functional_stv}. In this style, we are making a judgment
+on each candidate, declaring them either to be elected or unelected. We recurse
+on our list of candidates, appending a list of judged candidates we are building
+with either judgments of \texttt{Elected} or \texttt{Eliminated}. We continue
+until we hit our base case of an empty candidates list, in which case we return
+the empty list. This is one way with which we can implement a functional STV
+counter. Of course, the lower-level detail including data structures and types
+are provided in the rest of this section. This pseudocode should be used to get
+a general sense of how a functional-paradigm STV counter is structured but I
+don't expect a reader to dwell on it for too long. 
 
 \begin{algorithm}
 	\SetKwFunction{stv}{stv}
 	\SetKwProg{Fn}{Function}{}{}
-	\Fn{\stv{ballots, seats, candidates, judged}}{
-		\eIf{candidates is not empty}{
-			\eIf{highestCandidate >= droopQuota}{
-				let next := elect(highestCandidate)\\
-				ballots = transferDown(ballots, highestCandidate)
+	\Fn{\stv{ballots, seats, candidates}}{
+        \eIf{candidates is not empty}{
+            // countBallots functions declared in imperative pseudocode.\\
+            countedBallots = countBallots(candidates, ballots)\\
+            highestCandidate = candidate with highest score\\
+			\eIf{highestCandidate >= droopQuota and seats > 0}{
+                newCandidates = candidates.remove(highestCandidate)\\
+                mark highestCandidate as ELECTED\\
+                // transferDown functions similarly to the imperative pseudocode\\
+                newBallots = transferDown(countedBallots, highestCandidate)\\
+                \Return{prepend(highestCandidate, stv(newBallots, seats, newCandidates))}
 			}{
-				let next := elim(lowestCandidate)
-				ballots = transferUp(ballots, lowestCandidate)
-			}
-			judged.append(next)\\
-			candidates.remove(next)\\
-			stv(ballots, seats, candidates, judged)
-		}{
-			judged
-		}
+                lowestCandidate = candidate with the lowest score. \\
+                newCandidates = candidates.remove(lowestCandidate)\\
+                mark lowestCandidate as ELIMINATED\\
+                // transferUp functions similarly to the imperative pseudocode\\
+                newBallots = transferUp(countedBallots, lowestCandidate)\\
+                \Return{prepend(lowestCandidate, stv(newBallots, seats, newCandidates))}
+            }
+        }{
+            \Return{empty list}
+        }
     }
-    \caption{Functional paradigm pseudocode for Palpatine.}
+    \caption{Functional paradigm pseudo-code for Palpatine.}
     \label{functional_stv}
 \end{algorithm}
 
@@ -39,20 +54,19 @@ judgments on each candidate. In other words, rather than build up a list of
 candidates, we simply iterate through our candidates, assigning them a judgment
 of either elected or unelected. Our overall code (ignore the types for the time
 being), ends up looking like in Figure~\ref{overall_code}. Just simply think of
-\texttt{Election} as a GADT where its first natural number paramater refers to
+\texttt{Election} as a type where its first natural number parameter refers to
 the number of remaining candidates left and the second natural number refers to
 the number of candidates that have been judged.
 
 In essence, our \texttt{stv} function repeatedly iterates over our
-\texttt{Election} GADT, calling \texttt{processOne} repeatedly.
-\texttt{processOne} checks to see if the highest scoring candidate is above the
-droopQuota. If the candidate is above the droopQuota, we elect the candidate. If
-not, we eliminate a candidate. If there are no seats left, as shown in the
-second parameter of the first pattern match, we run \texttt{notElectedHead},
-which just eliminates one candidate. If there are no seats left,
-\texttt{notElectedHead} is called repeatedly until we eliminate all the
-candidates.For the time being, we can ignore the \texttt{rewrite} function
-present in the last line of the code. 
+\texttt{Election}, calling \texttt{processOne}. \texttt{processOne}
+checks to see if the highest scoring candidate is above the droopQuota. If the
+candidate is above the droopQuota, we elect the candidate. If not, we eliminate
+a candidate. If there are no seats left, as shown in the second parameter of the
+first pattern match, we run \texttt{notElectedHead}, which just eliminates one
+candidate. If there are no seats left, \texttt{notElectedHead} is called
+repeatedly until we eliminate all the candidates. For the time being, we can
+ignore the use of \texttt{rewrite} in the last line of the code. 
 
 \begin{figure}[htbp!!!!!!!!]
 	\caption{Ballots with initial score.}
@@ -79,8 +93,8 @@ present in the last line of the code.
 
 \subsection{Data Structures}
 
-We essentially need to store several pieces of information. This section
-describes the data structures we will be using in our STV vote counter.
+We need to store several pieces of information. This section describes the data
+structures we will be using in our STV vote counter.
 
 \begin{enumerate}
 	\item We need to store the candidates remaining and also the score of each
@@ -94,38 +108,29 @@ describes the data structures we will be using in our STV vote counter.
 	      growing list of each candidate that contains the judgment that the candidate
 	      was either elected or not elected.
 	\item We need to store the seats remaining. This is stored as a natural
-	number. 
+    number. 
+    \item We need to store the Droop Quota. This is stored as an integer. 
 \end{enumerate}
 
 \subsubsection{Candidates Data Type}
 
-We choose to represent each candidate as a record type\footnote{Record Types are
-	present in Haskell so discussing them is assumed as background knowledge. As
-	always, Real World Haskell serves as a good primer for Record Types. }. Our
-declaration for a record type contains its \texttt{CandidateName}, a type alias
-for \texttt{String}, and its \texttt{VoteValue}, a type alias for
-\texttt{Double}. The candidates who have not been judged yet are represented by
-\texttt{Candidates}, a length-indexed vector with elements of the type
-\texttt{Candidate}. In addition, we provide several accessors for our
-\texttt{Candidates} type that will become useful later. While we have generic
-getters and setters as well as incrementors and decrementors for the VoteValue
-of a candidate, we also have a function \texttt{getHighestIndex} that takes in
-an element of type \texttt{Candidates (S n)} and returns the index of the
-candidate with the highest score. This index is represented by a number of type
-\texttt{Fin (S n)}. \texttt{Fin (S n)} is a type that represents the set of
+We choose to represent each candidate as a record type\footnote{Record types are
+present in Haskell so they are assumed as background knowledge. As always, Real
+World Haskell serves as a good primer for background Haskell knowledge and
+discusses record syntax in Chapter 3. A link is available here:
+http://book.realworldhaskell.org/read/defining-types-streamlining-functions.html}.
+All the code relevant to candidates is shown in Figure~\ref{candidates_code}.
+While we have generic getters as well as incrementors and decrementors for the
+VoteValue of a candidate, we also have a function \texttt{getHighestIndex} that
+takes in an element of type \texttt{Candidates (S n)} and returns the index of
+the candidate with the highest score. This index is represented by a number of
+type \texttt{Fin (S n)}. \texttt{Fin (S n)} is a type that represents the set of
 numbers between zero and the natural number \texttt{S n}. In other words, this
 type signature guarantees to us that the index we return will be within bounds
-of our length-indexed vector. We'll be using a lot more of \texttt{Fin}s
-elsewhere in Palpatine.
-
-As an aside here, unlike Haskell, Idris does not support the automatic
-\textit{deriving} keyword which allows a programmer to easily extend a type to
-support type classes. I had to define the implementations for \texttt{Eq, Ord,
-	Show} for \texttt{Candidate} and all subsequent custom data types by hand. All
-the code relevant to candidates is shown in Figure~\ref{candidates_code}
+of our length-indexed vector.
 
 \begin{figure}[htbp!!!!!!!!!!!!!!]
-	\caption{Candidates data type with relevant accessors and setters}
+	\caption{Candidates data type with relevant accessors}
 	\label{candidates_code}
 	\begin{lstlisting}
         CandidateName : Type
@@ -165,27 +170,23 @@ the code relevant to candidates is shown in Figure~\ref{candidates_code}
 \subsubsection{Storing results}
 
 Like \texttt{Candidate}, we also choose to represent each judgment as a record
-type. A judgment consists of a candidate name and whether or not that candidate
-was elected. To represent that, we must declare a new Algebraic Data Type called
-\texttt{Judgment}. \texttt{Judgment} simply contains two values and is in a way
-analogous to \texttt{Bool}. It simply tells us if a \texttt{candidate} is
-\texttt{Elected} or \texttt{NotElected}. We then have a \texttt{Results} data
-type that is a length-indexed vector containing elements of type
-\texttt{Judgment}. Like \texttt{Candidate} and \texttt{Candidates}, I also had
-to write implementations for the various type classes. It was especially
-frustrating for \texttt{Judgment}, which I felt was a very generic ADT that
-Haskell's \texttt{deriving} keyword would've handled just fine. The code is
-given in Figure~\ref{judgments_code}
-
-The \texttt{Judged} data type is a record type that contains an element of type
-\texttt{CandidateName} (recall this is a type alias for a string) and an element
-of type \texttt{Judgment}. \texttt{Results} of our STV counter are stored in a
-length-indexed vector containing elements of type \texttt{Judged}.
+type \texttt{Judged}. A value of type \texttt{Judged} consists of a candidate
+name and whether or not that candidate was elected. To represent that, we must
+declare a new algebraic data type called \texttt{Judgment}. \texttt{Judgment}
+simply contains two values and is in a way analogous to \texttt{Bool}. It simply
+tells us if a \texttt{candidate} is \texttt{Elected} or \texttt{NotElected}. We
+then have a \texttt{Results} data type that is a length-indexed vector
+containing elements of type \texttt{Judged}. 
 
 \begin{figure}[htbp!!!!!!!!!!!!!!]
-	\caption{Results data type with relevant accessors and setters}
+	\caption{Results data type with relevant accessors}
 	\label{judgments_code}
-	\begin{lstlisting}
+    \begin{lstlisting}
+        record Judged where
+            constructor MkJudgment
+            candName : CandidateName
+            judgment : Judgment
+
         data Judgment = Elected | NotElected
 
         Results : Nat -> Type
@@ -221,21 +222,30 @@ length-indexed vector containing elements of type \texttt{Judged}.
         Ballots : Nat -> Type
         Ballots n = List $ Ballot n
 
+        ||| nextCand returns the index of the ballot's next preference if one exists. 
         total
         nextCand : Ballot n -> Maybe $ Fin n
         nextCand ballot         = case getPrefs ballot of
             [] => Nothing
             (cand :: _) => Just cand
 
+        replacePrefs : Preferences n -> Ballot n -> Ballot n
+        replacePrefs new ballot = record { prefs = new } ballot
+
+        ||| restCand returns the rest of the ballot's preferences. 
         total
         restCand : Ballot n -> Ballot n
         restCand ballot         = case getPrefs ballot of
             []          => ballot
             (_ :: rest) => replacePrefs rest ballot
 
+        ||| takes a CandidateName and checks to see if the ballot has 
+        ||| voted for the candidate. 
         ballotDidElectCandidate : CandidateName -> Ballot n -> Bool
         ballotDidElectCandidate name ballot = elem name (votedFor ballot)
         
+        ||| adds the next candidate preferenced to the
+        ||| list of candidates that this ballot has voted for. 
         addToVotedFor : Candidates n -> Ballot n -> Ballot n
         addToVotedFor cands ballot = case nextCand ballot of
             Just topPrefIndex => let name = candName (index topPrefIndex cands) in 
@@ -243,7 +253,8 @@ length-indexed vector containing elements of type \texttt{Judged}.
                     votedFor = name :: (votedFor ballot) 
                 } (restCand ballot)
             Nothing => ballot
-        
+        ||| check to see if our ballot has voted for the candidate and 
+        ||| if it has, we change its weight to the new weight given. 
         total
         changeBallotIfIsCand : CandidateName -> VoteValue -> Ballot n -> Ballot n
         changeBallotIfIsCand cand vv ballot = if ballotDidElectCandidate cand ballot
@@ -256,34 +267,26 @@ length-indexed vector containing elements of type \texttt{Judged}.
 A ballot contains, as described above, three things. A list of unexhausted
 preferences, representing candidates the ballot has yet to vote for, a value,
 denoting the current score of the ballot, and a list of candidates that the
-ballot has already voted for. This can be represented as a record type. The
-record type \texttt{Ballot} contains a constructor, a list of candidates that
-the ballot has voted for, and a list of \texttt{Preferences n} that reflects the
-preferences of each ballot. It finally contains a \texttt{VoteValue}, or
-\texttt{Double} that reflects the value of the ballot. \texttt{Preferences n} is
-an algebraic data type that takes in a natural number representing the number of
-candidates left in \texttt{Remaining}. Each Fin it contains is bounded by the
-index of the candidates remaining. In other words, each Fin stored as a
-\texttt{Preference} maps to an element in \texttt{Remaining}. The code for storing
-and handling ballots is given in Figure~\ref{ballots_code}
+ballot has already voted for. This can be represented as a record type.
+\texttt{Preferences n} is a type that takes in a natural number representing the
+number of candidates left in \texttt{Candidates n}. Each \texttt{Fin} it
+contains is bounded by the index of the candidates remaining. In other words,
+each \texttt{Fin} stored as a \texttt{Preference} maps to an element in
+\texttt{Candidates n}. The code for storing and handling ballots is given in
+Figure~\ref{ballots_code}. Functions that act on ballots are also provided in
+the figure, with comments explaining their purpose. As each preference is counted
+for a ballot, we index the candidate name from the \texttt{Candidates n}
+length-indexed vector and we take that candidate and we put it into
+\texttt{votedFor}, representing the list of candidates the ballot has voted for.
 
-We provide several functions to act on ballots. \texttt{nextCand} returns the
-index of the ballot's next preference if one exists. \texttt{restCand} returns
-the rest of the ballot's preferences. \texttt{ballotDidElectCandidate} takes a
-\texttt{CandidateName} and checks to see if the ballot has voted for the
-candidate. \texttt{addToVotedFor} adds the next candidate preferenced to the
-list of candidates that this ballot has voted for. \texttt{changeBallotIfIsCand}
-is what's used when changing a ballot's value. We check to see if our ballot has
-voted for the candidate and if it has, we change its value to the new value
-given. 
 
-\subsubsection{The Election GADT}
+\subsubsection{The Election Type}
 
 Now we can group together all the different data structures we've built to make
 the \texttt{Election} data type, which contains the Droop Quota as an
 \texttt{Integer}, the number of seats available as a natural number, the
-ballots, the candidates and the results. The code for the election GADT is given
-in Figure~\ref{election_type_code}. 
+ballots, the candidates and the results. The code for the \texttt{Election} type
+is given in Figure~\ref{election_type_code}. 
 
 \begin{figure}[ht!!!!!!!!!!!!!!]
 	\caption{Election Type}
@@ -334,16 +337,16 @@ the sake of convenience.
     \end{lstlisting}
 \end{figure}
 
-Now, notice that we've defined we're doing type-level arithmetic on the natural
-numbers in our Election data type. Our \texttt{stv} function takes in a value of
-type \texttt{Election} with $r$ remaining candidates and $j$ made judgments. Our
+Now, notice that we're doing type-level arithmetic on the natural numbers in our
+\texttt{Election} data type. Our \texttt{stv} function takes in a value of type
+\texttt{Election} with $r$ remaining candidates and $j$ made judgments. Our
 function is guaranteed to return an element of type \texttt{Election} with no
 remaining candidates $Z$ and judgments on all the candidates $r+j$. As mentioned
 above, our \texttt{stv} function calls \texttt{processOne} repeatedly. Now we
 also have guarantees that \texttt{processOne} takes in an \texttt{Election} with
 at least one candidate remaining. Notice that the first natural number of
-\texttt{Election} is \texttt{(S r)}, so it must be of one or greater since it is not
-Zero, or $Z$. 
+\texttt{Election} is \texttt{(S r)}, so it must be of one or greater since it is
+not Zero, or $Z$. 
 
 What's left then, is to introduce several functions that were mentioned in the
 \texttt{stv} and \texttt{processOne} functions. We must first introduce the
@@ -351,8 +354,8 @@ function for counting the first preferences of each ballot. We must then
 introduce the function for electing a candidate and eliminating a candidate. We
 must then introduce the predicate \texttt{weCanElect}. We must also introduce
 \texttt{notElectedHead} which just eliminates a candidate indiscriminately after
-all the seats have been filled. Finally, we will comment on the use of the
-\texttt{rewrite} function in the last line of \texttt{stv}. 
+all the seats have been filled. Finally, we will comment on the use of
+\texttt{rewrite} in the last line of \texttt{stv}. 
 
 \subsubsection{Counting First Preferences}
 
@@ -365,32 +368,25 @@ all the seats have been filled. Finally, we will comment on the use of the
         total
         count : Election r j -> Election r j
         count {r} election@(dq, seats, ballots, cands, results) = 
-            makeElection dq seats newBallots newCands results where
-                countBallot : Ballot r -> Candidates r -> Candidates r
-                countBallot ballot cands = case nextCand ballot of
-                    Just topPrefIndex => 
-                        addVoteVal topPrefIndex cands $ ballotValue ballot
-                    Nothing           => cands
-                countBallots : Ballots r -> Candidates r -> Candidates r
-                countBallots Nil cands       = cands
-                countBallots (x :: xs) cands = countBallots xs $ countBallot x cands
-                newBallots : Ballots r
-                newBallots = map (addToVotedFor cands) ballots
-                newCands : Candidates r
-                newCands = countBallots ballots cands
+            makeElection dq seats newBallots newCands results
+                -- For the sake of brevity, the code for deriving newBallots 
+                -- and newCands has been omitted. 
     \end{lstlisting}
 \end{figure}
 
-As mentioned above, we store the score that each candidate currently has in the
-\texttt{Candidate} record type. Thus, counting a ballot takes the ballot's first
-preference, removes it and adds it to the list of candidates that ballot has
-voted for. The ballot value is then added to the score of the \texttt{Candidate}
-inside of the length-indexed vector remaining. Our \texttt{countBallot} function
-takes the score of each ballot and adds it to its first preference. Our
-\texttt{newBallots} are created by mapping \texttt{addToVotedFor} over our list
-of ballots, which eliminates the next preferenced candidate and moves it to the
-list of candidates that the ballot has voted for. We then take our newBallots
-and newCandidates and rebuild our election of type \texttt{Election r j}. 
+Counting ballots does not cause a change in the type of our \texttt{Election} in
+any way. Therefore, we will gloss over counting with a quick description as to
+keep the focus of this work on types and verification rather than
+implementation. A call to \texttt{count} does a full count of our ballots. For
+each ballot in \texttt{ballots}, we take its first preference as an index to a
+candidate in the \texttt{cands} length-indexed vector of candidates. We then add
+the ballot's weight to that candidate in \texttt{cands}. Finally, we remove that
+ballot's first preference and add the candidate it just voted for to its
+\texttt{votedFor} list. The aggregate produced new length-indexed vector of
+candidates becomes \texttt{newCands}, and the aggregate produced new ballots
+become \texttt{newBallots}. We build another \texttt{Election} with the same
+number of candidates remaining and judged as none have been elected or
+eliminated in this process. 
 
 \subsubsection{Removing candidates once all have been elected}
 
@@ -453,11 +449,12 @@ candidates. It then indexes them according to the next, smaller length-indexed
 vector of candidates. This function does a \texttt{map} over the ballots,
 calling the function \texttt{reindexBallot} on each function.
 \texttt{reindexBallot} does a mapMaybe of \texttt{reindexCand}, grabbing each
-preference from the ballot and seeing whether it is present in the new ballot.
-\texttt{mapMaybe} is a \texttt{map} function that does not append to a list if
-the result is \texttt{Nothing}. In other words, if the candidate being indexed
-is not in the new length-indexed vector, it won't be part of the returned list
-of preferences in the ballot. 
+preference from the ballot and seeing whether it is present in the new
+length-indexed vector of remaining candidates. \texttt{mapMaybe} is a
+\texttt{map} function that does not append to a list if the result is
+\texttt{Nothing}. In other words, if the candidate being indexed is not in the
+new length-indexed vector, it won't be part of the returned list of preferences
+in the ballot. 
 
 \subsubsection{Eliminating a candidate}
 
@@ -491,7 +488,7 @@ candidate with the lowest score. We then make a judgment of this candidate as a
 candidate we are not going to elect by calling our \texttt{dontElect} function
 to create an element of type \texttt{Judged}. We then add this to our
 length-indexed vector of judgments. Whereas previously this length-indexed
-vector was of length $j$, it is now of length \texttt{(S j)}. We remove that
+vector was of length \texttt{j}, it is now of length \texttt{(S j)}. We remove that
 candidate from our length-indexed vector of candidates. Whereas previously our
 length-indexed vector of remaining candidates was of length \texttt{(S r)},
 having just eliminated the candidate with the lowest score, it now has length
@@ -549,7 +546,7 @@ we reindex the ballots according to the newly created, one size smaller
 length-indexed vector of remaining candidates. We then rebuild our election, now
 of type \texttt{Election r (S j)}
 
-\subsubsection{Why call rewrite?}
+\subsubsection{Why use rewrite?}
 
 
 \begin{figure}[ht!!!!!!!!]
@@ -587,18 +584,18 @@ of type \texttt{Election r (S j)}
     \end{lstlisting}
 \end{figure}
 
-The last item to explain in the code of our STV function is why we call
-\texttt{rewrite}. If we didn't call it, the code for \texttt{stv} would look
-like the code given in Figure~\ref{no_rewrite_code}. The Idris compiler produces
-an error, telling us that it is unable to compile. This error message is
-reproduced in Figure~\ref{idris_error_code}.
+The last item to explain in the code of our STV function is why we use
+\texttt{rewrite}. If we didn't use \texttt{rewrite}, the code for \texttt{stv}
+would look like the code given in Figure~\ref{no_rewrite_code}. The Idris
+compiler produces an error, telling us that it is unable to compile. This error
+message is reproduced in Figure~\ref{idris_error_code}.
 
 What does this error message mean? It means that this function has an output of
 \texttt{Election 0 (S len + j)}. However, the function makes a recursive call to
 \texttt{processOne}, which produces an Election of type \texttt{Election len (S
 j)}. The Idris compiler is unable to deduce that \texttt{(S len + j)} is the
 same as \texttt{len + (S j)}. Luckily, there is a function in the Idris Prelude
-that operates on Natural Numbers that proves this equality for us. It is called
+that operates on natural numbers that proves this equality for us. It is called
 \texttt{plusSuccRightSucc}. What we need to do is use this proof to rewrite some
 of our type variables. \texttt{plusSuccRightSucc} has type signature:
 \texttt{total plusSuccRightSucc : (left : Nat) -> (right : Nat) -> S (left +
@@ -611,17 +608,26 @@ right) = left + (S right)}.
         total
         stv : Election r j -> Election Z (r + j)
         stv         e@(_, _, _, Nil, _)      = e
-        stv {r=(S n)} {j} e@(_, _, _, (_ :: _), _) = 
-            rewrite plusSuccRightSucc n j in stv $ processOne e
+        stv {r=(S len)} {j} e@(_, _, _, (_ :: _), _) = 
+            rewrite plusSuccRightSucc len j in stv $ processOne e
     \end{lstlisting}
 \end{figure}
 
-Thus, to call this function to demonstrate the necessary equality, we need to
-call \texttt{plusSuccRightSucc} with \texttt{len} and $j$, where \texttt{len}
-refers to the natural number preceeding $r$ and $j$ refers to the number of
-judgments in the input \texttt{Election}. Thus, we call \texttt{rewrite} to
-allow the Idris compiler to recognize this equality and our code ends up looking
-like in Figure~\ref{with_rewrite_code}. 
+How do we use the equality that's provided by \texttt{plusSuccRightSucc}? Idris
+provides syntactic sugar for type coersion with a keyword called
+\texttt{rewrite}. \texttt{rewrite} takes a proven equality and then whenever it
+sees a type that is the same as one side of the equality, it will attempt
+substituting that type with the type on the other side of the equality and see
+if compilation would succeed with that type. 
+
+Thus, to demonstrate the necessary equality, we need to call
+\texttt{plusSuccRightSucc} with \texttt{len} and \texttt{j}, where \texttt{len}
+refers to the natural number preceding \texttt{r} and \texttt{j} refers to the
+number of judgments in the input \texttt{Election}. We then use the syntactic
+sugar of \texttt{rewrite} to employ the proof of \texttt{plusSuccRightSucc}. The
+subsequent type coersion rewrites the addition in order to demonstrate that our
+recursive call to \texttt{stv \$ processOne} satisfies our type constraints. Our
+code then successfully compiles. 
 
 Thus, in this section, we have introduced all the code that Palpatine uses to
 count STV ballots. 

@@ -1,4 +1,4 @@
-\chapter{What have we verified?}
+\section{What have we verified?}
 
 Having gone through the trouble of building Palpatine, the question we
 now ask is: by building it, what have we verified? What compile-time guarantees
@@ -6,42 +6,51 @@ does Palpatine give us? In this section, I assert that Palpatine has
 guarantees of termination and of the cardinality of judgments and remaining
 candidates. 
 
-\section{Termination}
+\subsection{Termination}
 
 One of the advantages of using Idris is its built in \texttt{total} keyword. If
 a function declaration is prepended with the \texttt{total} keyword, the Idris
-compiler will check at compile-time for \textit{totality}. 
+compiler will check at compile-time for \textit{totality}. While a specific
+definition for totality is given in Idris' documentation, all that matters is
+that the totality checker verifies that the program will terminate in a finite
+amount of time and that all possible input cases are covered by the compiler. If
+compilation succeeds, my program becomes a proof of termination. Given that I
+annotated my \texttt{stv} function with the keyword \texttt{total}, it follows
+that because my code compiles, my STV counter must terminate and that all input
+cases are covered. 
 
-This definition of Totality is taken from \cite{tdd_book}. 
-\begin{enumerate}
-    \item A total function must cover all inputs. That is, our patterns must
-    match every element in the set denoted by the type of our input.
-    \item A total function must be \textit{well-founded}. That is, for all
-    recursive calls or mutually recursive calls, ``it must be shown that one of
-    its arguments has decreased''. 
-    \item Our function must not have any arguments or produce any arguments that
-    are data types that are \textit{strictly positive}. A data type $D$ that is
-    not strictly positive would have a constructor with $D$ to the left of any
-    arrow. 
-    \item Finally, a total function must not call any other non-total function.
-    It obviously follows that calling any non-total code ruins totality. 
-\end{enumerate}
+Palpatine takes in the file to read from a user-provided command line argument.
+Reading these command-line arguments is currently \texttt{partial}. As such, I
+cannot guarantee that all of my code terminates at the moment, but with the
+exception of one IO operation, all other code currently has termination
+guarantees. 
 
-To prove that Palpatine terminates, I can thus use Idris' built-in
-totality checker. If my code compiles and all functions are annotated with the
-\texttt{total} keyword, then it follows that all of my code must satisfy all
-four of these conditions and thus it must terminate. 
-
-\section{Cardinality of Candidates and Judgment}
+\subsection{Cardinality of Candidates and Judgment}
 
 Let's look at the type signature for \texttt{stv} and the guarantees that it
 gives us. The function has type signature: \texttt{stv : Election r j ->
 Election Z (r + j)}. What that means is, to put it quite simply, if \texttt{stv}
 compiles, it is guaranteed that invoking STV with a list of candidates of
-length-indexed vector of length $r$ and a vector of judgments of length $j$ will
-produce a length-indexed vector of judgments that is exactly $r$ longer. 
+length-indexed vector of length \texttt{r} and a vector of judgments of length
+\texttt{j} will produce a length-indexed vector of judgments that is exactly \texttt{r}
+longer than \texttt{j}. In addition, given that we call \texttt{stv} from our
+\texttt{runElection} function with an element of type \texttt{Election r Z}, we
+have guarantees that Palpatine, when run, will judge exactly \texttt{r}
+candidates. This is because the output of \texttt{stv} will be \texttt{Election
+Z (r + j)} and since \texttt{j} was zero when runElection called \texttt{stv},
+we thus have compile-time guarantees that the output will be a value of type
+\texttt{Election Z r}. 
 
-\section{Future Work}
+Cardinality is not formal verification that every one of my \texttt{r}
+candidates becomes judged. There is, after all, no guarantee that the \texttt{r}
+candidates judged by my \texttt{stv} function are the same candidates that were
+input. That being said, it is highly unlikely that this would be the case. Even
+if the programmer of a STV vote counter was adversarial, this would be an easily
+spotted and unideal vector of attack. Thus, I can say with a high-degree of
+certainty that Palpatine will judge every candidate input in an election as
+either elected or eliminated. 
+
+\subsection{Future Work}
 
 Having verified this, there are next steps we can take to further verify
 correctness of our implementation of Palpatine. Perhaps if we separated out the
@@ -52,6 +61,4 @@ elements as the number of seats allocated. Since the seats allocated is not
 statically known and is given to us at compile-time, this would be an instance
 where we can use dependent types. Further, we have no current guarantees that
 the current set of candidates and the set of elected candidates each contain
-unique elements. To take this even further, work in that area could bring us to
-verify that the candidates that are elected are the ones expected in a run of
-the algorithm. 
+unique elements. 

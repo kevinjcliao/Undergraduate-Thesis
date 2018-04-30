@@ -5,10 +5,10 @@ In functional programming, we want to isolate side effects as much as possible
 to keep our code clear. In Haskell and many other programming languages, side
 effects like IO, state, random number generation, etc. are handled by monads
 \cite{realworldhaskell}\footnote{This part of the literature assumes that you
-are familiar with Monads, which is how the Haskell programming language handles
+are familiar with monads, which is how the Haskell programming language handles
 side effects. For more information, I highly recommend reading O'Sullivan et.
-al's Real World Haskell or other widely available tutorials on Monads in
-Haskell.}. If we want to use several Monads at once (our code requires
+al's Real World Haskell or other widely available tutorials on monads in
+Haskell.}. If we want to use several monads at once (our code requires
 simultaneous handling of different side effects), we are often required to use
 monad transformers. While this approach works for programs that require one or
 two transformations between monads, as we bring in more and more side effects,
@@ -21,7 +21,7 @@ defining an \texttt{EFFECT} type, as seen in Figure~\ref{effects_def}. This
 \texttt{EFFECT} data type enumerates the different kinds of side effects that an
 Effects DSL could need to handle. In order for a function to use our effects
 DSL, it will have to be of type \texttt{Eff}, where \texttt{Eff} is a data
-declaration where the 'execution context' m (optionally a Monad) is specified, a
+declaration where the 'execution context' m (optionally a monad) is specified, a
 list of side effects, and the program's return type. For example, a function
 that of the execution context \texttt{IO} that throws side effects, does work on
 STDIO, and maintains an integer state will look something like the function
@@ -139,7 +139,7 @@ important, however, we can note that different effects require different
 execution contexts. \texttt{STATE}, for example, is strictly locally confined
 and thus its execution context does not matter. Meanwhile, \texttt{STDIO} does
 IO operations, and therefore its execution context must be inside of the IO
-Monad. We can specify a type class \texttt{Handler}. All effects should be
+monad. We can specify a type class \texttt{Handler}. All effects should be
 instances of this type class. \texttt{Handler} enforces that the environment we
 invoke a function from is the correct one. In other words, if I attempted to
 invoke a \texttt{runpure} function that had an \texttt{STDIO} side effect, the
@@ -193,7 +193,7 @@ specifying side effects as a list of effects rather than with monad transformers
 means that we can easily add or remove side effects as required. Let's say I
 wanted to add IO code into \texttt{tag}. When calling it, all I have to do is
 call it in the context of \texttt{run}, specifying the execution context of IO.
-Monadic transformers would require me to make a type signature that chains
+monadic transformers would require me to make a type signature that chains
 together different monadic transformers. I'd then be required to convert data
 between different monads in inconvenient ways that'll only increase in
 complexity as I require more side effects.

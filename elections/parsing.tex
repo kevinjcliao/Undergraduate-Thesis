@@ -28,7 +28,10 @@ In order to read this file format, we must first read the first line, building
 the total length-indexed vector of the number of candidates remaining and the
 number of seats remaining. We then read each ballot, building a list of ballots
 and indexing each according to the length-indexed vector of candidates
-remaining. We'll go through the code for doing each of these actions. 
+remaining. We'll go through reading the first line as there is interesting
+information around verification and types present, but we assume that parsing
+the rest of the ballots would be something easily accomplished by a functional
+programmer. 
 
 \subsection{Reading Line 1}
 
@@ -59,67 +62,22 @@ Figure~\ref{read_first_line_code}. The \texttt{readFirstLine} function takes in
 a string which contains the contents of our data file and it outputs two items
 contained by the first line. The first is an \texttt{ExVect} containing all the
 candidates possible, and the second is a natural number that denotes the number
-of seats available to elect. Most of the code above is self-explanatory. We
-start by taking the first line of our file. We split according to the colon. The
-first element is then run through a function parseList, which takes items in the
-format ``[a,b,c]'' and returns a list containing the strings $a, b,c$. In other
-words, we produce a list containing the names of the candidates as strings. We
-then map over this list with our  \texttt{MkCandidate} function, producing a
-candidate with a score of 0. The second element is the number of seats
-available, and the function \texttt{parsePositive} takes a string. 
+of seats available to elect. 
 
 Something important to note here is the \texttt{ExVect} data type. We discussed
 the concept of \textit{Dependent Pairs} earlier on in the literature review
-section of this thesis. The \texttt{ExVect} is a dependent pair between a
-natural number on the left and a length-indexed vector on the right. That is,
-the vector on the right must have the length $n$, the same length as the value
-of the natural number on the left. If we don't know the length of a vector in
-advance, the Existential Vector, or \texttt{ExVect} is a way to create a vector
-wrapped inside of a dependent pair. We can pattern match on the an ExVect to
-remove the length-indexed vector wrapped inside of it later. Otherwise, since
-the length of the \texttt{ExVect} depends purely on another natural number to
-its left, \texttt{ExVect}s often function analogously to lists. 
+section of this thesis in \autoref{pbm_review}. The \texttt{ExVect} is a
+dependent pair between a natural number on the left and a length-indexed vector
+on the right. That is, the vector on the right must have the length $n$, the
+same length as the value of the natural number on the left. If we don't know the
+length of a vector in advance, the existential vector, or \texttt{ExVect} is a
+way to create a vector wrapped inside of a dependent pair. We can pattern match
+on the an \texttt{ExVect} to remove the length-indexed vector wrapped inside of
+it later. \texttt{ExVect}s are isomorphic to lists. 
 
 All of these operations take place in the syntactic sugar of \textit{do}
-notation afforded to us by the \texttt{Maybe} Monad. That is, if a single one of
+notation afforded to us by the \texttt{maybe} monad. That is, if a single one of
 these operations fails, our whole function will return \texttt{Nothing}. 
-
-\subsection{Reading Ballots}
-
-\begin{figure}[ht!!!!!!!]
-    \caption{Data format}
-    \label{parse_ballots_code}
-    \begin{lstlisting}
-        total
-        parseBallot : Candidates x -> List CandidateName -> Ballot x
-        parseBallot {x} cands strs = MkBallot [] prefs 1 where
-            getCandAsFin : CandidateName -> Maybe $ Fin x
-            getCandAsFin cand = findIndex (\x => candName x == cand) cands
-            prefs : List $ Fin x
-            prefs = mapMaybe getCandAsFin strs
-
-        total
-        readBallots : String -> Candidates y -> Ballots y
-        readBallots input cands = map (parseBallot cands) listOfPrefs where
-            lines : List String
-            lines = drop 1 $ splitToLines input
-            listOfPrefs : List $ List String
-            listOfPrefs = mapMaybe parseList lines
-    \end{lstlisting}
-\end{figure}
-
-The code for \texttt{readBallots} is given above in
-Figure~\ref{parse_ballots_code}. \texttt{readBallots} takes in a string
-containing the contents of the file, the length-indexed vector containing our
-candidates, and it produces a list of ballots. To do this, we drop the first
-line which we have read already, and we map our \texttt{parseList} function,
-described in our previous section on parsing line 1, on each line. This creates
-a list of lists of strings. Each list of strings corresponds to the preferences
-of a ballot. Finally we map our function \texttt{parseBallot} over each list of
-strings, which takes each string preference and tries to find the equivalent
-index of the candidate in the length-indexed vector of candidates to elect.
-Finally, it calls the constructor for the \texttt{Ballot} record type, assigning
-each ballot it creates a \texttt{VoteValue} of 1. 
 
 \section{Running Palpatine}
 
@@ -156,17 +114,10 @@ Idris standard library, taking in a string containing the file name and
 producing an \texttt{IO String}. We then want the candidates and the ballots
 from the first line. To produce this, we call our \texttt{readLine} function
 which produces an ExVect of candidates, and a natural number denoting the number
-of seats encapsulated inside of the Maybe Monad. If parsing line 1 does not
+of seats encapsulated inside of the Maybe monad. If parsing line 1 does not
 succeed, producing a value \texttt{Nothing}, we simply error. If it does, we
 pattern match on the ExVect that is produced, extracting the length-indexed
 vector that is produced and the natural number of seats. We then run
 \texttt{readBallots} with the length-indexed vector we just extracted from the
 \texttt{ExVect}. We now have enough information to invoke our STV counter. The
 code for \texttt{runElection} is given in Figure ~\ref{main_code}. 
-
-At this point, Idris successfully parses small text files containing data that
-conforms to my file format specification. However, reading large files (hundreds
-of kilobytes) produces a segmentation fault that is a result of an error in the
-\texttt{readFile} function in the Idris Prelude. As such, it is currently not
-possible to run Palpatine on large election-scale text files. A bug
-report has been opened with the developers of Idris. 

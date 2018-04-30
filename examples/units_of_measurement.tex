@@ -5,12 +5,12 @@ dependent types.}
 My first example is to demonstrate how dependent types can eliminate bugs that
 can arise from improper unit conversions \cite{gundry2013}. Units of measurement
 are already implemented in Microsoft's F\# Programming Language
-\cite{kennedy2009}. If numbers carry a type denoting their unit of measurement
-with them, we can ensure at compile time that improper unit conversions are not
-going to occur at runtime. These bugs can be catastrophic, as made evident by
-NASA's loss of the \$125-million Mars Climate Orbiter when ``spacecraft
-engineers failed to convert from English to Metric units of measurement''
-\cite{hotz1999}. 
+\cite{kennedy2009,f_sharp_units}. If numbers carry a type denoting their unit of
+measurement with them, we can ensure at compile time that improper unit
+conversions are not going to occur at runtime. These bugs can be catastrophic,
+as made evident by NASA's loss of the \$125-million Mars Climate Orbiter when
+``spacecraft engineers failed to convert from English to Metric units of
+measurement'' \cite{hotz1999}. 
 
 \begin{figure}[ht!]
   \caption{Displays a unit error that would be caught at compile-time with units of measurement.}
@@ -144,8 +144,8 @@ derived units (see our definition of Newton).
 Since derived units have become type-level arithmetic, we know that we will be
 able to consistently derive units where required in contrast to other methods in
 non-dependently-typed programming languages. Our implementation is able to
-derive units for examples that F\# is unable to \cite{gundry2013,f_sharp_units}.
-At the same time, error messages remain very difficult to debug. Rather than
-showing the unit names for conversions that fail, Idris will show the type
-declaration (e.g. Instead of showing \texttt{Metres} in an error message, Idris
-will show \texttt{Unit 1 0 0}). 
+derive units for examples that F\# is unable to \cite{gundry2013}. At the same
+time, error messages remain very difficult to debug. Rather than showing the
+unit names for conversions that fail, Idris will show the type declaration (e.g.
+Instead of showing \texttt{Metres} in an error message, Idris will show
+\texttt{Unit 1 0 0}). 

@@ -1,36 +1,36 @@
-\chapter{Relevant Background on the Single Transferrable Vote}
+\chapter{Relevant Background on the Single Transferable Vote}
 
 Having provided a grounding in dependently-typed programming, I now move to the
 voting system that I take an interest in. I take an interest in the Single
 Transferable Vote (STV) system that is used to count voter preferences in many
-developed democracies. STV is used in Ireland, Australia, New Zealand, and lower
-level elections across the United Kingdom and the United States. Many variants
-of the system exist and I concern myself with the method of STV currently used
-to count votes in the Australian Senate. In this section, I will give an outline
-of how STV works, provide optional pseudocode for the algorithm, and then run a
-sample STV election to demonstrate how it works. 
+developed democracies. STV is used in national elections in Ireland, Australia,
+New Zealand, and lower level elections across the United Kingdom and the United
+States. Many variants of the system exist and I concern myself with the method
+of STV currently used to count votes in the Australian Senate. In this section,
+I will give an outline of how STV works, provide optional pseudocode for the
+algorithm, and then run a sample STV election to demonstrate how it works. 
 
 \section{How STV works}
 
-The Single Transferrable Vote works on a list of ballots each containing the
+The Single transferable Vote works on a list of ballots each containing the
 ranked choices (preferences) of a constituent. We start by calculating the Droop
 Quota, given by the formula below, where $b$ represents the number of ballots
 and $n$ represents the number of seats to elect. The Droop Quota, named after
-English Lawyer and Mathematician Henry Droop, represents the minimum `score' of
-a candidate required for them to be given a seat in the election
-\cite{henry_droop}. The Droop Quota as a value represents the smallest number
-such that there can be no more candidates that reach the quota than the number
-of seats to be filled. If a candidate possesses a score greater than or equal to
-the Droop Quota, we elect them. 
+English Lawyer and Mathematician Henry Droop, represents the minimum
+\textit{score} of a candidate required for them to be given a seat in the
+election \cite{henry_droop}. The Droop Quota as a value represents the smallest
+number such that there can be no more candidates that reach the quota than the
+number of seats to be filled. If a candidate possesses a score greater than or
+equal to the Droop Quota, we elect them. 
 
 $$
-DQ = floor(\frac{b}{n + 1}) + 1
+DQ = \lfloor\frac{b}{n + 1}\rfloor + 1
 $$
 
 STV starts by counting all the first preferences of the ballots. In the
-beginning, each candidate is assumed to have a `score' of zero. Each ballot has
-a `weight', a value by which the `score' for the candidate preferenced first by
-it is incremented on each count. Our vote counter then sees if any of the
+beginning, each candidate is assumed to have a score of zero. Each ballot has a
+\textit{weight}, a value by which the score for the candidate preferenced first
+by it is incremented on each count. Our vote counter then sees if any of the
 candidates have a score higher than the Droop Quota. If any of them have a score
 higher, we choose the candidate with the highest score and elect them. If not,
 we eliminate the candidate with the lowest vote score. If a candidate is
@@ -40,63 +40,76 @@ In this formula, $s$ represents the surplus score (score - Droop Quota) and $n$
 represents the the total number of ballots that preferenced the candidate. After
 electing or eliminating a candidate, we then repeat again, counting each
 ballot's next preference. If all the preferences of a ballot have been counted,
-we just ignore the ballot. Ballots with no preferences are said to be
-\textit{exhausted}. By iterating like this, eventually, the number of candidates
-required to fill the seats will be elected. Pseudocode for single-transferrable
-vote is given in Algorithm~\ref{imperative_stv}\footnote{This pseudocode is
-adapted from a Github gist found here:\\
-https://gist.github.com/jerinphilip/749393a53c0a6442e797cbba460ba989}
+we just ignore the ballot. Ballots with no preferences left to be counted are
+said to be \textit{exhausted}. By iterating like this, eventually, the number of
+candidates required to fill the seats will be elected. Pseudocode for
+single-transferable vote is given in
+Algorithm~\ref{imperative_stv}\footnote{This pseudocode is adapted from a Github
+gist found here:\\
+https://gist.github.com/jerinphilip/749393a53c0a6442e797cbba460ba989 and while
+it is not from a verified source, it appears to conform to my interpretation of
+the AEC's description of STV which is why it was used. I'll comment more about
+the lack of a formal specification in the conclusions of this thesis.}.
+Understanding this pseudocode in full is not necessary to continue reading on
+but it provides a reference for anyone who may be interested. 
 
 
 \begin{algorithm}
     \SetKwFunction{transferDown}{transferDown}
     \SetKwProg{Fn}{Function}{}{}
-    \Fn{\transferDown{candidate}}{
-        votes = $cand_{score}$\\
+    \Fn{\transferDown{candidate, ballots}}{
+        votes = $candidate_{score}$\\
         excess = votes - droopQuota\\
         transferValue = excess/votes\\
         \For{ballot in ballots}{
-            \If{ballot first preference is for candidate}{
+            \If{ballot has voted for candidate}{
                 $ballot_{value}$ = transferValue
             }
-            removeCandFromBallot
+            remove candidate from ballot if present
         }
+        \Return{ballots}
     }
     \SetKwFunction{transferUp}{transferUp}
     \SetKwProg{Fn}{Function}{}{}
-    \Fn{\transferUp{candidate}}{
+    \Fn{\transferUp{candidate, ballots}}{
         \For{ballot in ballots}{
-            remove candidate from ballot
+            remove candidate from ballot if present
         }
+        \Return{ballots}
+    }
+    \SetKwFunction{countBallots}{countBallots}
+    \SetKwProg{Fn}{Function}{}{}
+    \Fn{\countBallots{candidates, vc, ballots}}{
+        \For{each ballot b in ballots}{
+            let $i$ = first preference of b\\
+            $vc_i$ = $vc_i$ + $b_{weight}$\\
+            note that $b$ has voted for $i$
+        }
+        \Return{(vc,ballots)}
     }
     \SetKwFunction{stv}{stv}
     \SetKwProg{Fn}{Function}{}{}
-    \Fn{\stv{ballots, seats, candidates}}{
-        let $dq$ = droopQuota\\
-        let $vc$ denote the total vote score of each candidate where $vc_i$ is
+    \Fn{\stv{droopQuota, ballots, seats, candidates}}{
+        let $vc$ denote the total vote score of all candidates, $vc_i$ is
         the score for candidate $i$\\
         let elected = empty list \\
         // Now we begin the first count. \\
-        \For{each ballot b in ballots}{
-            let $i$ = first preference of b\\
-            $vc_i$ = $vc_i$ + 1\\
-        }
-        \While{ len(elected) < seats}{
-            countNextBallots\\
-            leader = getMaxCandScore(vc)\\
-            \eIf{leader has higher score than droop Quota}{
+        \While{len(elected) < seats}{
+            vc, ballots = countBallots(candidates, vc, ballots)\\
+            leader = candidate in $vc$ with the highest score \\
+            \eIf{$leader_{score}$ >= droopQuota}{
                 elected.append(leader)\\
                 candidates.remove(leader)\\
-                transferDown(leader)\\
+                ballots = transferDown(leader, ballots)\\
             }{
                 loser = getMinCandScore\\
                 candidates.remove(loser)\\
-                transferUp(loser)
+                ballots = transferUp(loser, ballots)
             }
         }
         \Return{elected}
     }
-    \caption{Imperative pseudocode for single-transferrable vote.}
+    \caption{Imperative pseudocode for single-transferable vote.}
     \label{imperative_stv}
 \end{algorithm}
 
@@ -115,8 +128,8 @@ two available seats. Now suppose that we have 5 voters who each have sent in
 preferences to be counted. The preferences are shown in
 Figure~\ref{sample_election}. Each voter's preferences are referenced by a list
 where the leftmost element represents the most preferred candidate and the
-rightmost candidate presents the voter's least preferred. There is no obligation
-to number all candidates. 
+rightmost candidate represents the voter's least preferred. There is no
+obligation to number all candidates. 
 
 
 \begin{figure}[ht!!!!!!!!]
@@ -134,11 +147,12 @@ to number all candidates.
 The Droop Quota of our sample election is, according to this formula, 
 
 $$
-S = floor(\frac{5}{2 + 1}) + 1 = floor(\frac{5}{3}) + 1 = 1 + 1 = 2
+S = \lfloor\frac{5}{2 + 1}\rfloor + 1 = \lfloor\frac{5}{3}\rfloor + 1 = 1 + 1 = 2
 $$
 
 Now, we assign a weight to each ballot. In the beginning of a run of the STV
-algorithm, each ballot is weighed at 1. Our ballots are now: 
+algorithm, each ballot is weighed at 1. Our ballots are now given in
+Figure~\ref{sample_election0}
 
 \begin{figure}[ht!!!!!!!!]
     \caption{Ballots with initial weight.}
@@ -155,13 +169,13 @@ algorithm, each ballot is weighed at 1. Our ballots are now:
 We now start by counting everyone's first preferences. $A$ receives 3 ballots
 each with the weight of 1.0. Thus, $A$ has reached the Droop Quota and $A$ is
 elected. No one else has hit the Droop Quota yet. Now, we transfer the surplus.
-We remove the ``head'' from all the ballots that preferenced $A$ and we transfer
-the surplus votes. The Droop Quota is 2, there are 3 votes for $A$ and so there
-is a surplus of 1. This means the surplus is expressed by $\frac{1}{3}$. By
-removing all instances of $A$ from the ballots, setting ballots that preferenced
-$A$ first to the transfer value, and removing all the heads of the ballots, we
-finish our initial count. The ballots after this count are shown in
-Figure~\ref{sample_election1}. 
+We remove the ``head'' from all the ballots and we change the weight of any
+ballot that voted for A to a new transfer value. The Droop Quota is 2. $A$ has a
+score of 3 and so there is a surplus of 1. This means the surplus is expressed
+by $\frac{1}{3}$. By removing all instances of $A$ from the ballots, setting
+ballots that voted for $A$ to the transfer value, and removing all the heads of
+the ballots, we finish our initial count. The ballots after this count are shown
+in Figure~\ref{sample_election1}. 
 
 \begin{figure}[ht!!!!!!!!]
     \caption{Ballots with initial score.}
