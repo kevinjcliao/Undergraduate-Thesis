@@ -116,7 +116,7 @@ candidate with the highest score. This index is represented by a number of type
 numbers between zero and the natural number \texttt{S n}. In other words, this
 type signature guarantees to us that the index we return will be within bounds
 of our length-indexed vector. We'll be using a lot more of \texttt{Fin}s
-elsewhere in \textit{Palpatine}.
+elsewhere in Palpatine.
 
 As an aside here, unlike Haskell, Idris does not support the automatic
 \textit{deriving} keyword which allows a programmer to easily extend a type to
@@ -280,7 +280,7 @@ given.
 \subsubsection{The Election GADT}
 
 Now we can group together all the different data structures we've built to make
-the \texttt{Election} data type, which contains the droop quota as an
+the \texttt{Election} data type, which contains the Droop Quota as an
 \texttt{Integer}, the number of seats available as a natural number, the
 ballots, the candidates and the results. The code for the election GADT is given
 in Figure~\ref{election_type_code}. 

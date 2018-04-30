@@ -6,42 +6,46 @@ Transferable Vote (STV) system that is used to count voter preferences in many
 developed democracies. STV is used in Ireland, Australia, New Zealand, and lower
 level elections across the United Kingdom and the United States. Many variants
 of the system exist and I concern myself with the method of STV currently used
-to count votes in the Australian Senate. 
+to count votes in the Australian Senate. In this section, I will give an outline
+of how STV works, provide optional pseudocode for the algorithm, and then run a
+sample STV election to demonstrate how it works. 
 
 \section{How STV works}
 
-STV works on a list of ballots each containing the ranked choices (preferences)
-of a constituent. We start by calculating the \textit{Droop Quota}, given by the
-formula below, where $b$ represents the number of ballots and $s$ represents the
-number of seats to elect. The Droop Quota represents the minimum `score' of a
-candidate required for them to be given a seat in the election. The droop quota
-as a value represents the smallest number such that there can be no more
-candidates that reach the quota than the number of seats to be filled. If a
-candidate possesses a score greater than or equal to the droop quota, we elect
-them. 
+The Single Transferrable Vote works on a list of ballots each containing the
+ranked choices (preferences) of a constituent. We start by calculating the Droop
+Quota, given by the formula below, where $b$ represents the number of ballots
+and $n$ represents the number of seats to elect. The Droop Quota, named after
+English Lawyer and Mathematician Henry Droop, represents the minimum `score' of
+a candidate required for them to be given a seat in the election
+\cite{henry_droop}. The Droop Quota as a value represents the smallest number
+such that there can be no more candidates that reach the quota than the number
+of seats to be filled. If a candidate possesses a score greater than or equal to
+the Droop Quota, we elect them. 
 
 $$
 DQ = floor(\frac{b}{n + 1}) + 1
 $$
 
-STV starts by counting all the first preferences of the ballots. It then sees if
-any of the candidates have a score higher than the Droop Quota. If any of them
-have a score higher, we elect them. If not, we eliminate the candidate with the
-lowest vote score. If a candidate is elected, the value of each ballot that
-voted for that candidate is changed to a new transfer value. The transfer value
-is calculated by the given formula below. In this formula, $s$ represents the
-surplus score (score - droop quota) and n represents the the total number of
-ballots that preferenced the candidate. After electing or eliminating a
-candidate, we then repeat again, counting each ballot's next preference. By
-iterating like this, eventually, the number of candidates required to fill the
-seats will be elected. Pseudocode for single-transferrable vote is given in
-Algorithm~\ref{imperative_stv}\footnote{This pseudocode is adapted from a Github
-gist found here:\\
+STV starts by counting all the first preferences of the ballots. In the
+beginning, each candidate is assumed to have a `score' of zero. Each ballot has
+a `weight', a value by which the `score' for the candidate preferenced first by
+it is incremented on each count. Our vote counter then sees if any of the
+candidates have a score higher than the Droop Quota. If any of them have a score
+higher, we choose the candidate with the highest score and elect them. If not,
+we eliminate the candidate with the lowest vote score. If a candidate is
+elected, the weight of each ballot that voted for that candidate is changed to a
+new transfer value. The transfer value is calculated by the formula: $v = s/n$.
+In this formula, $s$ represents the surplus score (score - Droop Quota) and $n$
+represents the the total number of ballots that preferenced the candidate. After
+electing or eliminating a candidate, we then repeat again, counting each
+ballot's next preference. If all the preferences of a ballot have been counted,
+we just ignore the ballot. Ballots with no preferences are said to be
+\textit{exhausted}. By iterating like this, eventually, the number of candidates
+required to fill the seats will be elected. Pseudocode for single-transferrable
+vote is given in Algorithm~\ref{imperative_stv}\footnote{This pseudocode is
+adapted from a Github gist found here:\\
 https://gist.github.com/jerinphilip/749393a53c0a6442e797cbba460ba989}
-
-$$
-v = s/n
-$$
 
 
 \begin{algorithm}
@@ -133,10 +137,11 @@ $$
 S = floor(\frac{5}{2 + 1}) + 1 = floor(\frac{5}{3}) + 1 = 1 + 1 = 2
 $$
 
-Now, we assign a \textit{weight} to each ballot. Our ballots are now: 
+Now, we assign a weight to each ballot. In the beginning of a run of the STV
+algorithm, each ballot is weighed at 1. Our ballots are now: 
 
 \begin{figure}[ht!!!!!!!!]
-    \caption{Ballots with initial score.}
+    \caption{Ballots with initial weight.}
     \label{sample_election0}
     \begin{lstlisting}
         ([A,C], 1)
@@ -150,31 +155,23 @@ Now, we assign a \textit{weight} to each ballot. Our ballots are now:
 We now start by counting everyone's first preferences. $A$ receives 3 ballots
 each with the weight of 1.0. Thus, $A$ has reached the Droop Quota and $A$ is
 elected. No one else has hit the Droop Quota yet. Now, we transfer the surplus.
-We remove the ``head'' from all the ballots that preferenced A and we transfer
-the surplus votes. The new value of the votes is calculated as follows: 
-
-$$
-v = s/n
-$$
-
-where $v$ is the surplus transfer value, $s$ is the surplus ballots and $n$ is
-the total number of ballots that preferenced the candidate first. By applying
-this formula, the Droop Quota is 2, there are 3 votes for $A$ and so there is a
-surplus of 1. $B, C$ each received one vote. This means the surplus is expressed
-by $\frac{1}{3}$. By removing all instances of A from the ballots, setting
-ballots that preferenced A first to the transfer value, and removing all the
-heads of the ballots. The ballots after this count are shown in
-Figure~\ref{sample_election1}
+We remove the ``head'' from all the ballots that preferenced $A$ and we transfer
+the surplus votes. The Droop Quota is 2, there are 3 votes for $A$ and so there
+is a surplus of 1. This means the surplus is expressed by $\frac{1}{3}$. By
+removing all instances of $A$ from the ballots, setting ballots that preferenced
+$A$ first to the transfer value, and removing all the heads of the ballots, we
+finish our initial count. The ballots after this count are shown in
+Figure~\ref{sample_election1}. 
 
 \begin{figure}[ht!!!!!!!!]
     \caption{Ballots with initial score.}
     \label{sample_election1}
     \begin{lstlisting}
-        ([C], 1/3)
-        ([B,C], 1/3)
-        ([C,B], 1/3)
-        ([], 1)
-        ([B], 1)
+        ([C], 1/3)   A has been removed as a first preference. 
+        ([B,C], 1/3) A has been removed as a first preference. 
+        ([C,B], 1/3) A has been removed as a first preference. 
+        ([], 1)      B has been removed as a first preference. A has been elected and removed. 
+        ([B], 1)     C has been removed as a first preference. A has been elected and removed. 
         
         elected: [A]
         
@@ -184,29 +181,30 @@ Figure~\ref{sample_election1}
     \end{lstlisting}
 \end{figure}
 
-Now, we count again the first preferences of each ballot. This results in the
-following ballots, shown in Figure~\ref{sample_election2}
+Now, we count again the first preferences of each ballot. We then remove each
+ballot's first preference. This results in the following ballots, shown in
+Figure~\ref{sample_election2}
 
 \begin{figure}[ht!!!!!!!!]
     \caption{Ballots after second count}
     \label{sample_election2}
     \begin{lstlisting}
-        ([], 1/3)
-        ([C], 1/3)
-        ([B], 1/3)
-        ([], 1)
-        ([], 1)
+        ([], 1/3)  C has been removed as a first preference. 
+        ([C], 1/3) B has been removed as a first preference. 
+        ([B], 1/3) C has been removed as a first preference. 
+        ([], 1)    Ballot was exhausted in last count. 
+        ([], 1)    B has been removed as a first preference. 
         
         elected: [A]
         
         scores: 
-        (B, 7/3)
-        (C, 5/3)
+        (B, 7/3) Obtained from the first preferences of ballot 2 and 5
+        (C, 5/3) Obtained from the first preferences of Ballot 1 and 3. 
     \end{lstlisting}
 \end{figure}
 
-Now, we see that B has passed the droop quota and is elected. With no seats
-left, C is eliminated. \footnote{This is different from the result in Ghale et.
-al. because they use a different droop quota formula.}
+Now, we see that B has passed the Droop Quota and is elected. With no seats
+left, C is eliminated \footnote{This is different from the result in Ghale et.
+al. because they use a different Droop Quota formula.}.
 
 \input{elections/assumptions}

@@ -1,8 +1,8 @@
 \chapter{What have we verified?}
 
-Having gone through the trouble of building \textit{Palpatine}, the question we
+Having gone through the trouble of building Palpatine, the question we
 now ask is: by building it, what have we verified? What compile-time guarantees
-does Palpatine give us? In this section, I assert that \textit{Palpatine} has
+does Palpatine give us? In this section, I assert that Palpatine has
 guarantees of termination and of the cardinality of judgments and remaining
 candidates. 
 
@@ -27,7 +27,7 @@ This definition of Totality is taken from \cite{tdd_book}.
     It obviously follows that calling any non-total code ruins totality. 
 \end{enumerate}
 
-To prove that \textit{Palpatine} terminates, I can thus use Idris' built-in
+To prove that Palpatine terminates, I can thus use Idris' built-in
 totality checker. If my code compiles and all functions are annotated with the
 \texttt{total} keyword, then it follows that all of my code must satisfy all
 four of these conditions and thus it must terminate. 
